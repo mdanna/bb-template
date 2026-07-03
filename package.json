@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.109.1",
+    "@auth/pg-adapter": "^1.11.2",
     "leaflet": "^1.9.4",
     "nanoid": "^5.1.16",
     "next": "16.2.9",

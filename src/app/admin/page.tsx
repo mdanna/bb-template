@@ -2,6 +2,7 @@ import Link from "next/link";
 import { auth, signIn } from "@/auth";
 import AdminEditor from "@/components/admin/AdminEditor";
 import AdminNav from "@/components/admin/AdminNav";
+import EmailLoginForm from "@/components/admin/EmailLoginForm";
 import { DEFAULT_PRICE, OVERRIDES } from "@/data/availability";
 
 export default async function AdminPage() {
@@ -20,8 +21,10 @@ export default async function AdminPage() {
           Amministrazione
         </h1>
         <p className="max-w-sm text-sm text-foreground/70">
-          Accedi con il tuo account GitHub autorizzato per gestire prezzi e disponibilità.
+          Accedi per gestire prezzi e disponibilità. Scegli il metodo che preferisci.
         </p>
+
+        {/* Login con GitHub */}
         <form
           action={async () => {
             "use server";
@@ -35,6 +38,13 @@ export default async function AdminPage() {
             Accedi con GitHub
           </button>
         </form>
+
+        <div className="flex items-center gap-3 text-xs uppercase tracking-widest text-foreground/40">
+          <span className="h-px w-8 bg-foreground/20" /> oppure <span className="h-px w-8 bg-foreground/20" />
+        </div>
+
+        {/* Login con magic-link via email (client component con esito inline) */}
+        <EmailLoginForm />
       </div>
     );
   }
