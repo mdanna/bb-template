@@ -50,10 +50,10 @@ function SaveButton({
   );
 }
 
-function LangBadge() {
+function LangBadge({ locale }: { locale: string }) {
   return (
     <span className="ml-2 rounded bg-gold/20 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-gold">
-      IT
+      {locale}
     </span>
   );
 }
@@ -147,15 +147,16 @@ export default function ContentEditor() {
     setTextsTranslatePreview(null);
     try {
       const paragraphTexts: Record<string, string> = {};
-      content.storyParagraphs.forEach((p, i) => { paragraphTexts[`storyP${i}`] = p.it; });
+      content.storyParagraphs.forEach((p, i) => { paragraphTexts[`storyP${i}`] = p[locale]; });
       const res = await fetch("/api/admin/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          sourceLocale: locale,
           texts: {
-            siteTitle: content.siteTitle.it,
-            heroSubtitle: content.heroSubtitle.it,
-            storyTitle: content.storyTitle.it,
+            siteTitle: content.siteTitle[locale],
+            heroSubtitle: content.heroSubtitle[locale],
+            storyTitle: content.storyTitle[locale],
             ...paragraphTexts,
           },
         }),
@@ -177,13 +178,14 @@ export default function ContentEditor() {
           storyParagraphs,
         };
       });
-      // Preview EN
+      // Preview one target locale (EN, unless the source is EN — then IT)
+      const previewLocale = locale === "en" ? "it" : "en";
       const preview: Record<string, string> = {
-        siteTitle: tr.siteTitle?.en ?? "",
-        heroSubtitle: tr.heroSubtitle?.en ?? "",
-        storyTitle: tr.storyTitle?.en ?? "",
+        siteTitle: tr.siteTitle?.[previewLocale] ?? "",
+        heroSubtitle: tr.heroSubtitle?.[previewLocale] ?? "",
+        storyTitle: tr.storyTitle?.[previewLocale] ?? "",
       };
-      content.storyParagraphs.forEach((_, i) => { preview[`storyP${i}`] = tr[`storyP${i}`]?.en ?? ""; });
+      content.storyParagraphs.forEach((_, i) => { preview[`storyP${i}`] = tr[`storyP${i}`]?.[previewLocale] ?? ""; });
       setTextsTranslatePreview(preview);
       setTextsTranslateState("done");
     } catch (e) {
@@ -200,7 +202,7 @@ export default function ContentEditor() {
       const res = await fetch("/api/admin/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ texts: { areaDescription: content.areaDescription.it } }),
+        body: JSON.stringify({ sourceLocale: locale, texts: { areaDescription: content.areaDescription[locale] } }),
       });
       const data = (await res.json()) as { translations?: Record<string, Record<string, string>>; error?: string };
       if (!res.ok || !data.translations) throw new Error(data.error ?? t.common.error);
@@ -221,13 +223,13 @@ export default function ContentEditor() {
       // Build a flat texts object: place_0_name, place_0_distance, place_1_name, ...
       const texts: Record<string, string> = {};
       content.areaPlaces.forEach((p, i) => {
-        texts[`place_${i}_name`] = p.name.it;
-        texts[`place_${i}_comment`] = p.comment.it;
+        texts[`place_${i}_name`] = p.name[locale];
+        texts[`place_${i}_comment`] = p.comment[locale];
       });
       const res = await fetch("/api/admin/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ texts }),
+        body: JSON.stringify({ sourceLocale: locale, texts }),
       });
       const data = (await res.json()) as { translations?: Record<string, Record<string, string>>; error?: string };
       if (!res.ok || !data.translations) throw new Error(data.error ?? t.common.error);
@@ -253,11 +255,11 @@ export default function ContentEditor() {
     setAmenitiesTranslateError("");
     try {
       const texts: Record<string, string> = {};
-      content.amenities.forEach((a, i) => { texts[`amenity_${i}`] = a.it; });
+      content.amenities.forEach((a, i) => { texts[`amenity_${i}`] = a[locale]; });
       const res = await fetch("/api/admin/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ texts }),
+        body: JSON.stringify({ sourceLocale: locale, texts }),
       });
       const data = (await res.json()) as { translations?: Record<string, Record<string, string>>; error?: string };
       if (!res.ok || !data.translations) throw new Error(data.error ?? t.common.error);
@@ -280,11 +282,11 @@ export default function ContentEditor() {
     setReviewsTranslateError("");
     try {
       const texts: Record<string, string> = {};
-      content.reviews.forEach((r, i) => { texts[`review_${i}`] = (r.text as L10n).it; });
+      content.reviews.forEach((r, i) => { texts[`review_${i}`] = (r.text as L10n)[locale]; });
       const res = await fetch("/api/admin/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ texts }),
+        body: JSON.stringify({ sourceLocale: locale, texts }),
       });
       const data = (await res.json()) as { translations?: Record<string, Record<string, string>>; error?: string };
       if (!res.ok || !data.translations) throw new Error(data.error ?? t.common.error);
@@ -313,12 +315,13 @@ export default function ContentEditor() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          sourceLocale: locale,
           texts: {
-            entirePlace: content.details.entirePlace.it,
-            quietCourtyard: content.details.quietCourtyard.it,
-            roomInfo: content.details.roomInfo.it,
-            maxGuests: content.details.maxGuests.it,
-            neighborhood: content.details.neighborhood.it,
+            entirePlace: content.details.entirePlace[locale],
+            quietCourtyard: content.details.quietCourtyard[locale],
+            roomInfo: content.details.roomInfo[locale],
+            maxGuests: content.details.maxGuests[locale],
+            neighborhood: content.details.neighborhood[locale],
           },
         }),
       });
@@ -356,32 +359,32 @@ export default function ContentEditor() {
     try {
       // Batch A: short fields (titles, details, amenities, area places)
       const batchA: Record<string, string> = {
-        siteTitle: content.siteTitle.it,
-        heroSubtitle: content.heroSubtitle.it,
-        storyTitle: content.storyTitle.it,
-        areaDescription: content.areaDescription.it,
-        entirePlace: content.details.entirePlace.it,
-        quietCourtyard: content.details.quietCourtyard.it,
-        roomInfo: content.details.roomInfo.it,
-        maxGuests: content.details.maxGuests.it,
-        neighborhood: content.details.neighborhood.it,
+        siteTitle: content.siteTitle[locale],
+        heroSubtitle: content.heroSubtitle[locale],
+        storyTitle: content.storyTitle[locale],
+        areaDescription: content.areaDescription[locale],
+        entirePlace: content.details.entirePlace[locale],
+        quietCourtyard: content.details.quietCourtyard[locale],
+        roomInfo: content.details.roomInfo[locale],
+        maxGuests: content.details.maxGuests[locale],
+        neighborhood: content.details.neighborhood[locale],
       };
-      content.amenities.forEach((a, i) => { batchA[`amenity_${i}`] = a.it; });
+      content.amenities.forEach((a, i) => { batchA[`amenity_${i}`] = a[locale]; });
       content.areaPlaces.forEach((p, i) => {
-        batchA[`place_${i}_name`] = p.name.it;
-        batchA[`place_${i}_comment`] = p.comment.it;
+        batchA[`place_${i}_name`] = p.name[locale];
+        batchA[`place_${i}_comment`] = p.comment[locale];
       });
 
       // Batch B: long fields (story paragraphs + reviews)
       const batchB: Record<string, string> = {};
-      content.storyParagraphs.forEach((p, i) => { batchB[`storyP${i}`] = p.it; });
-      content.reviews.forEach((r, i) => { batchB[`review_${i}`] = (r.text as L10n).it; });
+      content.storyParagraphs.forEach((p, i) => { batchB[`storyP${i}`] = p[locale]; });
+      content.reviews.forEach((r, i) => { batchB[`review_${i}`] = (r.text as L10n)[locale]; });
 
       const translate = async (texts: Record<string, string>) => {
         const res = await fetch("/api/admin/translate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ texts }),
+          body: JSON.stringify({ sourceLocale: locale, texts }),
         });
         const data = (await res.json()) as { translations?: Record<string, Record<string, string>>; error?: string };
         if (!res.ok || !data.translations) throw new Error(data.error ?? t.common.error);
@@ -527,13 +530,13 @@ export default function ContentEditor() {
             ] as { key: keyof Details; label: string }[]
           ).map(({ key, label }) => (
             <label key={key} className={labelCls}>
-              <span className={labelTextCls}>{label} <LangBadge /></span>
+              <span className={labelTextCls}>{label} <LangBadge locale={locale} /></span>
               <input
                 type="text"
-                value={content.details[key].it}
+                value={content.details[key][locale]}
                 onChange={(e) =>
                   setContent((c) =>
-                    c ? { ...c, details: { ...c.details, [key]: { ...c.details[key], it: e.target.value } } } : c
+                    c ? { ...c, details: { ...c.details, [key]: { ...c.details[key], [locale]: e.target.value } } } : c
                   )
                 }
                 className={inputCls}
@@ -568,8 +571,8 @@ export default function ContentEditor() {
       set("storyParagraphs", content!.storyParagraphs.filter((_, i) => i !== idx));
     }
 
-    function setParagraphIt(idx: number, value: string) {
-      const updated = content!.storyParagraphs.map((p, i) => i === idx ? { ...p, it: value } : p);
+    function setParagraphSource(idx: number, value: string) {
+      const updated = content!.storyParagraphs.map((p, i) => i === idx ? { ...p, [locale]: value } : p);
       set("storyParagraphs", updated);
     }
 
@@ -578,19 +581,19 @@ export default function ContentEditor() {
         <div className="rounded-lg border border-gold/30 bg-background p-6 space-y-5">
           {/* Titolo struttura */}
           <label className={labelCls}>
-            <span className={labelTextCls}>{L.titoloStruttura} <LangBadge /></span>
-            <input type="text" value={content.siteTitle.it}
-              onChange={(e) => setL10nField("siteTitle", "it", e.target.value)} className={inputCls} />
+            <span className={labelTextCls}>{L.titoloStruttura} <LangBadge locale={locale} /></span>
+            <input type="text" value={content.siteTitle[locale]}
+              onChange={(e) => setL10nField("siteTitle", locale, e.target.value)} className={inputCls} />
           </label>
           <label className={labelCls}>
-            <span className={labelTextCls}>{L.sottotitoloHero} <LangBadge /></span>
-            <input type="text" value={content.heroSubtitle.it}
-              onChange={(e) => setL10nField("heroSubtitle", "it", e.target.value)} className={inputCls} />
+            <span className={labelTextCls}>{L.sottotitoloHero} <LangBadge locale={locale} /></span>
+            <input type="text" value={content.heroSubtitle[locale]}
+              onChange={(e) => setL10nField("heroSubtitle", locale, e.target.value)} className={inputCls} />
           </label>
           <label className={labelCls}>
-            <span className={labelTextCls}>{L.titoloRacconto} <LangBadge /></span>
-            <input type="text" value={content.storyTitle.it}
-              onChange={(e) => setL10nField("storyTitle", "it", e.target.value)} className={inputCls} />
+            <span className={labelTextCls}>{L.titoloRacconto} <LangBadge locale={locale} /></span>
+            <input type="text" value={content.storyTitle[locale]}
+              onChange={(e) => setL10nField("storyTitle", locale, e.target.value)} className={inputCls} />
           </label>
         </div>
 
@@ -598,7 +601,7 @@ export default function ContentEditor() {
         <div className="rounded-lg border border-gold/30 bg-background p-6 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-bold uppercase tracking-widest text-foreground/50">
-              {L.paragrafiRacconto} <LangBadge />
+              {L.paragrafiRacconto} <LangBadge locale={locale} />
               <span className="ml-2 text-foreground/40 normal-case font-normal">
                 ({content.storyParagraphs.length}/{MAX_PARAGRAPHS})
               </span>
@@ -613,8 +616,8 @@ export default function ContentEditor() {
             <div key={idx} className="flex gap-2 items-start">
               <textarea
                 rows={4}
-                value={p.it}
-                onChange={(e) => setParagraphIt(idx, e.target.value)}
+                value={p[locale]}
+                onChange={(e) => setParagraphSource(idx, e.target.value)}
                 placeholder={`Paragrafo ${idx + 1}…`}
                 className={`${inputCls} flex-1`}
               />
@@ -681,12 +684,12 @@ export default function ContentEditor() {
           <h3 className="text-xs font-bold uppercase tracking-widest text-foreground/50">Descrizione area</h3>
           <label className={labelCls}>
             <span className={labelTextCls}>
-              Descrizione <LangBadge />
+              Descrizione <LangBadge locale={locale} />
             </span>
             <textarea
               rows={3}
-              value={content.areaDescription.it}
-              onChange={(e) => setL10nField("areaDescription", "it", e.target.value)}
+              value={content.areaDescription[locale]}
+              onChange={(e) => setL10nField("areaDescription", locale, e.target.value)}
               className={inputCls}
             />
           </label>
@@ -814,14 +817,14 @@ export default function ContentEditor() {
                 <div className="flex-1 grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <label className={labelCls}>
                     <span className={labelTextCls}>
-                      Nome <LangBadge />
+                      Nome <LangBadge locale={locale} />
                     </span>
                     <input
                       type="text"
-                      value={place.name.it}
+                      value={place.name[locale]}
                       onChange={(e) => {
                         const updated: AreaPlace[] = content.areaPlaces.map((p, j) =>
-                          j === i ? { ...p, name: { ...p.name, it: e.target.value } } : p
+                          j === i ? { ...p, name: { ...p.name, [locale]: e.target.value } } : p
                         );
                         set("areaPlaces", updated);
                       }}
@@ -830,14 +833,14 @@ export default function ContentEditor() {
                   </label>
                   <label className={labelCls}>
                     <span className={labelTextCls}>
-                      Commento <LangBadge />
+                      Commento <LangBadge locale={locale} />
                     </span>
                     <input
                       type="text"
-                      value={place.comment.it}
+                      value={place.comment[locale]}
                       onChange={(e) => {
                         const updated: AreaPlace[] = content.areaPlaces.map((p, j) =>
-                          j === i ? { ...p, comment: { ...p.comment, it: e.target.value } } : p
+                          j === i ? { ...p, comment: { ...p.comment, [locale]: e.target.value } } : p
                         );
                         set("areaPlaces", updated);
                       }}
@@ -903,10 +906,10 @@ export default function ContentEditor() {
             <div key={i} className="flex items-center gap-2">
               <input
                 type="text"
-                value={(item as L10n).it}
+                value={(item as L10n)[locale]}
                 onChange={(e) => {
                   const updated = content.amenities.map((a, j) =>
-                    j === i ? { ...(a as L10n), it: e.target.value } : a
+                    j === i ? { ...(a as L10n), [locale]: e.target.value } : a
                   );
                   set("amenities", updated);
                 }}
@@ -983,14 +986,14 @@ export default function ContentEditor() {
               </div>
               <label className={labelCls}>
                 <span className={labelTextCls}>
-                  Testo recensione <LangBadge />
+                  Testo recensione <LangBadge locale={locale} />
                 </span>
                 <textarea
                   rows={4}
-                  value={(review.text as L10n).it}
+                  value={(review.text as L10n)[locale]}
                   onChange={(e) => {
                     const updated: Review[] = content.reviews.map((r, j) =>
-                      j === i ? { ...r, text: { ...(r.text as L10n), it: e.target.value } } : r
+                      j === i ? { ...r, text: { ...(r.text as L10n), [locale]: e.target.value } } : r
                     );
                     set("reviews", updated);
                   }}
