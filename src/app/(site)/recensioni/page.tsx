@@ -1,6 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/i18n/LanguageContext";
+import { format } from "@/i18n/format";
 import { CONTENT } from "@/lib/siteContent";
 
 function Diamond() {
@@ -15,7 +16,11 @@ export default function RecensioniPage() {
       <h1 className="font-serif-display mb-2 text-center text-3xl italic text-foreground">
         {t.reviews.title}
       </h1>
-      <p className="text-center text-sm text-foreground/60">{t.reviews.subtitle}</p>
+      {CONTENT.airbnbReviewCount > 0 && (
+        <p className="text-center text-sm text-foreground/60">
+          {format(t.reviews.subtitle, { rating: CONTENT.airbnbRating, count: CONTENT.airbnbReviewCount })}
+        </p>
+      )}
       <div className="mx-auto mb-10 mt-4 max-w-xs">
         <Diamond />
       </div>

@@ -18,9 +18,11 @@ export default function ServiziPage() {
           <li>{CONTENT.details.roomInfo[locale] || CONTENT.details.roomInfo.it}</li>
           <li>{CONTENT.details.maxGuests[locale] || CONTENT.details.maxGuests.it}</li>
           <li>{CONTENT.details.neighborhood[locale] || CONTENT.details.neighborhood.it}</li>
-          <li>
-            {format(t.details.rating, { rating: CONTENT.airbnbRating, count: CONTENT.airbnbReviewCount })}
-          </li>
+          {CONTENT.airbnbReviewCount > 0 && (
+            <li>
+              {format(t.details.rating, { rating: CONTENT.airbnbRating, count: CONTENT.airbnbReviewCount })}
+            </li>
+          )}
         </ul>
       </div>
       <div>
