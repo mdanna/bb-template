@@ -2,10 +2,58 @@
 
 import { useEffect, useState } from "react";
 import type { Policies } from "@/lib/policies";
+import { useAdminLanguage } from "@/i18n/AdminLanguageContext";
 
 type SaveState = "idle" | "saving" | "success" | "error";
 
+const POLICY_LABELS = {
+  it: {
+    cityTax: "Tassa di soggiorno", taxPerPerson: "€ per persona/notte", taxMaxNights: "Max notti",
+    depositBalance: "Deposito e saldo", deposit: "Deposito (%)", balanceDays: "Giorni per saldo",
+    reminder1: "1° promemoria saldo", reminder2: "2° promemoria saldo",
+    cancellation: "Cancellazione", fullRefund: "Rimborso completo (giorni)", halfRefund: "Rimborso parziale (giorni)",
+    partialPct: "Rimborso parziale (%)", feePct: "Spese di cancellazione (%)",
+    booking: "Prenotazione", minAdvance: "Preavviso minimo (giorni)", maxGuests: "Ospiti massimi",
+    minNights: "Notti minime", maxNights: "Notti massime",
+    times: "Orari", checkin: "Orario check-in", checkout: "Orario check-out",
+  },
+  en: {
+    cityTax: "City tax", taxPerPerson: "€ per person/night", taxMaxNights: "Max nights",
+    depositBalance: "Deposit & balance", deposit: "Deposit (%)", balanceDays: "Days for balance",
+    reminder1: "1st balance reminder", reminder2: "2nd balance reminder",
+    cancellation: "Cancellation", fullRefund: "Full refund (days)", halfRefund: "Partial refund (days)",
+    partialPct: "Partial refund (%)", feePct: "Cancellation fee (%)",
+    booking: "Booking", minAdvance: "Min advance (days)", maxGuests: "Max guests",
+    minNights: "Min nights", maxNights: "Max nights",
+    times: "Times", checkin: "Check-in time", checkout: "Check-out time",
+  },
+  es: {
+    cityTax: "Tasa turística", taxPerPerson: "€ por persona/noche", taxMaxNights: "Máx noches",
+    depositBalance: "Depósito y saldo", deposit: "Depósito (%)", balanceDays: "Días para saldo",
+    reminder1: "1er recordatorio saldo", reminder2: "2do recordatorio saldo",
+    cancellation: "Cancelación", fullRefund: "Reembolso completo (días)", halfRefund: "Reembolso parcial (días)",
+    partialPct: "Reembolso parcial (%)", feePct: "Gastos de cancelación (%)",
+    booking: "Reserva", minAdvance: "Antelación mínima (días)", maxGuests: "Huéspedes máx.",
+    minNights: "Noches mínimas", maxNights: "Noches máximas",
+    times: "Horarios", checkin: "Hora check-in", checkout: "Hora check-out",
+  },
+  fr: {
+    cityTax: "Taxe de séjour", taxPerPerson: "€ par personne/nuit", taxMaxNights: "Max nuits",
+    depositBalance: "Acompte et solde", deposit: "Acompte (%)", balanceDays: "Jours pour solde",
+    reminder1: "1er rappel solde", reminder2: "2e rappel solde",
+    cancellation: "Annulation", fullRefund: "Remboursement complet (jours)", halfRefund: "Remboursement partiel (jours)",
+    partialPct: "Remboursement partiel (%)", feePct: "Frais d'annulation (%)",
+    booking: "Réservation", minAdvance: "Délai minimum (jours)", maxGuests: "Voyageurs max.",
+    minNights: "Nuits minimum", maxNights: "Nuits maximum",
+    times: "Horaires", checkin: "Heure check-in", checkout: "Heure check-out",
+  },
+} as const;
+
 export default function PolicyEditor() {
+  const { t, locale } = useAdminLanguage();
+  const tp = t.policy;
+  const lbl = POLICY_LABELS[locale] ?? POLICY_LABELS.en;
+
   const [policies, setPolicies] = useState<Policies | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [error, setError] = useState("");
@@ -14,7 +62,8 @@ export default function PolicyEditor() {
     fetch("/api/admin/policies")
       .then((r) => r.json())
       .then(setPolicies)
-      .catch(() => setError("Errore nel caricamento"));
+      .catch(() => setError(t.common.error));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleSave() {
@@ -28,23 +77,18 @@ export default function PolicyEditor() {
         body: JSON.stringify({ ...policies, defaultDepositRate: policies.minDepositRate }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Errore");
+      if (!res.ok) throw new Error(data.error ?? t.common.error);
       setSaveState("success");
       setTimeout(() => setSaveState("idle"), 3000);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Errore");
+      setError(e instanceof Error ? e.message : t.common.error);
       setSaveState("error");
     }
   }
 
-  // Keys stored as 0–1 decimals but displayed/edited as 0–100 integers
   const percentFields = new Set<keyof Policies>(["minDepositRate"]);
 
-  function field(
-    label: string,
-    key: keyof Policies,
-    type: "number" | "text" = "number"
-  ) {
+  function field(label: string, key: keyof Policies, type: "number" | "text" = "number") {
     const isPercent = percentFields.has(key);
     const displayValue = isPercent && policies ? Math.round((policies[key] as number) * 100) : (policies?.[key] ?? "");
     return (
@@ -75,37 +119,37 @@ export default function PolicyEditor() {
   }
 
   if (!policies) {
-    return <p className="text-sm text-foreground/60">{error || "Caricamento…"}</p>;
+    return <p className="text-sm text-foreground/60">{error || t.common.loading}</p>;
   }
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 items-end">
-        {groupLabel("Tassa di soggiorno")}
-        {field("€ per persona/notte", "cityTaxPerPersonPerNight")}
-        {field("Max notti", "cityTaxMaxNights")}
+        {groupLabel(lbl.cityTax)}
+        {field(lbl.taxPerPerson, "cityTaxPerPersonPerNight")}
+        {field(lbl.taxMaxNights, "cityTaxMaxNights")}
 
-        {groupLabel("Deposito e saldo")}
-        {field("Deposito (%)", "minDepositRate")}
-        {field("Giorni per saldo", "balanceDueDays")}
-        {field("1° promemoria saldo", "balanceReminderDaysFirst")}
-        {field("2° promemoria saldo", "balanceReminderDaysSecond")}
+        {groupLabel(lbl.depositBalance)}
+        {field(lbl.deposit, "minDepositRate")}
+        {field(lbl.balanceDays, "balanceDueDays")}
+        {field(lbl.reminder1, "balanceReminderDaysFirst")}
+        {field(lbl.reminder2, "balanceReminderDaysSecond")}
 
-        {groupLabel("Cancellazione")}
-        {field("Rimborso completo (giorni)", "cancelFullRefundDays")}
-        {field("Rimborso parziale (giorni)", "cancelHalfRefundDays")}
-        {field("Rimborso parziale (%)", "cancelPartialRefundPct")}
-        {field("Spese di cancellazione (%)", "cancelFeePercent")}
+        {groupLabel(lbl.cancellation)}
+        {field(lbl.fullRefund, "cancelFullRefundDays")}
+        {field(lbl.halfRefund, "cancelHalfRefundDays")}
+        {field(lbl.partialPct, "cancelPartialRefundPct")}
+        {field(lbl.feePct, "cancelFeePercent")}
 
-        {groupLabel("Prenotazione")}
-        {field("Preavviso minimo (giorni)", "minAdvanceBookingDays")}
-        {field("Ospiti massimi", "maxGuests")}
-        {field("Notti minime", "minNights")}
-        {field("Notti massime", "maxNights")}
+        {groupLabel(lbl.booking)}
+        {field(lbl.minAdvance, "minAdvanceBookingDays")}
+        {field(lbl.maxGuests, "maxGuests")}
+        {field(lbl.minNights, "minNights")}
+        {field(lbl.maxNights, "maxNights")}
 
-        {groupLabel("Orari")}
-        {field("Orario check-in", "checkinTime", "text")}
-        {field("Orario check-out", "checkoutTime", "text")}
+        {groupLabel(lbl.times)}
+        {field(lbl.checkin, "checkinTime", "text")}
+        {field(lbl.checkout, "checkoutTime", "text")}
       </div>
 
       <div className="flex items-center gap-4">
@@ -114,14 +158,10 @@ export default function PolicyEditor() {
           disabled={saveState === "saving"}
           className="rounded-full border border-gold bg-gold px-6 py-2 text-xs uppercase tracking-widest text-[#faf6ec] transition hover:bg-transparent hover:text-gold disabled:opacity-50"
         >
-          {saveState === "saving" ? "Salvataggio…" : "Salva policy"}
+          {saveState === "saving" ? tp.saving : tp.save}
         </button>
-        {saveState === "success" && (
-          <span className="text-sm text-green-600">Salvato. Il sito si aggiornerà automaticamente in 1–2 minuti.</span>
-        )}
-        {saveState === "error" && (
-          <span className="text-sm text-red-600">{error}</span>
-        )}
+        {saveState === "success" && <span className="text-sm text-green-600">{tp.saved}</span>}
+        {saveState === "error" && <span className="text-sm text-red-600">{error}</span>}
       </div>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import type { SiteContent } from "@/lib/siteContent";
+import { useAdminLanguage } from "@/i18n/AdminLanguageContext";
 
 interface ImageFile {
   name: string;
@@ -14,6 +15,9 @@ type SaveState = "idle" | "saving" | "success" | "error";
 const MAX_GALLERY = 12;
 
 export default function ImageManager() {
+  const { t } = useAdminLanguage();
+  const ti = t.images;
+
   const [images, setImages] = useState<ImageFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -33,7 +37,7 @@ export default function ImageManager() {
   async function loadImages() {
     const res = await fetch("/api/admin/images");
     const data = await res.json() as { files?: ImageFile[]; error?: string };
-    if (!res.ok) throw new Error(data.error ?? "Errore");
+    if (!res.ok) throw new Error(data.error ?? t.common.error);
     setImages(data.files ?? []);
   }
 
@@ -53,11 +57,12 @@ export default function ImageManager() {
       })
       .catch(() => {
         if (!cancelled) {
-          setLoadError("Errore nel caricamento");
+          setLoadError(t.common.error);
           setLoading(false);
         }
       });
     return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function toggleHero(name: string) {
@@ -88,7 +93,7 @@ export default function ImageManager() {
         body: JSON.stringify(body),
       });
       const data = (await res.json()) as { error?: string };
-      if (!res.ok) throw new Error(data.error ?? "Errore");
+      if (!res.ok) throw new Error(data.error ?? t.common.error);
       setFullContent(body);
       setSaveState("success");
       setSelectionDirty(false);
@@ -110,7 +115,7 @@ export default function ImageManager() {
           const result = reader.result as string;
           resolve(result.split(",")[1] ?? "");
         };
-        reader.onerror = () => reject(new Error("Lettura file fallita"));
+        reader.onerror = () => reject(new Error(t.common.error));
         reader.readAsDataURL(file);
       });
       const res = await fetch("/api/admin/images", {
@@ -119,19 +124,19 @@ export default function ImageManager() {
         body: JSON.stringify({ name: file.name, base64, mimeType: file.type }),
       });
       const data = await res.json() as { ok?: boolean; error?: string };
-      if (!res.ok) throw new Error(data.error ?? "Upload fallito");
+      if (!res.ok) throw new Error(data.error ?? t.common.error);
       setUploadState("success");
       await loadImages();
       if (fileInputRef.current) fileInputRef.current.value = "";
       setTimeout(() => setUploadState("idle"), 3000);
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : "Errore upload");
+      setUploadError(err instanceof Error ? err.message : t.common.error);
       setUploadState("error");
     }
   }
 
   async function handleDelete(name: string) {
-    if (!confirm(`Eliminare l'immagine "${name}"?`)) return;
+    if (!confirm(`${ti.delete} "${name}"?`)) return;
     setDeletingName(name);
     try {
       const res = await fetch("/api/admin/images", {
@@ -140,13 +145,12 @@ export default function ImageManager() {
         body: JSON.stringify({ name }),
       });
       const data = await res.json() as { ok?: boolean; error?: string };
-      if (!res.ok) throw new Error(data.error ?? "Errore");
-      // Also remove from hero/gallery if it was selected
+      if (!res.ok) throw new Error(data.error ?? t.common.error);
       if (heroImage === name) { setHeroImage(""); setSelectionDirty(true); }
       if (galleryImages.includes(name)) { setGalleryImages((prev) => prev.filter((n) => n !== name)); setSelectionDirty(true); }
       await loadImages();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Errore eliminazione");
+      alert(err instanceof Error ? err.message : t.common.error);
     } finally {
       setDeletingName(null);
     }
@@ -154,18 +158,13 @@ export default function ImageManager() {
 
   return (
     <div className="space-y-8">
-      <p className="text-xs text-foreground/50 italic">
-        Le immagini caricate saranno disponibili automaticamente in 1–2 minuti.
-      </p>
-
-      {/* Section 1 — Libreria immagini */}
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h3 className="text-sm font-medium text-foreground/80">
-            Libreria immagini
+            {ti.gallery}
             {!loading && (
               <span className="ml-2 text-xs text-foreground/40">
-                Galleria ({galleryImages.length}/{MAX_GALLERY})
+                ({galleryImages.length}/{MAX_GALLERY})
               </span>
             )}
           </h3>
@@ -176,24 +175,20 @@ export default function ImageManager() {
                 disabled={saveState === "saving"}
                 className="rounded-full bg-gold px-5 py-1.5 text-xs uppercase tracking-widest text-[#faf6ec] transition hover:opacity-90 disabled:opacity-50"
               >
-                {saveState === "saving" ? "Salvataggio…" : "Salva selezione"}
+                {saveState === "saving" ? t.contents.saving : t.contents.save}
               </button>
-              {saveState === "success" && (
-                <span className="text-xs text-green-600">Salvato.</span>
-              )}
-              {saveState === "error" && (
-                <span className="text-xs text-red-600">Errore nel salvataggio.</span>
-              )}
+              {saveState === "success" && <span className="text-xs text-green-600">{t.contents.saved}</span>}
+              {saveState === "error" && <span className="text-xs text-red-600">{t.common.error}</span>}
             </div>
           )}
         </div>
 
         {loading ? (
-          <p className="text-sm text-foreground/60">Caricamento immagini…</p>
+          <p className="text-sm text-foreground/60">{t.common.loading}</p>
         ) : loadError ? (
           <p className="text-sm text-red-600">{loadError}</p>
         ) : images.length === 0 ? (
-          <p className="text-sm text-foreground/50">Nessuna immagine trovata.</p>
+          <p className="text-sm text-foreground/50">{ti.noImages}</p>
         ) : (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
             {images.map((img) => {
@@ -201,10 +196,7 @@ export default function ImageManager() {
               const inGallery = galleryImages.includes(img.name);
               const galleryFull = galleryImages.length >= MAX_GALLERY && !inGallery;
               return (
-                <div
-                  key={img.name}
-                  className="rounded-lg border border-gold/30 bg-card overflow-hidden"
-                >
+                <div key={img.name} className="rounded-lg border border-gold/30 bg-card overflow-hidden">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={`/images/${img.name}`}
@@ -217,18 +209,16 @@ export default function ImageManager() {
                       {img.name}
                     </p>
                     <div className="flex items-center gap-2">
-                      {/* Hero toggle */}
                       <button
                         onClick={() => toggleHero(img.name)}
-                        title="Imposta come copertina"
+                        title={ti.hero}
                         className={`text-base leading-none transition ${isHero ? "text-yellow-500" : "text-foreground/30 hover:text-yellow-400"}`}
                       >
                         {isHero ? "★" : "☆"}
                       </button>
-                      {/* Gallery checkbox */}
                       <label
                         className={`flex items-center gap-1 text-[11px] cursor-pointer ${galleryFull ? "opacity-40 cursor-not-allowed" : ""}`}
-                        title={galleryFull ? `Galleria piena (max ${MAX_GALLERY})` : "Includi in galleria"}
+                        title={galleryFull ? `Max ${MAX_GALLERY}` : ti.gallery}
                       >
                         <input
                           type="checkbox"
@@ -237,7 +227,7 @@ export default function ImageManager() {
                           onChange={() => toggleGallery(img.name)}
                           className="accent-gold"
                         />
-                        <span className="text-foreground/60">Galleria</span>
+                        <span className="text-foreground/60">{ti.gallery}</span>
                       </label>
                     </div>
                     <button
@@ -245,7 +235,7 @@ export default function ImageManager() {
                       disabled={deletingName === img.name}
                       className="text-[11px] text-red-500 hover:text-red-700 disabled:opacity-50"
                     >
-                      {deletingName === img.name ? "Eliminazione…" : "Elimina"}
+                      {deletingName === img.name ? ti.deleting : ti.delete}
                     </button>
                   </div>
                 </div>
@@ -255,9 +245,8 @@ export default function ImageManager() {
         )}
       </div>
 
-      {/* Section 2 — Carica nuova immagine */}
       <div className="rounded-lg border border-gold/40 bg-background p-4 space-y-3">
-        <h3 className="text-sm font-medium text-foreground/80">Carica nuova immagine</h3>
+        <h3 className="text-sm font-medium text-foreground/80">{ti.upload}</h3>
         <input
           ref={fileInputRef}
           type="file"
@@ -266,15 +255,9 @@ export default function ImageManager() {
           disabled={uploadState === "uploading"}
           className="block text-sm text-foreground/70 file:mr-4 file:rounded-full file:border file:border-gold/40 file:bg-gold/10 file:px-4 file:py-1.5 file:text-xs file:uppercase file:tracking-widest file:text-gold hover:file:bg-gold/20 disabled:opacity-50"
         />
-        {uploadState === "uploading" && (
-          <p className="text-xs text-foreground/60">Caricamento in corso…</p>
-        )}
-        {uploadState === "success" && (
-          <p className="text-xs text-green-700">Immagine caricata con successo.</p>
-        )}
-        {uploadState === "error" && (
-          <p className="text-xs text-red-600">{uploadError}</p>
-        )}
+        {uploadState === "uploading" && <p className="text-xs text-foreground/60">{ti.uploading}</p>}
+        {uploadState === "success" && <p className="text-xs text-green-700">{t.common.success}</p>}
+        {uploadState === "error" && <p className="text-xs text-red-600">{uploadError}</p>}
       </div>
     </div>
   );

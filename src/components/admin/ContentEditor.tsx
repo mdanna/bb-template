@@ -2,18 +2,20 @@
 
 import { useEffect, useState } from "react";
 import type { SiteContent, MapBookmark, Review, AreaPlace, L10n, Details } from "@/lib/siteContent";
+import { useAdminLanguage } from "@/i18n/AdminLanguageContext";
 
 type SaveState = "idle" | "saving" | "success" | "error";
 type TranslateState = "idle" | "translating" | "done" | "error";
 type SubTab = "struttura" | "testi" | "area" | "servizi" | "recensioni";
 
-const SUB_TABS: { id: SubTab; label: string }[] = [
-  { id: "struttura", label: "Struttura" },
-  { id: "testi", label: "Testi" },
-  { id: "area", label: "Area" },
-  { id: "servizi", label: "Servizi" },
-  { id: "recensioni", label: "Recensioni" },
-];
+const SUB_TAB_LABELS: Record<string, Record<SubTab, string>> = {
+  it: { struttura: "Struttura", testi: "Testi", area: "Area", servizi: "Servizi", recensioni: "Recensioni" },
+  en: { struttura: "Property", testi: "Texts", area: "Area", servizi: "Services", recensioni: "Reviews" },
+  es: { struttura: "Propiedad", testi: "Textos", area: "Área", servizi: "Servicios", recensioni: "Reseñas" },
+  fr: { struttura: "Propriété", testi: "Textes", area: "Zone", servizi: "Services", recensioni: "Avis" },
+};
+
+const SUB_TABS: SubTab[] = ["struttura", "testi", "area", "servizi", "recensioni"];
 
 const inputCls =
   "rounded border border-gold/40 bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-gold";
@@ -27,9 +29,11 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
 function SaveButton({
   saveState,
   onClick,
+  labels,
 }: {
   saveState: SaveState;
   onClick: () => void;
+  labels: { save: string; saving: string; saved: string; error: string };
 }) {
   return (
     <div className="flex items-center gap-4 pt-6">
@@ -38,14 +42,10 @@ function SaveButton({
         disabled={saveState === "saving"}
         className="rounded-full bg-gold px-6 py-2 text-xs uppercase tracking-widest text-[#faf6ec] transition hover:opacity-90 disabled:opacity-50"
       >
-        {saveState === "saving" ? "Salvataggio…" : "Salva"}
+        {saveState === "saving" ? labels.saving : labels.save}
       </button>
-      {saveState === "success" && (
-        <span className="text-sm text-green-600">Salvato. Il sito si aggiornerà automaticamente in 1–2 minuti.</span>
-      )}
-      {saveState === "error" && (
-        <span className="text-sm text-red-600">Errore nel salvataggio.</span>
-      )}
+      {saveState === "success" && <span className="text-sm text-green-600">{labels.saved}</span>}
+      {saveState === "error" && <span className="text-sm text-red-600">{labels.error}</span>}
     </div>
   );
 }
@@ -59,6 +59,20 @@ function LangBadge() {
 }
 
 export default function ContentEditor() {
+  const { t, locale } = useAdminLanguage();
+  const tc = t.contents;
+  const subTabLabels = SUB_TAB_LABELS[locale] ?? SUB_TAB_LABELS.en;
+  const saveLabels = { save: tc.save, saving: tc.saving, saved: tc.saved, error: t.common.error };
+
+  const CONTENT_LABELS = {
+    it: { property: "Struttura", posizione: "Posizione (visualizzata)", città: "Città", indirizzo: "Indirizzo", tel: "Telefono", email: "Email contatto", emailPren: "Email prenotazioni", piva: "Partita IVA / Codice fiscale host", cin: "CIN (Codice Identificativo Nazionale)", nomeHost: "Nome host", metaDesc: "Meta description (SEO)", privacyNote: "Visualizzato nella pagina Privacy come titolare del trattamento dati.", airbnbUrl: "URL Airbnb", rating: "Rating", numReviews: "Numero recensioni", details: "Dettagli", tipoAlloggio: "Tipo di alloggio", caratteristiche: "Caratteristiche", composizione: "Composizione", capacità: "Capacità", zona: "Zona", titoloStruttura: "Titolo struttura", sottotitoloHero: "Sottotitolo hero", titoloRacconto: "Titolo racconto", paragrafiRacconto: "Paragrafi racconto", aggiungiParag: "+ Aggiungi paragrafo", descArea: "Descrizione area", descrizione: "Descrizione", coordinate: "Coordinate appartamento", lat: "Latitudine", lng: "Longitudine", segnalibri: "Segnalibri mappa (max 5)", etichetta: "Etichetta", aggiungiSegnalibro: "Aggiungi segnalibro", puntiInteresse: "Punti di interesse", nome: "Nome", commento: "Commento", aggiungiPunto: "Aggiungi punto", servizi: "Servizi", aggiungiServizio: "Aggiungi servizio", autore: "Autore", testoRecensione: "Testo recensione", aggiungiRecensione: "Aggiungi recensione", elimina: "Elimina", rimuovi: "Rimuovi", traduceTutto: "Traduci tutto", traduceDesc: "Traduce automaticamente tutti i contenuti in 8 lingue con un solo clic, poi salva.", traduzioneCompletata: "Traduzione completata — ricordati di salvare.", traduciAuto: "Traduci automaticamente", traduciDettagli: "Traduci dettagli", traduciArea: "Traduci", traduciPunti: "Traduci punti di interesse", traduciServizi: "Traduci servizi", traduciRecensioni: "Traduci recensioni", inCorso: "Traduzione in corso…", vediEn: "Vedi traduzioni (EN)", nascondi: "Nascondi", tradotto: "Tradotto" },
+    en: { property: "Property", posizione: "Location (displayed)", città: "City", indirizzo: "Address", tel: "Phone", email: "Contact email", emailPren: "Booking email", piva: "VAT / Tax ID (host)", cin: "CIN (National ID Code)", nomeHost: "Host name", metaDesc: "Meta description (SEO)", privacyNote: "Shown on the Privacy page as data controller.", airbnbUrl: "Airbnb URL", rating: "Rating", numReviews: "Review count", details: "Details", tipoAlloggio: "Accommodation type", caratteristiche: "Features", composizione: "Composition", capacità: "Capacity", zona: "Area", titoloStruttura: "Property title", sottotitoloHero: "Hero subtitle", titoloRacconto: "Story title", paragrafiRacconto: "Story paragraphs", aggiungiParag: "+ Add paragraph", descArea: "Area description", descrizione: "Description", coordinate: "Property coordinates", lat: "Latitude", lng: "Longitude", segnalibri: "Map bookmarks (max 5)", etichetta: "Label", aggiungiSegnalibro: "Add bookmark", puntiInteresse: "Points of interest", nome: "Name", commento: "Comment", aggiungiPunto: "Add point", servizi: "Services", aggiungiServizio: "Add service", autore: "Author", testoRecensione: "Review text", aggiungiRecensione: "Add review", elimina: "Delete", rimuovi: "Remove", traduceTutto: "Translate all", traduceDesc: "Automatically translates all content into 8 languages with one click, then save.", traduzioneCompletata: "Translation complete — remember to save.", traduciAuto: "Translate automatically", traduciDettagli: "Translate details", traduciArea: "Translate", traduciPunti: "Translate points", traduciServizi: "Translate services", traduciRecensioni: "Translate reviews", inCorso: "Translating…", vediEn: "Show translations (EN)", nascondi: "Hide", tradotto: "Translated" },
+    es: { property: "Propiedad", posizione: "Ubicación (mostrada)", città: "Ciudad", indirizzo: "Dirección", tel: "Teléfono", email: "Email de contacto", emailPren: "Email de reservas", piva: "NIF / CIF (anfitrión)", cin: "CIN (Código de Identificación)", nomeHost: "Nombre anfitrión", metaDesc: "Meta descripción (SEO)", privacyNote: "Mostrado en la página de Privacidad como responsable del tratamiento.", airbnbUrl: "URL Airbnb", rating: "Valoración", numReviews: "Nº de reseñas", details: "Detalles", tipoAlloggio: "Tipo de alojamiento", caratteristiche: "Características", composizione: "Composición", capacità: "Capacidad", zona: "Zona", titoloStruttura: "Título del alojamiento", sottotitoloHero: "Subtítulo hero", titoloRacconto: "Título de la historia", paragrafiRacconto: "Párrafos de la historia", aggiungiParag: "+ Añadir párrafo", descArea: "Descripción del área", descrizione: "Descripción", coordinate: "Coordenadas del alojamiento", lat: "Latitud", lng: "Longitud", segnalibri: "Marcadores del mapa (máx 5)", etichetta: "Etiqueta", aggiungiSegnalibro: "Añadir marcador", puntiInteresse: "Puntos de interés", nome: "Nombre", commento: "Comentario", aggiungiPunto: "Añadir punto", servizi: "Servicios", aggiungiServizio: "Añadir servicio", autore: "Autor", testoRecensione: "Texto de la reseña", aggiungiRecensione: "Añadir reseña", elimina: "Eliminar", rimuovi: "Quitar", traduceTutto: "Traducir todo", traduceDesc: "Traduce automáticamente todos los contenidos a 8 idiomas con un clic, luego guarda.", traduzioneCompletata: "Traducción completa — recuerda guardar.", traduciAuto: "Traducir automáticamente", traduciDettagli: "Traducir detalles", traduciArea: "Traducir", traduciPunti: "Traducir puntos", traduciServizi: "Traducir servicios", traduciRecensioni: "Traducir reseñas", inCorso: "Traduciendo…", vediEn: "Ver traducciones (EN)", nascondi: "Ocultar", tradotto: "Traducido" },
+    fr: { property: "Propriété", posizione: "Localisation (affichée)", città: "Ville", indirizzo: "Adresse", tel: "Téléphone", email: "Email de contact", emailPren: "Email de réservation", piva: "N° TVA / SIRET (hôte)", cin: "CIN (Code d'Identification National)", nomeHost: "Nom de l'hôte", metaDesc: "Méta description (SEO)", privacyNote: "Affiché sur la page Politique de confidentialité comme responsable du traitement.", airbnbUrl: "URL Airbnb", rating: "Note", numReviews: "Nombre d'avis", details: "Détails", tipoAlloggio: "Type de logement", caratteristiche: "Caractéristiques", composizione: "Composition", capacità: "Capacité", zona: "Zone", titoloStruttura: "Titre du logement", sottotitoloHero: "Sous-titre hero", titoloRacconto: "Titre de l'histoire", paragrafiRacconto: "Paragraphes de l'histoire", aggiungiParag: "+ Ajouter un paragraphe", descArea: "Description de la zone", descrizione: "Description", coordinate: "Coordonnées du logement", lat: "Latitude", lng: "Longitude", segnalibri: "Signets de la carte (max 5)", etichetta: "Étiquette", aggiungiSegnalibro: "Ajouter un signet", puntiInteresse: "Points d'intérêt", nome: "Nom", commento: "Commentaire", aggiungiPunto: "Ajouter un point", servizi: "Services", aggiungiServizio: "Ajouter un service", autore: "Auteur", testoRecensione: "Texte de l'avis", aggiungiRecensione: "Ajouter un avis", elimina: "Supprimer", rimuovi: "Retirer", traduceTutto: "Tout traduire", traduceDesc: "Traduit automatiquement tous les contenus en 8 langues en un clic, puis enregistrez.", traduzioneCompletata: "Traduction terminée — pensez à enregistrer.", traduciAuto: "Traduire automatiquement", traduciDettagli: "Traduire les détails", traduciArea: "Traduire", traduciPunti: "Traduire les points", traduciServizi: "Traduire les services", traduciRecensioni: "Traduire les avis", inCorso: "Traduction en cours…", vediEn: "Voir les traductions (EN)", nascondi: "Masquer", tradotto: "Traduit" },
+  } as const;
+
+  const L = CONTENT_LABELS[locale as keyof typeof CONTENT_LABELS] ?? CONTENT_LABELS.en;
+
   const [content, setContent] = useState<SiteContent | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [loadError, setLoadError] = useState("");
@@ -92,7 +106,8 @@ export default function ContentEditor() {
     fetch("/api/admin/content")
       .then((r) => r.json())
       .then(setContent)
-      .catch(() => setLoadError("Errore nel caricamento"));
+      .catch(() => setLoadError(t.common.error));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleSave() {
@@ -105,7 +120,7 @@ export default function ContentEditor() {
         body: JSON.stringify(content),
       });
       const data = (await res.json()) as { error?: string };
-      if (!res.ok) throw new Error(data.error ?? "Errore");
+      if (!res.ok) throw new Error(data.error ?? t.common.error);
       setSaveState("success");
       setTimeout(() => setSaveState("idle"), 3000);
     } catch {
@@ -146,7 +161,7 @@ export default function ContentEditor() {
         }),
       });
       const data = (await res.json()) as { translations?: Record<string, Record<string, string>>; error?: string };
-      if (!res.ok || !data.translations) throw new Error(data.error ?? "Errore");
+      if (!res.ok || !data.translations) throw new Error(data.error ?? t.common.error);
       const tr = data.translations;
       setContent((c) => {
         if (!c) return c;
@@ -172,7 +187,7 @@ export default function ContentEditor() {
       setTextsTranslatePreview(preview);
       setTextsTranslateState("done");
     } catch (e) {
-      setTextsTranslateError(e instanceof Error ? e.message : "Errore");
+      setTextsTranslateError(e instanceof Error ? e.message : t.common.error);
       setTextsTranslateState("error");
     }
   }
@@ -188,12 +203,12 @@ export default function ContentEditor() {
         body: JSON.stringify({ texts: { areaDescription: content.areaDescription.it } }),
       });
       const data = (await res.json()) as { translations?: Record<string, Record<string, string>>; error?: string };
-      if (!res.ok || !data.translations) throw new Error(data.error ?? "Errore");
+      if (!res.ok || !data.translations) throw new Error(data.error ?? t.common.error);
       const tr = data.translations.areaDescription ?? {};
       setContent((c) => c ? { ...c, areaDescription: { ...c.areaDescription, ...tr } } : c);
       setAreaDescTranslateState("done");
     } catch (e) {
-      setAreaDescTranslateError(e instanceof Error ? e.message : "Errore");
+      setAreaDescTranslateError(e instanceof Error ? e.message : t.common.error);
       setAreaDescTranslateState("error");
     }
   }
@@ -215,7 +230,7 @@ export default function ContentEditor() {
         body: JSON.stringify({ texts }),
       });
       const data = (await res.json()) as { translations?: Record<string, Record<string, string>>; error?: string };
-      if (!res.ok || !data.translations) throw new Error(data.error ?? "Errore");
+      if (!res.ok || !data.translations) throw new Error(data.error ?? t.common.error);
       const tr = data.translations;
       setContent((c) => {
         if (!c) return c;
@@ -227,7 +242,7 @@ export default function ContentEditor() {
       });
       setPlacesTranslateState("done");
     } catch (e) {
-      setPlacesTranslateError(e instanceof Error ? e.message : "Errore");
+      setPlacesTranslateError(e instanceof Error ? e.message : t.common.error);
       setPlacesTranslateState("error");
     }
   }
@@ -245,7 +260,7 @@ export default function ContentEditor() {
         body: JSON.stringify({ texts }),
       });
       const data = (await res.json()) as { translations?: Record<string, Record<string, string>>; error?: string };
-      if (!res.ok || !data.translations) throw new Error(data.error ?? "Errore");
+      if (!res.ok || !data.translations) throw new Error(data.error ?? t.common.error);
       const tr = data.translations;
       setContent((c) => {
         if (!c) return c;
@@ -254,7 +269,7 @@ export default function ContentEditor() {
       });
       setAmenitiesTranslateState("done");
     } catch (e) {
-      setAmenitiesTranslateError(e instanceof Error ? e.message : "Errore");
+      setAmenitiesTranslateError(e instanceof Error ? e.message : t.common.error);
       setAmenitiesTranslateState("error");
     }
   }
@@ -272,7 +287,7 @@ export default function ContentEditor() {
         body: JSON.stringify({ texts }),
       });
       const data = (await res.json()) as { translations?: Record<string, Record<string, string>>; error?: string };
-      if (!res.ok || !data.translations) throw new Error(data.error ?? "Errore");
+      if (!res.ok || !data.translations) throw new Error(data.error ?? t.common.error);
       const tr = data.translations;
       setContent((c) => {
         if (!c) return c;
@@ -284,7 +299,7 @@ export default function ContentEditor() {
       });
       setReviewsTranslateState("done");
     } catch (e) {
-      setReviewsTranslateError(e instanceof Error ? e.message : "Errore");
+      setReviewsTranslateError(e instanceof Error ? e.message : t.common.error);
       setReviewsTranslateState("error");
     }
   }
@@ -308,7 +323,7 @@ export default function ContentEditor() {
         }),
       });
       const data = (await res.json()) as { translations?: Record<string, Record<string, string>>; error?: string };
-      if (!res.ok || !data.translations) throw new Error(data.error ?? "Errore");
+      if (!res.ok || !data.translations) throw new Error(data.error ?? t.common.error);
       const tr = data.translations;
       setContent((c) => {
         if (!c) return c;
@@ -329,7 +344,7 @@ export default function ContentEditor() {
       });
       setDetailsTranslateState("done");
     } catch (e) {
-      setDetailsTranslateError(e instanceof Error ? e.message : "Errore");
+      setDetailsTranslateError(e instanceof Error ? e.message : t.common.error);
       setDetailsTranslateState("error");
     }
   }
@@ -369,7 +384,7 @@ export default function ContentEditor() {
           body: JSON.stringify({ texts }),
         });
         const data = (await res.json()) as { translations?: Record<string, Record<string, string>>; error?: string };
-        if (!res.ok || !data.translations) throw new Error(data.error ?? "Errore");
+        if (!res.ok || !data.translations) throw new Error(data.error ?? t.common.error);
         return data.translations;
       };
 
@@ -409,13 +424,13 @@ export default function ContentEditor() {
       setAllTranslateState("done");
       setTimeout(() => setAllTranslateState("idle"), 4000);
     } catch (e) {
-      setAllTranslateError(e instanceof Error ? e.message : "Errore");
+      setAllTranslateError(e instanceof Error ? e.message : t.common.error);
       setAllTranslateState("error");
     }
   }
 
   if (!content) {
-    return <p className="text-sm text-foreground/60">{loadError || "Caricamento…"}</p>;
+    return <p className="text-sm text-foreground/60">{loadError || t.common.loading}</p>;
   }
 
   // ---- Sub-tab renders ----
@@ -426,19 +441,19 @@ export default function ContentEditor() {
       <div className="space-y-6">
         {/* Struttura card */}
         <div className="rounded-lg border border-gold/30 bg-background p-6">
-          <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-foreground/50">Struttura</h3>
+          <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-foreground/50">{L.property}</h3>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
             {(
               [
-                ["Posizione (visualizzata)", "locationDisplay"],
-                ["Città", "city"],
-                ["Indirizzo", "address"],
-                ["Telefono", "phone"],
-                ["Email contatto", "email"],
-                ["Email prenotazioni", "bookingEmail"],
-                ["Partita IVA / Codice fiscale host", "vatNumber"],
-                ["CIN (Codice Identificativo Nazionale)", "cin"],
-                ["Nome host", "hostName"],
+                [L.posizione, "locationDisplay"],
+                [L.città, "city"],
+                [L.indirizzo, "address"],
+                [L.tel, "phone"],
+                [L.email, "email"],
+                [L.emailPren, "bookingEmail"],
+                [L.piva, "vatNumber"],
+                [L.cin, "cin"],
+                [L.nomeHost, "hostName"],
               ] as [string, keyof SiteContent][]
             ).map(([label, key]) => (
               <label key={key} className={labelCls}>
@@ -451,9 +466,9 @@ export default function ContentEditor() {
                 />
               </label>
             ))}
-            <p className="col-span-full text-xs text-foreground/40 -mt-2">Visualizzato nella pagina Privacy come titolare del trattamento dati.</p>
+            <p className="col-span-full text-xs text-foreground/40 -mt-2">{L.privacyNote}</p>
             <label className={`${labelCls} col-span-full`}>
-              <FieldLabel>Meta description (SEO)</FieldLabel>
+              <FieldLabel>{L.metaDesc}</FieldLabel>
               <textarea
                 rows={2}
                 value={content.metaDescription ?? ""}
@@ -469,7 +484,7 @@ export default function ContentEditor() {
           <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-foreground/50">Airbnb</h3>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <label className={`${labelCls} sm:col-span-3`}>
-              <FieldLabel>URL Airbnb</FieldLabel>
+              <FieldLabel>{L.airbnbUrl}</FieldLabel>
               <input
                 type="text"
                 value={content.airbnbUrl}
@@ -478,7 +493,7 @@ export default function ContentEditor() {
               />
             </label>
             <label className={labelCls}>
-              <FieldLabel>Rating</FieldLabel>
+              <FieldLabel>{L.rating}</FieldLabel>
               <input
                 type="number"
                 step="0.01"
@@ -488,7 +503,7 @@ export default function ContentEditor() {
               />
             </label>
             <label className={labelCls}>
-              <FieldLabel>Numero recensioni</FieldLabel>
+              <FieldLabel>{L.numReviews}</FieldLabel>
               <input
                 type="number"
                 value={content.airbnbReviewCount}
@@ -501,14 +516,14 @@ export default function ContentEditor() {
 
         {/* Dettagli card */}
         <div className="rounded-lg border border-gold/30 bg-background p-6 space-y-5">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-foreground/50">Dettagli</h3>
+          <h3 className="text-xs font-bold uppercase tracking-widest text-foreground/50">{L.details}</h3>
           {(
             [
-              { key: "entirePlace", label: "Tipo di alloggio" },
-              { key: "quietCourtyard", label: "Caratteristiche" },
-              { key: "roomInfo", label: "Composizione" },
-              { key: "maxGuests", label: "Capacità" },
-              { key: "neighborhood", label: "Zona" },
+              { key: "entirePlace", label: L.tipoAlloggio },
+              { key: "quietCourtyard", label: L.caratteristiche },
+              { key: "roomInfo", label: L.composizione },
+              { key: "maxGuests", label: L.capacità },
+              { key: "neighborhood", label: L.zona },
             ] as { key: keyof Details; label: string }[]
           ).map(({ key, label }) => (
             <label key={key} className={labelCls}>
@@ -526,23 +541,16 @@ export default function ContentEditor() {
             </label>
           ))}
           <div className="flex flex-wrap items-center gap-4 pt-1">
-            <button
-              onClick={handleTranslateDetails}
-              disabled={detailsTranslateState === "translating"}
-              className="rounded-full border border-foreground/30 px-4 py-1.5 text-xs text-foreground/70 transition hover:bg-foreground/5 disabled:opacity-50"
-            >
-              {detailsTranslateState === "translating" ? "Traduzione in corso…" : "Traduci dettagli"}
+            <button onClick={handleTranslateDetails} disabled={detailsTranslateState === "translating"}
+              className="rounded-full border border-foreground/30 px-4 py-1.5 text-xs text-foreground/70 transition hover:bg-foreground/5 disabled:opacity-50">
+              {detailsTranslateState === "translating" ? L.inCorso : L.traduciDettagli}
             </button>
-            {detailsTranslateState === "done" && (
-              <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-700">Tradotto</span>
-            )}
-            {detailsTranslateState === "error" && (
-              <span className="text-xs text-red-600">{detailsTranslateError}</span>
-            )}
+            {detailsTranslateState === "done" && <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-700">{L.tradotto}</span>}
+            {detailsTranslateState === "error" && <span className="text-xs text-red-600">{detailsTranslateError}</span>}
           </div>
         </div>
 
-        <SaveButton saveState={saveState} onClick={handleSave} />
+        <SaveButton saveState={saveState} onClick={handleSave} labels={saveLabels} />
       </div>
     );
   }
@@ -570,19 +578,17 @@ export default function ContentEditor() {
         <div className="rounded-lg border border-gold/30 bg-background p-6 space-y-5">
           {/* Titolo struttura */}
           <label className={labelCls}>
-            <span className={labelTextCls}>Titolo struttura <LangBadge /></span>
+            <span className={labelTextCls}>{L.titoloStruttura} <LangBadge /></span>
             <input type="text" value={content.siteTitle.it}
               onChange={(e) => setL10nField("siteTitle", "it", e.target.value)} className={inputCls} />
           </label>
-          {/* Sottotitolo hero */}
           <label className={labelCls}>
-            <span className={labelTextCls}>Sottotitolo hero <LangBadge /></span>
+            <span className={labelTextCls}>{L.sottotitoloHero} <LangBadge /></span>
             <input type="text" value={content.heroSubtitle.it}
               onChange={(e) => setL10nField("heroSubtitle", "it", e.target.value)} className={inputCls} />
           </label>
-          {/* Titolo racconto */}
           <label className={labelCls}>
-            <span className={labelTextCls}>Titolo racconto <LangBadge /></span>
+            <span className={labelTextCls}>{L.titoloRacconto} <LangBadge /></span>
             <input type="text" value={content.storyTitle.it}
               onChange={(e) => setL10nField("storyTitle", "it", e.target.value)} className={inputCls} />
           </label>
@@ -592,17 +598,14 @@ export default function ContentEditor() {
         <div className="rounded-lg border border-gold/30 bg-background p-6 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-bold uppercase tracking-widest text-foreground/50">
-              Paragrafi racconto <LangBadge />
+              {L.paragrafiRacconto} <LangBadge />
               <span className="ml-2 text-foreground/40 normal-case font-normal">
                 ({content.storyParagraphs.length}/{MAX_PARAGRAPHS})
               </span>
             </h3>
             {content.storyParagraphs.length < MAX_PARAGRAPHS && (
-              <button
-                onClick={addParagraph}
-                className="rounded-full border border-gold/50 px-3 py-1 text-xs text-gold hover:bg-gold/10 transition"
-              >
-                + Aggiungi paragrafo
+              <button onClick={addParagraph} className="rounded-full border border-gold/50 px-3 py-1 text-xs text-gold hover:bg-gold/10 transition">
+                {L.aggiungiParag}
               </button>
             )}
           </div>
@@ -618,7 +621,7 @@ export default function ContentEditor() {
               {content.storyParagraphs.length > 1 && (
                 <button
                   onClick={() => removeParagraph(idx)}
-                  title="Rimuovi paragrafo"
+                  title={L.rimuovi}
                   className="mt-1 text-foreground/30 hover:text-red-500 transition text-lg leading-none"
                 >
                   ×
@@ -635,7 +638,7 @@ export default function ContentEditor() {
             disabled={textsTranslateState === "translating"}
             className="rounded-full border border-foreground/30 px-4 py-1.5 text-xs text-foreground/70 transition hover:bg-foreground/5 disabled:opacity-50"
           >
-            {textsTranslateState === "translating" ? "Traduzione in corso…" : "Traduci automaticamente"}
+            {textsTranslateState === "translating" ? L.inCorso : L.traduciAuto}
           </button>
           {textsTranslateState === "done" && (
             <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-700">Tradotto</span>
@@ -648,7 +651,7 @@ export default function ContentEditor() {
               onClick={() => setShowTextsPreview((v) => !v)}
               className="text-xs text-foreground/50 underline"
             >
-              {showTextsPreview ? "Nascondi" : "Vedi traduzioni (EN)"}
+              {showTextsPreview ? L.nascondi : L.vediEn}
             </button>
           )}
         </div>
@@ -664,7 +667,7 @@ export default function ContentEditor() {
           </div>
         )}
 
-        <SaveButton saveState={saveState} onClick={handleSave} />
+        <SaveButton saveState={saveState} onClick={handleSave} labels={saveLabels} />
       </div>
     );
   }
@@ -693,7 +696,7 @@ export default function ContentEditor() {
               disabled={areaDescTranslateState === "translating"}
               className="rounded-full border border-foreground/30 px-4 py-1.5 text-xs text-foreground/70 transition hover:bg-foreground/5 disabled:opacity-50"
             >
-              {areaDescTranslateState === "translating" ? "Traduzione in corso…" : "Traduci"}
+              {areaDescTranslateState === "translating" ? L.inCorso : L.traduciArea}
             </button>
             {areaDescTranslateState === "done" && (
               <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-700">Tradotto</span>
@@ -872,7 +875,7 @@ export default function ContentEditor() {
               disabled={placesTranslateState === "translating"}
               className="rounded-full border border-foreground/30 px-4 py-1.5 text-xs text-foreground/70 transition hover:bg-foreground/5 disabled:opacity-50"
             >
-              {placesTranslateState === "translating" ? "Traduzione in corso…" : "Traduci punti di interesse"}
+              {placesTranslateState === "translating" ? L.inCorso : L.traduciPunti}
             </button>
             {placesTranslateState === "done" && (
               <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-700">Tradotto</span>
@@ -883,7 +886,7 @@ export default function ContentEditor() {
           </div>
         </div>
 
-        <SaveButton saveState={saveState} onClick={handleSave} />
+        <SaveButton saveState={saveState} onClick={handleSave} labels={saveLabels} />
       </div>
     );
   }
@@ -934,7 +937,7 @@ export default function ContentEditor() {
               disabled={amenitiesTranslateState === "translating"}
               className="rounded-full border border-foreground/30 px-4 py-1.5 text-xs text-foreground/70 transition hover:bg-foreground/5 disabled:opacity-50"
             >
-              {amenitiesTranslateState === "translating" ? "Traduzione in corso…" : "Traduci servizi"}
+              {amenitiesTranslateState === "translating" ? L.inCorso : L.traduciServizi}
             </button>
             {amenitiesTranslateState === "done" && (
               <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-700">Tradotto</span>
@@ -944,7 +947,7 @@ export default function ContentEditor() {
             )}
           </div>
         </div>
-        <SaveButton saveState={saveState} onClick={handleSave} />
+        <SaveButton saveState={saveState} onClick={handleSave} labels={saveLabels} />
       </div>
     );
   }
@@ -1013,7 +1016,7 @@ export default function ContentEditor() {
               disabled={reviewsTranslateState === "translating"}
               className="rounded-full border border-foreground/30 px-4 py-1.5 text-xs text-foreground/70 transition hover:bg-foreground/5 disabled:opacity-50"
             >
-              {reviewsTranslateState === "translating" ? "Traduzione in corso…" : "Traduci recensioni"}
+              {reviewsTranslateState === "translating" ? L.inCorso : L.traduciRecensioni}
             </button>
             {reviewsTranslateState === "done" && (
               <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-700">Tradotto</span>
@@ -1023,7 +1026,7 @@ export default function ContentEditor() {
             )}
           </div>
         </div>
-        <SaveButton saveState={saveState} onClick={handleSave} />
+        <SaveButton saveState={saveState} onClick={handleSave} labels={saveLabels} />
       </div>
     );
   }
@@ -1037,7 +1040,7 @@ export default function ContentEditor() {
           disabled={allTranslateState === "translating"}
           className="rounded-full bg-gold px-5 py-1.5 text-xs uppercase tracking-widest text-[#faf6ec] transition hover:opacity-90 disabled:opacity-50"
         >
-          {allTranslateState === "translating" ? "Traduzione in corso…" : "Traduci tutto"}
+          {allTranslateState === "translating" ? L.inCorso : L.traduceTutto}
         </button>
         <p className="text-xs text-foreground/50">
           Traduce automaticamente tutti i contenuti in 8 lingue con un solo clic, poi salva.
@@ -1056,15 +1059,15 @@ export default function ContentEditor() {
       <div className="flex gap-6 border-b border-gold/20">
         {SUB_TABS.map((tab) => (
           <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            key={tab}
+            onClick={() => setActiveTab(tab)}
             className={`pb-2 text-sm transition ${
-              activeTab === tab.id
+              activeTab === tab
                 ? "border-b border-foreground text-foreground"
                 : "text-foreground/60 hover:text-foreground/80"
             }`}
           >
-            {tab.label}
+            {subTabLabels[tab]}
           </button>
         ))}
       </div>
