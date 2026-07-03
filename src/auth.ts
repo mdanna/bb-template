@@ -47,6 +47,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   session: { strategy: "jwt" },
   providers: [
     GitHub({
+      // Con l'adapter DB, se esiste già un utente con la stessa email (es. creato
+      // dal login via magic-link) il login GitHub darebbe OAuthAccountNotLinked.
+      // Colleghiamo l'account allo stesso utente: l'accesso resta comunque
+      // ristretto dall'allowlist (ADMIN_GITHUB_LOGINS/ADMIN_EMAILS).
+      allowDangerousEmailAccountLinking: true,
       // I commit su GitHub usano GITHUB_BOT_TOKEN, non il token OAuth dell'admin:
       // qui basta lo scope minimo per identificare l'utente che effettua il login.
       authorization: { params: { scope: "read:user user:email" } },
