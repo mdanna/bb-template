@@ -228,7 +228,7 @@ const zh: Translation = {
   confirmation: {
     eyebrow: "预订已确认",
     title: "谢谢您,{name}!",
-    subtitle: "您在神秘小屋的天使们的预订已确认。",
+    subtitle: "您在{site}的预订已确认。",
     guests: "{count} 位客人",
     totalPaid: "已付总额",
     method: "支付方式",

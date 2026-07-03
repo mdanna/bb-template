@@ -232,7 +232,7 @@ const es: Translation = {
   confirmation: {
     eyebrow: "Reserva confirmada",
     title: "¡Gracias, {name}!",
-    subtitle: "Tu reserva en Los Ángeles de la Casa Misteriosa está confirmada.",
+    subtitle: "Tu reserva en {site} está confirmada.",
     guests: "{count} huéspedes",
     totalPaid: "Total pagado",
     method: "Método",

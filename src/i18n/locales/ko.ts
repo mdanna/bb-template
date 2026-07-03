@@ -228,7 +228,7 @@ const ko: Translation = {
   confirmation: {
     eyebrow: "예약 확정",
     title: "감사합니다, {name}님!",
-    subtitle: "신비한 집의 천사들 예약이 확정되었습니다.",
+    subtitle: "{site} 예약이 확정되었습니다.",
     guests: "{count}명",
     totalPaid: "결제 총액",
     method: "결제 방법",

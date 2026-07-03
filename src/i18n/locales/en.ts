@@ -231,7 +231,7 @@ const en: Translation = {
   confirmation: {
     eyebrow: "Booking confirmed",
     title: "Thank you, {name}!",
-    subtitle: "Your booking at The Angels of the Mysterious Home is confirmed.",
+    subtitle: "Your booking at {site} is confirmed.",
     guests: "{count} guests",
     totalPaid: "Total paid",
     method: "Method",

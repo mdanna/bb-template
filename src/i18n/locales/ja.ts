@@ -228,7 +228,7 @@ const ja: Translation = {
   confirmation: {
     eyebrow: "予約確定",
     title: "{name}様、ありがとうございます!",
-    subtitle: "不思議な家の天使たちでのご予約が確定しました。",
+    subtitle: "{site}でのご予約が確定しました。",
     guests: "{count}名様",
     totalPaid: "お支払い合計",
     method: "支払い方法",

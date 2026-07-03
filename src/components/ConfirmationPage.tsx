@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { translations, type LocaleCode } from "@/i18n/index";
 import { format } from "@/i18n/format";
 import { formatDateOnly } from "@/lib/dateOnly";
+import { CONTENT } from "@/lib/siteContent";
 
 interface BookingSummary {
   code: string;
@@ -125,7 +126,9 @@ export default function ConfirmationPage({ code }: { code: string }) {
       <h1 className="font-serif-display mt-2 max-w-lg text-3xl italic text-foreground sm:text-4xl">
         {format(t.confirmation.title, { name: booking.first_name })}
       </h1>
-      <p className="mt-4 max-w-md text-foreground/80">{t.confirmation.subtitle}</p>
+      <p className="mt-4 max-w-md text-foreground/80">
+        {format(t.confirmation.subtitle, { site: CONTENT.siteTitle[locale] ?? CONTENT.siteTitle.it })}
+      </p>
 
       <div className="mt-8 w-full max-w-md rounded-lg border border-gold/40 bg-card p-6 text-left">
         <p className="font-serif-display text-lg italic text-foreground">{booking.code}</p>

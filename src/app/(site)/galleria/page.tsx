@@ -11,7 +11,7 @@ function Diamond() {
 const galleryPhotos = CONTENT.galleryImages.map((img) => `/images/${img}`);
 
 export default function GalleriaPage() {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
 
   return (
     <section className="px-6 py-16">
@@ -24,7 +24,7 @@ export default function GalleriaPage() {
       <div className="mx-auto grid max-w-5xl grid-cols-2 gap-3 sm:grid-cols-3">
         {galleryPhotos.map((src) => (
           <div key={src} className="relative aspect-square overflow-hidden rounded-md border border-gold/40">
-            <Image src={src} alt="Gli Angeli della Casa Misteriosa" fill className="object-cover" />
+            <Image src={src} alt={CONTENT.siteTitle[locale] || CONTENT.siteTitle.it} fill className="object-cover" />
           </div>
         ))}
       </div>

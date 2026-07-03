@@ -18,7 +18,7 @@ export default function Home() {
       <header className="relative flex min-h-[80vh] flex-col items-center justify-center overflow-hidden px-6 py-24 text-center">
         <Image
           src={`/images/${CONTENT.heroImage}`}
-          alt="Gli Angeli della Casa Misteriosa"
+          alt={CONTENT.siteTitle[locale] || CONTENT.siteTitle.it}
           fill
           priority
           className="object-cover"
