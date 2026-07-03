@@ -1,0 +1,20 @@
+{
+  "airbnbIcalUrl": "",
+  "cityTaxPerPersonPerNight": 6,
+  "cityTaxMaxNights": 10,
+  "defaultDepositRate": 0.5,
+  "minDepositRate": 0.2,
+  "balanceDueDays": 2,
+  "cancelFullRefundDays": 15,
+  "cancelHalfRefundDays": 2,
+  "cancelPartialRefundPct": 50,
+  "cancelFeePercent": 5,
+  "minAdvanceBookingDays": 2,
+  "minNights": 1,
+  "maxNights": 30,
+  "maxGuests": 2,
+  "balanceReminderDaysFirst": 5,
+  "balanceReminderDaysSecond": 2,
+  "checkinTime": "14:00",
+  "checkoutTime": "10:00"
+}

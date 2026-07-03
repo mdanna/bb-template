@@ -1,0 +1,33 @@
+"use client";
+
+import Image from "next/image";
+import { useLanguage } from "@/i18n/LanguageContext";
+import { CONTENT } from "@/lib/siteContent";
+
+function Diamond() {
+  return <div className="divider-diamond text-gold">◆</div>;
+}
+
+const galleryPhotos = CONTENT.galleryImages.map((img) => `/images/${img}`);
+
+export default function GalleriaPage() {
+  const { t } = useLanguage();
+
+  return (
+    <section className="px-6 py-16">
+      <h1 className="font-serif-display mb-2 text-center text-3xl italic text-foreground">
+        {t.gallery.title}
+      </h1>
+      <div className="mx-auto mb-10 max-w-xs">
+        <Diamond />
+      </div>
+      <div className="mx-auto grid max-w-5xl grid-cols-2 gap-3 sm:grid-cols-3">
+        {galleryPhotos.map((src) => (
+          <div key={src} className="relative aspect-square overflow-hidden rounded-md border border-gold/40">
+            <Image src={src} alt="Gli Angeli della Casa Misteriosa" fill className="object-cover" />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}

@@ -1,0 +1,45 @@
+"use client";
+
+import { useLanguage } from "@/i18n/LanguageContext";
+import { CONTENT } from "@/lib/siteContent";
+
+function Diamond() {
+  return <div className="divider-diamond text-gold">◆</div>;
+}
+
+export default function RecensioniPage() {
+  const { t, locale } = useLanguage();
+
+  return (
+    <section className="px-6 py-20">
+      <h1 className="font-serif-display mb-2 text-center text-3xl italic text-foreground">
+        {t.reviews.title}
+      </h1>
+      <p className="text-center text-sm text-foreground/60">{t.reviews.subtitle}</p>
+      <div className="mx-auto mb-10 mt-4 max-w-xs">
+        <Diamond />
+      </div>
+      <div className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-3">
+        {CONTENT.reviews.map((review, i) => (
+          <blockquote
+            key={i}
+            className="rounded-lg border border-gold/40 bg-card p-6 text-sm leading-7 text-foreground/80"
+          >
+            <p>&ldquo;{review.text[locale] || review.text.it}&rdquo;</p>
+            <footer className="label-gold mt-4 text-[10px]">{review.author}</footer>
+          </blockquote>
+        ))}
+      </div>
+      <p className="mx-auto mt-4 max-w-5xl text-center text-xs">
+        <a
+          href={CONTENT.airbnbUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-gold underline"
+        >
+          {t.reviews.readMore}
+        </a>
+      </p>
+    </section>
+  );
+}

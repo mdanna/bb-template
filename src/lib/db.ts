@@ -1,0 +1,99 @@
+import { Pool } from "pg";
+
+const connectionString =
+  process.env.POSTGRES_URL ?? process.env.DATABASE_URL ?? process.env.PRISMA_DATABASE_URL;
+
+declare global {
+  var __pgPool: Pool | undefined;
+}
+
+export const pool =
+  global.__pgPool ??
+  new Pool({
+    connectionString,
+    ssl: connectionString?.includes("sslmode=require") ? { rejectUnauthorized: false } : undefined,
+    // Ambiente serverless: ogni istanza calda riusa questo pool (è un singleton a livello di
+    // modulo), ma con molte istanze concorrenti un max alto può esaurire i collegamenti
+    // disponibili lato Neon. Un pool piccolo per istanza, con chiusura rapida delle
+    // connessioni inattive, è più sicuro qui.
+    max: 3,
+    idleTimeoutMillis: 10_000,
+  });
+
+if (process.env.NODE_ENV !== "production") {
+  global.__pgPool = pool;
+}
+
+let initialized = false;
+
+export async function ensureSchema() {
+  if (initialized) return;
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS bookings (
+      id SERIAL PRIMARY KEY,
+      code TEXT UNIQUE NOT NULL,
+      first_name TEXT NOT NULL,
+      last_name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      locale TEXT NOT NULL DEFAULT 'it',
+      guests INTEGER NOT NULL,
+      checkin DATE NOT NULL,
+      checkout DATE NOT NULL,
+      total_price NUMERIC,
+      message TEXT,
+      status TEXT NOT NULL DEFAULT 'pending',
+      rejection_reason TEXT,
+      payment_method TEXT,
+      paid_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+  `);
+  // Migrazioni per tabelle create prima dell'introduzione di queste colonne.
+  await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS locale TEXT NOT NULL DEFAULT 'it';`);
+  await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS archived BOOLEAN NOT NULL DEFAULT false;`);
+  await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS deposit_amount NUMERIC;`);
+  await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS balance_due NUMERIC;`);
+  await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS city_tax NUMERIC;`);
+  await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS stripe_payment_intent_id TEXT;`);
+  await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS refunded_at TIMESTAMPTZ;`);
+  await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS balance_reminder_sent_at TIMESTAMPTZ;`);
+  await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS balance_reminder_2_sent_at TIMESTAMPTZ;`);
+  await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS balance_paid_at TIMESTAMPTZ;`);
+  await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS balance_payment_intent_id TEXT;`);
+  await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS custom_price NUMERIC;`);
+  await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS deposit_rate NUMERIC;`);
+  initialized = true;
+}
+
+export interface Booking {
+  id: number;
+  code: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  locale: string;
+  guests: number;
+  checkin: string;
+  checkout: string;
+  total_price: number | null;
+  message: string | null;
+  status: "pending" | "approved" | "rejected" | "completed" | "cancelled";
+  rejection_reason: string | null;
+  payment_method: string | null;
+  paid_at: string | null;
+  created_at: string;
+  archived: boolean;
+  deposit_amount: number | null;
+  balance_due: number | null;
+  city_tax: number | null;
+  stripe_payment_intent_id: string | null;
+  refunded_at: string | null;
+  balance_reminder_sent_at: string | null;
+  balance_reminder_2_sent_at: string | null;
+  balance_paid_at: string | null;
+  balance_payment_intent_id: string | null;
+  custom_price: number | null;
+  deposit_rate: number | null;
+}

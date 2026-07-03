@@ -1,0 +1,62 @@
+"use client";
+
+import dynamic from "next/dynamic";
+import { useLanguage } from "@/i18n/LanguageContext";
+import { CONTENT } from "@/lib/siteContent";
+
+const AreaMap = dynamic(() => import("@/components/AreaMap"), { ssr: false });
+
+function Diamond() {
+  return <div className="divider-diamond text-gold">◆</div>;
+}
+
+export default function ZonaPage() {
+  const { t, locale } = useLanguage();
+
+  return (
+    <section className="bg-card px-6 py-20">
+      <div className="mx-auto max-w-4xl text-center">
+        <h1 className="font-serif-display text-3xl italic text-foreground">{t.area.title}</h1>
+        <div className="mx-auto mt-4 max-w-xs">
+          <Diamond />
+        </div>
+        <p className="mx-auto mt-6 max-w-xl text-foreground/80">{CONTENT.areaDescription[locale] || CONTENT.areaDescription.it}</p>
+
+        <div className="mx-auto mt-10 overflow-hidden rounded-lg border border-gold/40">
+          <AreaMap
+            markers={[
+              { lat: CONTENT.mapLat, lon: CONTENT.mapLng, label: t.area.mapApartmentLabel, color: "#2563eb" },
+              ...CONTENT.mapBookmarks.map((b) => ({ lat: b.lat, lon: b.lng, label: b.label, color: "#dc2626" })),
+            ]}
+          />
+        </div>
+        <div className="mx-auto mt-3 flex max-w-xs items-center justify-center gap-6 text-xs text-foreground/60">
+          <span className="flex items-center gap-2">
+            <span className="inline-block h-3 w-3 rounded-full border border-white" style={{ backgroundColor: "#2563eb" }} />
+            {t.area.mapApartmentLabel}
+          </span>
+          <span className="flex items-center gap-2">
+            <span className="inline-block h-3 w-3 rounded-full border border-white" style={{ backgroundColor: "#dc2626" }} />
+            {t.area.mapMetroLabel}
+          </span>
+        </div>
+
+        <div className="mt-10 grid gap-6 sm:grid-cols-2">
+          {CONTENT.areaPlaces.map((place) => {
+            const name = place.name[locale] || place.name.it;
+            const distance = place.comment[locale] || place.comment.it;
+            return (
+              <div
+                key={place.name.it}
+                className="rounded-lg border border-gold/40 bg-background p-6 text-left"
+              >
+                <p className="font-serif-display text-lg italic text-foreground">{name}</p>
+                <p className="mt-1 text-sm text-foreground/70">{distance}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}

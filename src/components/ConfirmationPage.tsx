@@ -1,0 +1,179 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { translations, type LocaleCode } from "@/i18n/index";
+import { format } from "@/i18n/format";
+import { formatDateOnly } from "@/lib/dateOnly";
+
+interface BookingSummary {
+  code: string;
+  first_name: string;
+  last_name: string;
+  guests: number;
+  checkin: string;
+  checkout: string;
+  total_price: string | null;
+  deposit_amount: string | null;
+  balance_due: string | null;
+  city_tax: string | null;
+  status: "pending" | "approved" | "rejected" | "completed";
+  payment_method: string | null;
+  paid_at: string | null;
+  locale: LocaleCode;
+}
+
+const INTL_LOCALE: Record<LocaleCode, string> = {
+  it: "it-IT",
+  en: "en-US",
+  fr: "fr-FR",
+  de: "de-DE",
+  es: "es-ES",
+  pt: "pt-PT",
+  zh: "zh-CN",
+  ja: "ja-JP",
+  ko: "ko-KR",
+};
+
+const METHOD_LABEL: Record<LocaleCode, Record<string, string>> = {
+  it: { card: "Carta di credito", paypal: "PayPal" },
+  en: { card: "Credit card", paypal: "PayPal" },
+  fr: { card: "Carte de crédit", paypal: "PayPal" },
+  de: { card: "Kreditkarte", paypal: "PayPal" },
+  es: { card: "Tarjeta de crédito", paypal: "PayPal" },
+  pt: { card: "Cartão de crédito", paypal: "PayPal" },
+  zh: { card: "信用卡", paypal: "PayPal" },
+  ja: { card: "クレジットカード", paypal: "PayPal" },
+  ko: { card: "신용카드", paypal: "PayPal" },
+};
+
+export default function ConfirmationPage({ code }: { code: string }) {
+  const [booking, setBooking] = useState<BookingSummary | null>(null);
+  const [error, setError] = useState(false);
+  const [token, setToken] = useState("");
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const t = params.get("t") ?? "";
+        setToken(t);
+        const sessionId = params.get("session_id");
+        if (sessionId) {
+          // L'ospite torna da Stripe Checkout: verifichiamo subito l'esito invece di
+          // aspettare il webhook, che può arrivare con un piccolo ritardo.
+          await fetch(`/api/bookings/${code}/confirm-session`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sessionId }),
+          }).catch(() => null);
+        }
+        const res = await fetch(`/api/bookings/${code}?t=${encodeURIComponent(t)}`);
+        const data = await res.json();
+        if (data.error) setError(true);
+        else setBooking(data.booking);
+      } catch {
+        setError(true);
+      }
+    }
+    load();
+  }, [code]);
+
+  const locale: LocaleCode = booking?.locale && translations[booking.locale] ? booking.locale : "it";
+  const t = translations[locale];
+  const intlLocale = INTL_LOCALE[locale] ?? "it-IT";
+
+  function formatStayDate(value: string) {
+    return formatDateOnly(value, intlLocale);
+  }
+
+  function formatTimestamp(value: string) {
+    return new Date(value).toLocaleDateString(intlLocale);
+  }
+
+  function methodLabel(method: string | null) {
+    if (!method) return "";
+    return (METHOD_LABEL[locale] ?? METHOD_LABEL.it)[method] ?? method;
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
+        <p className="text-foreground/70">{t.confirmation.notFound}</p>
+      </div>
+    );
+  }
+
+  if (!booking) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <p className="text-foreground/60">{t.confirmation.loading}</p>
+      </div>
+    );
+  }
+
+  if (booking.status !== "completed") {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
+        <p className="text-foreground/70">{t.confirmation.notCompleted}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-16 text-center">
+      <p className="label-gold text-xs">{t.confirmation.eyebrow}</p>
+      <h1 className="font-serif-display mt-2 max-w-lg text-3xl italic text-foreground sm:text-4xl">
+        {format(t.confirmation.title, { name: booking.first_name })}
+      </h1>
+      <p className="mt-4 max-w-md text-foreground/80">{t.confirmation.subtitle}</p>
+
+      <div className="mt-8 w-full max-w-md rounded-lg border border-gold/40 bg-card p-6 text-left">
+        <p className="font-serif-display text-lg italic text-foreground">{booking.code}</p>
+        <p className="mt-2 text-sm text-foreground/80">
+          {formatStayDate(booking.checkin)} → {formatStayDate(booking.checkout)} ·{" "}
+          {format(t.confirmation.guests, { count: booking.guests })}
+        </p>
+        {booking.total_price && (
+          <p className="mt-1 text-sm text-foreground/80">
+            {t.confirmation.totalStayPrice}: €{booking.total_price}
+          </p>
+        )}
+        {booking.deposit_amount && (
+          <p className="mt-1 text-sm text-foreground/80">
+            {t.confirmation.depositPaid}: €{booking.deposit_amount}
+          </p>
+        )}
+        {booking.balance_due && Number(booking.balance_due) > 0 && (
+          <p className="mt-1 text-sm text-foreground/80">
+            {format(t.confirmation.balanceDueAtCheckin, { amount: booking.balance_due })}
+          </p>
+        )}
+        {booking.city_tax && Number(booking.city_tax) > 0 && (
+          <p className="mt-1 text-sm text-foreground/60">
+            {format(t.confirmation.cityTaxNote, { amount: booking.city_tax })}
+          </p>
+        )}
+        <p className="mt-1 text-sm text-foreground/80">
+          {t.confirmation.method}: {methodLabel(booking.payment_method)}
+        </p>
+        {booking.paid_at && (
+          <p className="mt-1 text-sm text-foreground/60">
+            {t.confirmation.paidOn} {formatTimestamp(booking.paid_at)}
+          </p>
+        )}
+        {booking.deposit_amount && (
+          <p className="mt-3 text-xs text-foreground/50">{t.confirmation.refundPolicy}</p>
+        )}
+      </div>
+
+      <a
+        href={`/api/bookings/${code}/receipt?t=${encodeURIComponent(token)}`}
+        className="mt-8 rounded-full border border-gold bg-gold px-8 py-3 text-sm font-medium uppercase tracking-widest text-[#faf6ec] transition hover:bg-transparent hover:text-gold"
+      >
+        {t.confirmation.downloadPdf}
+      </a>
+
+      <p className="mt-6 text-xs text-foreground/50">{t.confirmation.emailNotice}</p>
+    </div>
+  );
+}
