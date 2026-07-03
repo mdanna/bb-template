@@ -30,7 +30,7 @@ const ja: Translation = {
   },
   reviews: {
     title: "ゲストの声",
-    subtitle: "認証済みのゲストレビュー",
+    subtitle: "Airbnb評価 ★{rating} · {count}件のレビュー",
     readMore: "Airbnbで全てのレビューを読む →",
   },
   booking: {

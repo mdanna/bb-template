@@ -30,7 +30,7 @@ const zh: Translation = {
   },
   reviews: {
     title: "客人评价",
-    subtitle: "已验证的房客评价",
+    subtitle: "Airbnb 评分 ★{rating} · {count} 条评价",
     readMore: "在 Airbnb 上查看所有评价 →",
   },
   booking: {

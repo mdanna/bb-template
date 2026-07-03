@@ -30,7 +30,7 @@ const ko: Translation = {
   },
   reviews: {
     title: "게스트 후기",
-    subtitle: "인증된 게스트 후기",
+    subtitle: "에어비앤비 평점 ★{rating} · 리뷰 {count}개",
     readMore: "에어비앤비에서 모든 리뷰 보기 →",
   },
   booking: {

@@ -30,7 +30,7 @@ const pt: Translation = {
   },
   reviews: {
     title: "O que os hóspedes dizem",
-    subtitle: "Avaliações verificadas dos hóspedes",
+    subtitle: "★ {rating} no Airbnb · {count} avaliações",
     readMore: "Leia todas as avaliações no Airbnb →",
   },
   booking: {
