@@ -65,7 +65,7 @@ Rules:
 - Do not add or remove sentences`;
 
   try {
-    const message = await client.messages.create({
+    const message = await client.messages.stream({
       model: "claude-haiku-4-5-20251001",
       max_tokens: 32000,
       tools: [
@@ -81,7 +81,7 @@ Rules:
       ],
       tool_choice: { type: "tool", name: "save_translations" },
       messages: [{ role: "user", content: prompt }],
-    });
+    }).finalMessage();
 
     if (message.stop_reason === "max_tokens") {
       throw new Error("Testi troppo lunghi per una singola traduzione: riprova con meno contenuti");
