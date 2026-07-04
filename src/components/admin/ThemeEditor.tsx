@@ -16,6 +16,9 @@ const PRESETS: { name: string; t: Theme }[] = [
   { name: "Blu mare", t: { background: "#f2f6fa", foreground: "#1b2a3a", gold: "#35708f", card: "#ffffff" } },
   { name: "Verde salvia", t: { background: "#f2f6f1", foreground: "#223029", gold: "#5f8a5a", card: "#ffffff" } },
   { name: "Bordeaux", t: { background: "#f9f3f1", foreground: "#2c1b1e", gold: "#8f3b52", card: "#fffaf8" } },
+  { name: "Lavanda", t: { background: "#f6f4fa", foreground: "#2b2536", gold: "#7c5ca6", card: "#ffffff" } },
+  { name: "Petrolio", t: { background: "#eef4f4", foreground: "#16292a", gold: "#1f6f78", card: "#ffffff" } },
+  { name: "Rame", t: { background: "#fbf4ee", foreground: "#2d2018", gold: "#bf6a3a", card: "#fffaf5" } },
 ];
 
 function toRgb(h: string): [number, number, number] {
