@@ -24,6 +24,7 @@ export const adminTranslations = {
       bookings: "Prenotazioni",
       dashboard: "Dashboard",
       stripe: "Stripe",
+      theme: "Colori",
       signOut: "Esci",
     },
     // Bookings
@@ -179,6 +180,7 @@ export const adminTranslations = {
       bookings: "Bookings",
       dashboard: "Dashboard",
       stripe: "Stripe",
+      theme: "Colors",
       signOut: "Sign out",
     },
     bookings: {
@@ -327,6 +329,7 @@ export const adminTranslations = {
       bookings: "Reservas",
       dashboard: "Panel",
       stripe: "Stripe",
+      theme: "Colores",
       signOut: "Cerrar sesión",
     },
     bookings: {
@@ -475,6 +478,7 @@ export const adminTranslations = {
       bookings: "Réservations",
       dashboard: "Tableau de bord",
       stripe: "Stripe",
+      theme: "Couleurs",
       signOut: "Se déconnecter",
     },
     bookings: {
@@ -615,7 +619,7 @@ export const adminTranslations = {
 
 export type AdminTranslation = {
   langName: string;
-  nav: { title: string; calendar: string; policy: string; contents: string; images: string; bookings: string; dashboard: string; stripe: string; signOut: string };
+  nav: { title: string; calendar: string; policy: string; contents: string; images: string; bookings: string; dashboard: string; stripe: string; theme: string; signOut: string };
   bookings: { title: string; loading: string; error: string; showArchived: string; hideArchived: string; noBookings: string; code: string; guest: string; period: string; guests: string; status: string; price: string; deposit: string; balance: string; cityTax: string; payment: string; message: string; customPrice: string; approve: string; approving: string; reject: string; rejecting: string; cancel: string; cancelling: string; archive: string; unarchive: string; archiving: string; rejectionReason: string; confirmReject: string; confirmCancel: string; cancelReason: string; receiptLink: string; paidAt: string; balancePaidAt: string; paymentMethod: string; card: string; paypal: string; cash: string; transfer: string; markBalancePaid: string; statusLabels: Record<string, string> };
   calendar: { title: string; syncAirbnb: string; syncing: string; syncDone: string; blockDays: string; unblockDays: string; addBooking: string; price: string; pricePerNight: string; setPrice: string; guestName: string; save: string; saving: string; cancel: string; confirmBlock: string; confirmUnblock: string; nights: string; selectDates: string; from: string; to: string; type: string; directBooking: string; manualBlock: string };
   contents: { title: string; save: string; saving: string; saved: string; translate: string; translating: string; translated: string; translateAll: string; field: string; preview: string; addItem: string; removeItem: string; moveUp: string; moveDown: string };

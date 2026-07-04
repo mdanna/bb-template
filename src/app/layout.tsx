@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
 import { CONTENT } from "@/lib/siteContent";
+import { themeCss } from "@/lib/theme";
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -52,7 +53,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="it" className={`${playfair.variable} ${inter.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-[#f5efe1] text-[#1f2a44]">{children}</body>
+      <body className="min-h-full flex flex-col bg-background text-foreground">
+        {/* Tema del cliente: sovrascrive le variabili colore di globals.css */}
+        <style dangerouslySetInnerHTML={{ __html: themeCss() }} />
+        {children}
+      </body>
     </html>
   );
 }
