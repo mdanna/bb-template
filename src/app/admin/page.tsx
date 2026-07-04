@@ -12,9 +12,8 @@ export default async function AdminPage() {
   if (!session && DEMO_MODE) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background px-6 text-center">
-        <Link href="/" className="fixed left-6 top-6 text-xs uppercase tracking-widest text-foreground/60 transition hover:text-gold">
-          ← Torna al sito
-        </Link>
+        {/* Nessun "Torna al sito" qui: in demo il banner in cima offre già
+            "Vedi il sito pubblico" (ed evita la sovrapposizione con la barra). */}
         <p className="text-xs uppercase tracking-[0.3em] text-gold">Demo interattiva</p>
         <h1 className="font-serif-display text-3xl italic text-foreground">Il pannello di Dimora Suite</h1>
         <p className="max-w-md text-sm text-foreground/70">
