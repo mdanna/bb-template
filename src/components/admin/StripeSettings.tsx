@@ -38,6 +38,8 @@ const LABELS = {
     no: "No",
     switchLive: "Attiva pagamenti reali (produzione)",
     switchTest: "Torna in modalità test",
+    updating: "aggiornamento…",
+    updatingMode: "Modalità in aggiornamento: attendi la fine della pubblicazione. La pagina si aggiornerà da sola (~1–2 min).",
     freshCode: "Codice authenticator (6 cifre)",
     liveExplain: "Stai per attivare i pagamenti reali: da questo momento gli ospiti verranno addebitati davvero sul tuo account Stripe di produzione.",
     ackCheckbox: "Ho capito e voglio attivare i pagamenti reali",
@@ -71,6 +73,8 @@ const LABELS = {
     no: "No",
     switchLive: "Enable real payments (production)",
     switchTest: "Back to test mode",
+    updating: "updating…",
+    updatingMode: "Mode updating: wait for the deployment to finish. The page will refresh on its own (~1–2 min).",
     freshCode: "Authenticator code (6 digits)",
     liveExplain: "You're about to enable real payments: from now on guests will be charged for real on your live Stripe account.",
     ackCheckbox: "I understand and want to enable real payments",
@@ -104,6 +108,8 @@ const LABELS = {
     no: "No",
     switchLive: "Activar pagos reales (producción)",
     switchTest: "Volver al modo de prueba",
+    updating: "actualizando…",
+    updatingMode: "Modo actualizándose: espera a que termine la publicación. La página se actualizará sola (~1–2 min).",
     freshCode: "Código authenticator (6 dígitos)",
     liveExplain: "Estás a punto de activar los pagos reales: a partir de ahora se cobrará de verdad a los huéspedes en tu cuenta de Stripe de producción.",
     ackCheckbox: "Entiendo y quiero activar los pagos reales",
@@ -137,6 +143,8 @@ const LABELS = {
     no: "Non",
     switchLive: "Activer les paiements réels (production)",
     switchTest: "Revenir en mode test",
+    updating: "mise à jour…",
+    updatingMode: "Mode en cours de mise à jour : attendez la fin de la publication. La page se rafraîchira toute seule (~1–2 min).",
     freshCode: "Code authenticator (6 chiffres)",
     liveExplain: "Vous êtes sur le point d'activer les paiements réels : désormais les clients seront débités pour de vrai sur votre compte Stripe de production.",
     ackCheckbox: "Je comprends et je veux activer les paiements réels",
@@ -167,6 +175,7 @@ export default function StripeSettings() {
   const [actionCode, setActionCode] = useState("");
   const [acknowledge, setAcknowledge] = useState(false);
   const [deploySha, setDeploySha] = useState<string | null>(null);
+  const [switching, setSwitching] = useState(false);
   // reset
   const [showReset, setShowReset] = useState(false);
   const [recovery, setRecovery] = useState("");
@@ -240,8 +249,9 @@ export default function StripeSettings() {
       const d = await res.json();
       if (!res.ok) throw new Error(d.error);
       setActionCode(""); setAcknowledge(false);
-      if (d.commitSha) setDeploySha(d.commitSha);
-      await loadHealth();
+      // La modalità cambia solo a redeploy completato: mostriamo "in aggiornamento"
+      // e lasciamo che il DeployToast, a fine pubblicazione, rilegga lo stato reale.
+      if (d.commitSha) { setDeploySha(d.commitSha); setSwitching(true); }
     } catch (e) { setError(e instanceof Error ? e.message : L.genericError); }
     finally { setBusy(false); }
   }
@@ -325,9 +335,13 @@ export default function StripeSettings() {
         <div className="space-y-5">
           <div className="flex items-center gap-3">
             <span className="text-sm text-foreground/60">{L.currentMode}:</span>
-            <span className={`rounded-full px-3 py-1 text-xs font-bold ${health.mode === "live" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-800"}`}>
-              {health.mode === "live" ? `🔴 ${L.live}` : `🧪 ${L.test}`}
-            </span>
+            {switching ? (
+              <span className="animate-pulse rounded-full bg-foreground/10 px-3 py-1 text-xs font-bold text-foreground/70">⏳ {L.updating}</span>
+            ) : (
+              <span className={`rounded-full px-3 py-1 text-xs font-bold ${health.mode === "live" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-800"}`}>
+                {health.mode === "live" ? `🔴 ${L.live}` : `🧪 ${L.test}`}
+              </span>
+            )}
           </div>
 
           <div className="space-y-1 rounded border border-gold/20 p-3 text-sm">
@@ -338,6 +352,10 @@ export default function StripeSettings() {
           </div>
 
           <div className="space-y-3 rounded border border-gold/20 p-3">
+            {switching ? (
+              <p className="text-xs text-foreground/70">{L.updatingMode}</p>
+            ) : (
+            <>
             <input inputMode="numeric" maxLength={6} value={actionCode}
               onChange={(e) => setActionCode(e.target.value.replace(/\D/g, ""))}
               className={codeCls} placeholder={L.freshCode} />
@@ -360,11 +378,13 @@ export default function StripeSettings() {
                 {L.switchTest}
               </button>
             )}
+            </>
+            )}
           </div>
         </div>
       )}
 
-      <DeployToast sha={deploySha} onDone={() => setDeploySha(null)} />
+      <DeployToast sha={deploySha} onDone={() => { setDeploySha(null); setSwitching(false); loadHealth(); }} />
     </div>
   );
 }
