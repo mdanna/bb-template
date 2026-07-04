@@ -169,10 +169,16 @@ export default function ContentEditor() {
       const tr = data.translations;
       setContent((c) => {
         if (!c) return c;
-        const merge = (field: L10n, key: string): L10n => (!tr[key] ? field : { ...field, ...tr[key] });
-        const storyParagraphs = c.storyParagraphs.map((p, i) =>
-          tr[`storyP${i}`] ? { ...p, ...tr[`storyP${i}`] } : p
-        );
+        const mergeNonEmpty = (field: L10n, trObj: Record<string, string> | undefined): L10n =>
+          trObj ? { ...field, ...Object.fromEntries(Object.entries(trObj).filter(([, v]) => v)) } : field;
+        const merge = (field: L10n, key: string): L10n => mergeNonEmpty(field, tr[key]);
+        const storyParagraphs = c.storyParagraphs.map((p, i) => {
+          const trP = tr[`storyP${i}`];
+          if (!trP) return p;
+          // Only merge non-empty translations to avoid blanking existing content
+          const merged = Object.fromEntries(Object.entries(trP).filter(([, v]) => v));
+          return { ...p, ...merged };
+        });
         return {
           ...c,
           siteTitle: merge(c.siteTitle, "siteTitle"),
@@ -295,10 +301,11 @@ export default function ContentEditor() {
       const tr = data.translations;
       setContent((c) => {
         if (!c) return c;
-        const updated = c.reviews.map((r, i) => ({
-          ...r,
-          text: { ...(r.text as L10n), ...(tr[`review_${i}`] ?? {}) },
-        }));
+        const updated = c.reviews.map((r, i) => {
+          const trR = tr[`review_${i}`];
+          const merged = trR ? Object.fromEntries(Object.entries(trR).filter(([, v]) => v)) : {};
+          return { ...r, text: { ...(r.text as L10n), ...merged } };
+        });
         return { ...c, reviews: updated };
       });
       setReviewsTranslateState("done");
@@ -395,7 +402,9 @@ export default function ContentEditor() {
 
       const [trA, trB] = await Promise.all([translate(batchA), translate(batchB)]);
       const tr = { ...trA, ...trB };
-      const merge = (field: L10n, key: string): L10n => (!tr[key] ? field : { ...field, ...tr[key] });
+      const mergeNE = (field: L10n, trObj: Record<string, string> | undefined): L10n =>
+        trObj ? { ...field, ...Object.fromEntries(Object.entries(trObj).filter(([, v]) => v)) } : field;
+      const merge = (field: L10n, key: string): L10n => mergeNE(field, tr[key]);
 
       setContent((c) => {
         if (!c) return c;
@@ -404,18 +413,16 @@ export default function ContentEditor() {
           siteTitle: merge(c.siteTitle, "siteTitle"),
           heroSubtitle: merge(c.heroSubtitle, "heroSubtitle"),
           storyTitle: merge(c.storyTitle, "storyTitle"),
-          storyParagraphs: c.storyParagraphs.map((p, i) =>
-            tr[`storyP${i}`] ? { ...p, ...tr[`storyP${i}`] } : p
-          ),
+          storyParagraphs: c.storyParagraphs.map((p, i) => mergeNE(p, tr[`storyP${i}`])),
           areaDescription: merge(c.areaDescription, "areaDescription"),
           areaPlaces: c.areaPlaces.map((p, i) => ({
-            name: { ...p.name, ...(tr[`place_${i}_name`] ?? {}) },
-            comment: { ...p.comment, ...(tr[`place_${i}_comment`] ?? {}) },
+            name: mergeNE(p.name, tr[`place_${i}_name`]),
+            comment: mergeNE(p.comment, tr[`place_${i}_comment`]),
           })),
-          amenities: c.amenities.map((a, i) => ({ ...a, ...(tr[`amenity_${i}`] ?? {}) })),
+          amenities: c.amenities.map((a, i) => mergeNE(a as L10n, tr[`amenity_${i}`])),
           reviews: c.reviews.map((r, i) => ({
             ...r,
-            text: { ...(r.text as L10n), ...(tr[`review_${i}`] ?? {}) },
+            text: mergeNE(r.text as L10n, tr[`review_${i}`]),
           })),
           details: {
             entirePlace: merge(c.details.entirePlace, "entirePlace"),

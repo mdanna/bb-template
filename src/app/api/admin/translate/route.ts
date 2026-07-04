@@ -32,8 +32,12 @@ export async function POST(request: Request) {
 
   const client = new Anthropic({ apiKey });
 
-  const fieldKeys = Object.keys(body.texts);
-  const fieldsList = Object.entries(body.texts)
+  // Drop fields with empty source text — nothing to translate, keeps Haiku from returning empty strings
+  const nonEmptyTexts = Object.fromEntries(Object.entries(body.texts).filter(([, v]) => v.trim()));
+  const fieldKeys = Object.keys(nonEmptyTexts);
+  if (fieldKeys.length === 0) return NextResponse.json({ translations: {} });
+
+  const fieldsList = Object.entries(nonEmptyTexts)
     .map(([key, val]) => `- ${key}: ${JSON.stringify(val)}`)
     .join("\n");
 
