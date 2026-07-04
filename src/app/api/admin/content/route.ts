@@ -65,8 +65,8 @@ export async function POST(request: Request) {
       sha = "";
     }
     const content = JSON.stringify(body, null, 2) + "\n";
-    await putFile(FILE_PATH, content, sha, "Update site content", token);
-    return NextResponse.json({ ok: true });
+    const { commitSha } = await putFile(FILE_PATH, content, sha, "Update site content", token);
+    return NextResponse.json({ ok: true, commitSha });
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Salvataggio fallito" },

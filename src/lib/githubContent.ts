@@ -46,6 +46,8 @@ export async function putFile(
   if (!res.ok) {
     throw new Error(`Impossibile salvare ${path} su GitHub: ${await res.text()}`);
   }
+  const data = await res.json();
+  return { commitSha: data.commit?.sha as string | undefined };
 }
 
 export async function deleteFile(

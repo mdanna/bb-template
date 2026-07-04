@@ -5,6 +5,7 @@ import type { DayRate } from "@/data/availability";
 import AdminCalendar from "./AdminCalendar";
 import type { SyncResult, SyncConflict } from "@/app/api/admin/airbnb-sync/route";
 import { useAdminLanguage } from "@/i18n/AdminLanguageContext";
+import DeployToast from "@/components/admin/DeployToast";
 
 interface Props {
   initialDefaultPrice: number;
@@ -115,6 +116,7 @@ export default function AdminEditor({ initialDefaultPrice, initialOverrides }: P
   const [defaultPrice, setDefaultPrice] = useState(initialDefaultPrice);
   const [overrides, setOverrides] = useState<DayRate[]>(initialOverrides);
   const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [deploySha, setDeploySha] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const today = toLocalISODate(new Date());
   const [airbnbIcalUrl, setAirbnbIcalUrl] = useState("");
@@ -231,9 +233,10 @@ export default function AdminEditor({ initialDefaultPrice, initialOverrides }: P
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ defaultPrice, overrides }),
       });
-      const data = await res.json() as { error?: string };
+      const data = await res.json() as { error?: string; commitSha?: string };
       if (!res.ok) throw new Error(data.error ?? t.common.error);
       setSaveState("success");
+      if (data.commitSha) setDeploySha(data.commitSha);
     } catch (err) {
       setSaveState("error");
       setErrorMessage(err instanceof Error ? err.message : t.common.error);
@@ -382,6 +385,8 @@ export default function AdminEditor({ initialDefaultPrice, initialOverrides }: P
           {saveState === "error" && <p className="text-sm text-red-600">{errorMessage}</p>}
         </section>
       </div>
+
+      <DeployToast sha={deploySha} onDone={() => setDeploySha(null)} />
     </div>
   );
 }

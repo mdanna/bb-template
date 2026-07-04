@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { SiteContent, MapBookmark, Review, AreaPlace, L10n, Details } from "@/lib/siteContent";
 import { useAdminLanguage } from "@/i18n/AdminLanguageContext";
+import DeployToast from "@/components/admin/DeployToast";
 
 type SaveState = "idle" | "saving" | "success" | "error";
 type TranslateState = "idle" | "translating" | "done" | "error";
@@ -78,6 +79,7 @@ export default function ContentEditor() {
 
   const [content, setContent] = useState<SiteContent | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [deploySha, setDeploySha] = useState<string | null>(null);
   const [loadError, setLoadError] = useState("");
   const [activeTab, setActiveTab] = useState<SubTab>("struttura");
 
@@ -122,9 +124,10 @@ export default function ContentEditor() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(content),
       });
-      const data = (await res.json()) as { error?: string };
+      const data = (await res.json()) as { error?: string; commitSha?: string };
       if (!res.ok) throw new Error(data.error ?? t.common.error);
       setSaveState("success");
+      if (data.commitSha) setDeploySha(data.commitSha);
       setTimeout(() => setSaveState("idle"), 3000);
     } catch {
       setSaveState("error");
@@ -1096,6 +1099,8 @@ export default function ContentEditor() {
         {activeTab === "servizi" && renderServizi()}
         {activeTab === "recensioni" && renderRecensioni()}
       </div>
+
+      <DeployToast sha={deploySha} onDone={() => setDeploySha(null)} />
     </div>
   );
 }

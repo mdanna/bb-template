@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { Policies } from "@/lib/policies";
 import { useAdminLanguage } from "@/i18n/AdminLanguageContext";
+import DeployToast from "@/components/admin/DeployToast";
 
 type SaveState = "idle" | "saving" | "success" | "error";
 
@@ -56,6 +57,7 @@ export default function PolicyEditor() {
 
   const [policies, setPolicies] = useState<Policies | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [deploySha, setDeploySha] = useState<string | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -79,6 +81,7 @@ export default function PolicyEditor() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? t.common.error);
       setSaveState("success");
+      if (data.commitSha) setDeploySha(data.commitSha);
       setTimeout(() => setSaveState("idle"), 3000);
     } catch (e) {
       setError(e instanceof Error ? e.message : t.common.error);
@@ -163,6 +166,8 @@ export default function PolicyEditor() {
         {saveState === "success" && <span className="text-sm text-green-600">{tp.saved}</span>}
         {saveState === "error" && <span className="text-sm text-red-600">{error}</span>}
       </div>
+
+      <DeployToast sha={deploySha} onDone={() => setDeploySha(null)} />
     </div>
   );
 }

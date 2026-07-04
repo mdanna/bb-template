@@ -160,6 +160,11 @@ export const adminTranslations = {
       noData: "Nessun dato disponibile.",
       optional: "opzionale",
     },
+    deploy: {
+      building: "Pubblicazione in corso… il sito si sta aggiornando",
+      ready: "Sito aggiornato!",
+      error: "Errore nella pubblicazione del sito",
+    },
   },
 
   en: {
@@ -301,6 +306,11 @@ export const adminTranslations = {
       loading: "Loading...",
       noData: "No data available.",
       optional: "optional",
+    },
+    deploy: {
+      building: "Publishing… the site is being updated",
+      ready: "Site updated!",
+      error: "Site publishing failed",
     },
   },
 
@@ -444,6 +454,11 @@ export const adminTranslations = {
       noData: "No hay datos disponibles.",
       optional: "opcional",
     },
+    deploy: {
+      building: "Publicando… el sitio se está actualizando",
+      ready: "¡Sitio actualizado!",
+      error: "Error al publicar el sitio",
+    },
   },
 
   fr: {
@@ -586,6 +601,11 @@ export const adminTranslations = {
       noData: "Aucune donnée disponible.",
       optional: "optionnel",
     },
+    deploy: {
+      building: "Publication en cours… le site est en cours de mise à jour",
+      ready: "Site mis à jour !",
+      error: "Échec de la publication du site",
+    },
   },
 } as const;
 
@@ -599,4 +619,5 @@ export type AdminTranslation = {
   images: { title: string; upload: string; uploading: string; delete: string; deleting: string; noImages: string; hero: string; gallery: string };
   dashboard: { title: string; totalBookings: string; revenue: string; occupancy: string; upcomingBookings: string; noUpcoming: string; thisMonth: string; thisYear: string };
   common: { yes: string; no: string; confirm: string; cancel: string; close: string; error: string; success: string; loading: string; noData: string; optional: string };
+  deploy: { building: string; ready: string; error: string };
 };

@@ -63,13 +63,12 @@ export async function POST(request: Request) {
       2
     );
 
-    await putFile(FILE_PATH, content, sha, "Update availability and pricing from admin panel", token);
+    const { commitSha } = await putFile(FILE_PATH, content, sha, "Update availability and pricing from admin panel", token);
+    return NextResponse.json({ ok: true, commitSha });
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Salvataggio fallito" },
       { status: 502 }
     );
   }
-
-  return NextResponse.json({ ok: true });
 }

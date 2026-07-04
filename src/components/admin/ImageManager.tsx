@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import type { SiteContent } from "@/lib/siteContent";
 import { useAdminLanguage } from "@/i18n/AdminLanguageContext";
+import DeployToast from "@/components/admin/DeployToast";
 
 interface ImageFile {
   name: string;
@@ -28,6 +29,7 @@ export default function ImageManager() {
 
   const [selectionDirty, setSelectionDirty] = useState(false);
   const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [deploySha, setDeploySha] = useState<string | null>(null);
 
   const [uploadState, setUploadState] = useState<UploadState>("idle");
   const [uploadError, setUploadError] = useState("");
@@ -92,10 +94,11 @@ export default function ImageManager() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const data = (await res.json()) as { error?: string };
+      const data = (await res.json()) as { error?: string; commitSha?: string };
       if (!res.ok) throw new Error(data.error ?? t.common.error);
       setFullContent(body);
       setSaveState("success");
+      if (data.commitSha) setDeploySha(data.commitSha);
       setSelectionDirty(false);
       setTimeout(() => setSaveState("idle"), 3000);
     } catch {
@@ -259,6 +262,8 @@ export default function ImageManager() {
         {uploadState === "success" && <p className="text-xs text-green-700">{t.common.success}</p>}
         {uploadState === "error" && <p className="text-xs text-red-600">{uploadError}</p>}
       </div>
+
+      <DeployToast sha={deploySha} onDone={() => setDeploySha(null)} />
     </div>
   );
 }
