@@ -24,3 +24,9 @@ jobs:
           AUTH_SECRET: ci-placeholder
           RESEND_API_KEY: ci-placeholder
           STRIPE_SECRET_KEY: sk_test_ci-placeholder
+          # Placeholder anche per la modalità live: quando l'admin committa
+          # stripe.json con mode=live, il build istanzia il client live e senza
+          # una chiave (non-vuota) Stripe lancia "Neither apiKey…". In produzione
+          # la chiave live vera è nelle env Vercel, quindi resta strict lì.
+          STRIPE_SECRET_KEY_LIVE: sk_live_ci-placeholder
+          STRIPE_WEBHOOK_SECRET_LIVE: whsec_ci-placeholder
