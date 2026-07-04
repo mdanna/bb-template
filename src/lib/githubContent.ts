@@ -1,8 +1,24 @@
 import { DEMO_MODE } from "@/lib/demo";
+import availabilityData from "@/data/availability.json";
+import contentData from "@/data/content.json";
+import policiesData from "@/data/policies.json";
+import themeData from "@/data/theme.json";
+import stripeData from "@/data/stripe.json";
 
 const REPO_OWNER = process.env.GITHUB_REPO_OWNER ?? "your-github-username";
 const REPO_NAME = process.env.GITHUB_REPO_NAME ?? "your-repo-name";
 const DATA_BRANCH = process.env.GITHUB_DATA_BRANCH ?? "main";
+
+// In demo non si legge/scrive da GitHub: le letture restituiscono i JSON già in
+// bundle (committati nel repo) e le scritture sono no-op. Così il pannello e il
+// calendario ospite funzionano usando i dati demo, senza credenziali GitHub.
+const DEMO_FILES: Record<string, unknown> = {
+  "src/data/availability.json": availabilityData,
+  "src/data/content.json": contentData,
+  "src/data/policies.json": policiesData,
+  "src/data/theme.json": themeData,
+  "src/data/stripe.json": stripeData,
+};
 
 function headers(token: string) {
   return {
@@ -13,6 +29,11 @@ function headers(token: string) {
 }
 
 export async function getFile(path: string, token: string) {
+  if (DEMO_MODE) {
+    const bundled = DEMO_FILES[path];
+    const content = bundled !== undefined ? JSON.stringify(bundled, null, 2) : "";
+    return { content, sha: "demo" };
+  }
   const res = await fetch(
     `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}?ref=${DATA_BRANCH}`,
     { headers: headers(token), cache: "no-store" }
