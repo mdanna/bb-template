@@ -66,6 +66,25 @@ export async function ensureSchema() {
   initialized = true;
 }
 
+let totpInitialized = false;
+
+// Tabella a riga singola (id=1) per il secret TOTP che protegge la pagina di
+// configurazione Stripe (switch test↔produzione). Idempotente.
+export async function ensureStripeAdminSchema() {
+  if (totpInitialized) return;
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS stripe_admin_totp (
+      id INTEGER PRIMARY KEY DEFAULT 1,
+      secret TEXT,
+      confirmed BOOLEAN NOT NULL DEFAULT false,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      confirmed_at TIMESTAMPTZ,
+      CONSTRAINT stripe_admin_totp_singleton CHECK (id = 1)
+    );
+  `);
+  totpInitialized = true;
+}
+
 let authInitialized = false;
 
 // Tabelle richieste da @auth/pg-adapter (login admin GitHub + magic-link email).

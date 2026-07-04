@@ -61,6 +61,7 @@ export default function AdminNav({ userName: _userName }: { userName?: string | 
     { href: "/admin/immagini", label: t.nav.images },
     { href: "/admin/bookings", label: t.nav.bookings },
     { href: "/admin/dashboard", label: t.nav.dashboard },
+    { href: "/admin/stripe", label: t.nav.stripe },
   ];
 
   function isActive(href: string) {

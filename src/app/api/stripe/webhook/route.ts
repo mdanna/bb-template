@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe";
+import type Stripe from "stripe";
+import { stripeTest, stripeLive, WEBHOOK_SECRET_TEST, WEBHOOK_SECRET_LIVE } from "@/lib/stripe";
 import { completeBookingPayment } from "@/lib/completeBooking";
 import { resolveSessionPaymentMethod } from "@/lib/stripePaymentMethod";
 import { markNightsBooked } from "@/lib/syncAvailability";
@@ -9,19 +10,35 @@ import { sendBalanceReceiptEmail, sendHostPaymentNotification } from "@/lib/emai
 // Stripe richiede il corpo grezzo (non parsato) per verificare la firma della richiesta.
 export async function POST(request: Request) {
   const signature = request.headers.get("stripe-signature");
-  const secret = process.env.STRIPE_WEBHOOK_SECRET;
-  if (!signature || !secret) {
+  if (!signature) {
+    return NextResponse.json({ error: "Firma webhook mancante" }, { status: 400 });
+  }
+
+  // Verifichiamo la firma provando i segreti di ENTRAMBE le modalità (test + live):
+  // così gli eventi non vengono rifiutati durante/dopo uno switch di modalità, e la
+  // stessa URL di webhook funziona per gli endpoint test e live di Stripe.
+  const candidates: { client: Stripe; secret: string }[] = [];
+  if (stripeLive && WEBHOOK_SECRET_LIVE) candidates.push({ client: stripeLive, secret: WEBHOOK_SECRET_LIVE });
+  if (WEBHOOK_SECRET_TEST) candidates.push({ client: stripeTest, secret: WEBHOOK_SECRET_TEST });
+  if (candidates.length === 0) {
     return NextResponse.json({ error: "Webhook non configurato" }, { status: 500 });
   }
 
   const rawBody = await request.text();
 
-  let event;
-  try {
-    event = stripe.webhooks.constructEvent(rawBody, signature, secret);
-  } catch (err) {
+  let event: Stripe.Event | null = null;
+  let lastErr: unknown = null;
+  for (const c of candidates) {
+    try {
+      event = c.client.webhooks.constructEvent(rawBody, signature, c.secret);
+      break;
+    } catch (err) {
+      lastErr = err;
+    }
+  }
+  if (!event) {
     return NextResponse.json(
-      { error: `Firma webhook non valida: ${err instanceof Error ? err.message : err}` },
+      { error: `Firma webhook non valida: ${lastErr instanceof Error ? lastErr.message : lastErr}` },
       { status: 400 }
     );
   }
