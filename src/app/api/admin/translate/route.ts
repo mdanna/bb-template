@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import Anthropic from "@anthropic-ai/sdk";
-import { localeOrder, type LocaleCode } from "@/i18n/index";
+import type { LocaleCode } from "@/i18n/index";
 
 const LOCALE_NAMES: Record<LocaleCode, string> = {
   it: "Italian", en: "English", fr: "French", de: "German",
@@ -9,21 +9,23 @@ const LOCALE_NAMES: Record<LocaleCode, string> = {
   ja: "Japanese", ko: "Korean",
 };
 
-// Body: { texts: Record<string, string>, sourceLocale?: LocaleCode }
-//   texts keys are field names, values are source texts written in `sourceLocale` (default "it").
-// Returns: { translations: Record<string, Record<LocaleCode, string>> } — one entry per target locale.
+const ALL_LOCALES: LocaleCode[] = ["it", "en", "fr", "de", "es", "pt", "zh", "ja", "ko"];
+
+// Body: { texts: Record<string, string>, sourceLang?: LocaleCode }
+// Returns: { translations: Record<string, Record<LocaleCode, string>> }
 export async function POST(request: Request) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Non autenticato" }, { status: 401 });
 
-  const body = await request.json().catch(() => null) as { texts?: Record<string, string>; sourceLocale?: LocaleCode } | null;
+  const body = await request.json().catch(() => null) as { texts?: Record<string, string>; sourceLang?: string } | null;
   if (!body?.texts || typeof body.texts !== "object") {
     return NextResponse.json({ error: "Body non valido" }, { status: 400 });
   }
 
-  const sourceLocale: LocaleCode = body.sourceLocale && LOCALE_NAMES[body.sourceLocale] ? body.sourceLocale : "it";
-  // Targets are every supported locale except the source.
-  const targetLocales: LocaleCode[] = localeOrder.filter((l) => l !== sourceLocale);
+  const sourceLang: LocaleCode = (body.sourceLang && ALL_LOCALES.includes(body.sourceLang as LocaleCode))
+    ? body.sourceLang as LocaleCode
+    : "it";
+  const TARGET_LOCALES = ALL_LOCALES.filter((l) => l !== sourceLang);
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return NextResponse.json({ error: "ANTHROPIC_API_KEY non configurata" }, { status: 503 });
@@ -35,26 +37,27 @@ export async function POST(request: Request) {
     .map(([key, val]) => `- ${key}: ${JSON.stringify(val)}`)
     .join("\n");
 
-  // Build tool schema with one string property per field × per target language
-  const localeProps = targetLocales.reduce<Record<string, { type: "string" }>>((acc, l) => {
+  // Build tool schema with one string property per field × per language
+  const localeProps = TARGET_LOCALES.reduce<Record<string, { type: "string" }>>((acc, l) => {
     acc[l] = { type: "string" };
     return acc;
   }, {});
 
   const fieldProps = fieldKeys.reduce<Record<string, { type: "object"; properties: typeof localeProps; required: string[] }>>((acc, key) => {
-    acc[key] = { type: "object", properties: localeProps, required: targetLocales as string[] };
+    acc[key] = { type: "object", properties: localeProps, required: TARGET_LOCALES as string[] };
     return acc;
   }, {});
 
-  const prompt = `You are a professional translator for a B&B accommodation website.
-Translate the following ${LOCALE_NAMES[sourceLocale]} text fields into: ${targetLocales.map(l => LOCALE_NAMES[l]).join(", ")}.
+  const sourceLangName = LOCALE_NAMES[sourceLang];
+  const prompt = `You are a professional translator for a B&B accommodation website in Rome, Italy.
+Translate the following ${sourceLangName} text fields into: ${TARGET_LOCALES.map(l => LOCALE_NAMES[l]).join(", ")}.
 
-${LOCALE_NAMES[sourceLocale]} source texts:
+${sourceLangName} source texts:
 ${fieldsList}
 
 Rules:
-- Keep proper nouns and place names in their conventional translated form
-- Maintain a warm, elegant tone
+- Keep proper nouns (Prati, Vaticano, San Pietro, Ottaviano, Morfeo) in their conventional translated form
+- Maintain the warm, elegant tone of a boutique B&B
 - Do not add or remove sentences`;
 
   try {
