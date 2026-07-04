@@ -3,6 +3,7 @@ import type { Translation } from "../types";
 const es: Translation = {
   langName: "Español",
   nav: {
+    location: "Roma · Prati",
     home: "Inicio",
     gallery: "Galería",
     amenities: "Servicios",
@@ -12,8 +13,15 @@ const es: Translation = {
     manage: "Mi reserva",
   },
   hero: {
+    subtitle:
+      "Un apartamento tranquilo y elegante en el corazón de Roma, a pocos pasos del Vaticano y del metro.",
     bookDirect: "Reserva aquí",
     bookAirbnb: "Reservar en Airbnb",
+  },
+  story: {
+    title: "Un refugio mágico y romántico",
+    p1: "Muy cerca de San Pedro, de los Museos Vaticanos y de la estación de metro Ottaviano, el apartamento está ubicado en el primer piso de un encantador edificio de época (1910) y da a un tranquilo patio interior. El acceso es a través de una escalera privada que sube desde ese patio hasta el balcón del apartamento, al que se abren dos amplias puertas-ventana.",
+    p2: "La particular ubicación del apartamento siempre ha despertado la imaginación de mis hijos, que de pequeños empezaron a llamarlo «La Casa Misteriosa». Los ángeles de varios pósters que representan la Anunciación dan la bienvenida y velan por la estancia de los huéspedes. El apartamento es silencioso y, sobre todo después de la puesta de sol, está impregnado de una atmósfera mágica y romántica.",
   },
   gallery: { title: "Galería" },
   details: {
@@ -22,15 +30,51 @@ const es: Translation = {
   },
   amenities: {
     title: "Servicios",
+    items: [
+      "Wi-Fi de alta velocidad",
+      "Aire acondicionado",
+      "Calefacción independiente",
+      "Cocina completa",
+      "Horno microondas",
+      "Smart TV",
+      "Lavadora",
+      "Plancha y tabla de planchar",
+      "Champú y gel de baño",
+      "Secador de pelo",
+    ],
   },
   area: {
     title: "La zona",
+    subtitle:
+      "Un apartamento tranquilo en el barrio Prati, a pocos pasos del Vaticano y de los Museos Vaticanos, bien conectado con el metro.",
+    places: [
+      { name: "Ciudad del Vaticano y Museos Vaticanos", distance: "pocos minutos a pie" },
+      { name: "Basílica de San Pedro", distance: "paseo corto" },
+      { name: "Piazza del Popolo / Piazza di Spagna", distance: "quince minutos a pie" },
+      { name: "Panteón / Piazza Navona", distance: "quince minutos a pie" },
+      { name: "Metro Línea A (Ottaviano / Lepanto)", distance: "a dos pasos" },
+      { name: "Barrio Prati", distance: "tiendas, cafés y restaurantes cerca" },
+    ],
     mapApartmentLabel: "El apartamento",
-    mapMetroLabel: "Puntos de interés",
+    mapMetroLabel: "Estación de metro Ottaviano (Línea A)",
   },
   reviews: {
     title: "Lo que dicen los huéspedes",
     subtitle: "★ {rating} en Airbnb · {count} reseñas",
+    items: [
+      {
+        text: "Mi pareja y yo nos alojamos en el apartamento de Mario en la zona de Prati y nos encontramos genial. El apartamento está limpio, ordenado y equipado con todo lo necesario. La ubicación es perfecta: una zona tranquila pero cercana al centro y bien conectada con el transporte público, el metro Ottaviano está a 3 minutos a pie. Mario es un anfitrión impecable — amable, disponible y atento a cada detalle, siempre dispuesto a dar consejos sobre restaurantes y cosas que hacer. Recomiendo totalmente este alojamiento a quien quiera visitar Roma con total comodidad.",
+        author: "Huésped de Airbnb",
+      },
+      {
+        text: "¡Pasamos una estancia maravillosa en casa de Mario! La ubicación es fantástica, a pocos pasos de los Museos Vaticanos y de la Plaza de San Pedro, con fácil acceso al metro y al autobús del aeropuerto. El apartamento es exactamente como en las fotos. ¡Es bonito, cómodo y está equipado con todo lo necesario! Mario es súper amable y nos dio excelentes consejos que mejoraron aún más nuestro viaje. Recomiendo mucho este lugar.",
+        author: "Huésped de Airbnb",
+      },
+      {
+        text: "Realmente hay un ángel en esta casa misteriosa… ¡Es Mario! Con sus consejos y recomendaciones hizo que nuestro viaje fuera agradable y maravilloso, tanto en cuanto al transporte, la elección de las visitas y las reservas que había que hacer con antelación, como en cuanto a los restaurantes del barrio, el mercado y las tiendas. ¡Y su apartamento, en una ubicación ideal, es una fuente de tranquilidad y calma tras un día agitado en Roma! El arte está presente en toda la decoración, incluso encima de la cama, donde los ángeles nos acompañan en brazos de Morfeo.",
+        author: "Huésped de Airbnb",
+      },
+    ],
     readMore: "Lee todas las reseñas en Airbnb →",
   },
   booking: {
@@ -76,6 +120,7 @@ const es: Translation = {
     error: "Algo salió mal. Inténtalo de nuevo o contáctanos directamente.",
     datesUnavailable: "Las fechas seleccionadas ya no están disponibles. Elige otro período.",
   },
+  footer: { copyright: "Los Ángeles de la Casa Misteriosa · Roma, Italia" },
   payment: {
     eyebrow: "Pago seguro",
     title: "Completa tu reserva",

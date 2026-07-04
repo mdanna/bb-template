@@ -3,6 +3,7 @@ import type { Translation } from "../types";
 const de: Translation = {
   langName: "Deutsch",
   nav: {
+    location: "Rom · Prati",
     home: "Start",
     gallery: "Galerie",
     amenities: "Ausstattung",
@@ -12,8 +13,15 @@ const de: Translation = {
     manage: "Meine Buchung",
   },
   hero: {
+    subtitle:
+      "Eine ruhige und elegante Wohnung im Herzen Roms, nur wenige Schritte vom Vatikan und der U-Bahn entfernt.",
     bookDirect: "Hier buchen",
     bookAirbnb: "Auf Airbnb buchen",
+  },
+  story: {
+    title: "Ein magischer und romantischer Rückzugsort",
+    p1: "Ganz in der Nähe von St. Peter, den Vatikanischen Museen und der U-Bahn-Station Ottaviano liegt die Wohnung im ersten Stock eines reizenden historischen Gebäudes (1910) und blickt auf einen ruhigen Innenhof. Der Zugang erfolgt über eine private Treppe, die von diesem Hof zum Balkon der Wohnung hinaufführt, zu dem zwei große Fenstertüren führen.",
+    p2: "Die besondere Lage der Wohnung hat schon immer die Fantasie meiner Kinder beflügelt, die sie als Kinder „Das geheimnisvolle Haus“ nannten. Engel auf verschiedenen Postern mit der Verkündigung begrüßen die Gäste und wachen über ihren Aufenthalt. Die Wohnung ist ruhig, und besonders nach Sonnenuntergang erfüllt sie eine magische, romantische Atmosphäre.",
   },
   gallery: { title: "Galerie" },
   details: {
@@ -22,15 +30,51 @@ const de: Translation = {
   },
   amenities: {
     title: "Ausstattung",
+    items: [
+      "Highspeed-WLAN",
+      "Klimaanlage",
+      "Eigene Heizung",
+      "Voll ausgestattete Küche",
+      "Mikrowelle",
+      "Smart-TV",
+      "Waschmaschine",
+      "Bügeleisen und Bügelbrett",
+      "Shampoo und Duschgel",
+      "Haartrockner",
+    ],
   },
   area: {
     title: "Die Gegend",
+    subtitle:
+      "Eine ruhige Wohnung im Stadtteil Prati, nur wenige Schritte vom Vatikan und den Vatikanischen Museen entfernt, gut an die U-Bahn angebunden.",
+    places: [
+      { name: "Vatikanstadt und Vatikanische Museen", distance: "wenige Gehminuten" },
+      { name: "Petersbasilika", distance: "kurzer Spaziergang" },
+      { name: "Piazza del Popolo / Piazza di Spagna", distance: "fünfzehn Gehminuten" },
+      { name: "Pantheon / Piazza Navona", distance: "fünfzehn Gehminuten" },
+      { name: "U-Bahn Linie A (Ottaviano / Lepanto)", distance: "nur einen Steinwurf entfernt" },
+      { name: "Stadtteil Prati", distance: "Geschäfte, Cafés und Restaurants in der Nähe" },
+    ],
     mapApartmentLabel: "Die Wohnung",
-    mapMetroLabel: "Sehenswürdigkeiten",
+    mapMetroLabel: "U-Bahn-Station Ottaviano (Linie A)",
   },
   reviews: {
     title: "Was die Gäste sagen",
     subtitle: "★ {rating} auf Airbnb · {count} Bewertungen",
+    items: [
+      {
+        text: "Mein Partner und ich haben in Marios Wohnung im Stadtteil Prati gewohnt und uns sehr wohl gefühlt! Die Wohnung ist sauber, ordentlich und mit allem Nötigen ausgestattet. Die Lage ist perfekt: ruhig, aber zentrumsnah und gut an öffentliche Verkehrsmittel angebunden — die U-Bahn-Station Ottaviano ist 3 Gehminuten entfernt. Mario ist ein tadelloser Gastgeber — freundlich, hilfsbereit und aufmerksam bis ins kleinste Detail, immer bereit, Tipps zu Restaurants und Aktivitäten zu geben. Ich kann diese Unterkunft jedem empfehlen, der Rom in vollem Komfort erleben möchte!",
+        author: "Airbnb-Gast",
+      },
+      {
+        text: "Wir hatten einen wunderschönen Aufenthalt bei Mario! Die Lage ist fantastisch, nur wenige Schritte von den Vatikanischen Museen und dem Petersplatz entfernt, mit einfachem Zugang zur U-Bahn und zum Flughafenbus. Die Wohnung entspricht genau den Fotos. Sie ist schön, komfortabel und mit allem Nötigen ausgestattet! Mario ist sehr freundlich und gab uns großartige Tipps, die unsere Reise noch besser machten. Sehr empfehlenswert.",
+        author: "Airbnb-Gast",
+      },
+      {
+        text: "Es gibt wirklich einen Engel in diesem geheimnisvollen Haus … Es ist Mario! Mit seinen Tipps und Empfehlungen hat er unsere Reise angenehm und wunderschön gemacht — bei den Verkehrsmitteln, der Auswahl der Sehenswürdigkeiten, den frühzeitig zu tätigenden Buchungen sowie bei den Restaurants im Viertel, dem Markt und den Geschäften. Und seine Wohnung, in idealer Lage, ist eine Quelle der Ruhe nach einem hektischen Tag in Rom! Kunst ist überall in der Einrichtung präsent, sogar über dem Bett, wo uns Engel beim Einschlafen begleiten!",
+        author: "Airbnb-Gast",
+      },
+    ],
     readMore: "Alle Bewertungen auf Airbnb lesen →",
   },
   booking: {
@@ -76,6 +120,7 @@ const de: Translation = {
     error: "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut oder kontaktieren Sie uns direkt.",
     datesUnavailable: "Die ausgewählten Daten sind nicht mehr verfügbar. Bitte wählen Sie einen anderen Zeitraum.",
   },
+  footer: { copyright: "Die Engel des geheimnisvollen Hauses · Rom, Italien" },
   payment: {
     eyebrow: "Sichere Zahlung",
     title: "Schließen Sie Ihre Buchung ab",

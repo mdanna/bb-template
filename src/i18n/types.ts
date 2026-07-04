@@ -3,6 +3,7 @@ export type LocaleCode = "it" | "en" | "fr" | "de" | "es" | "pt" | "zh" | "ja" |
 export interface Translation {
   langName: string;
   nav: {
+    location: string;
     home: string;
     gallery: string;
     amenities: string;
@@ -11,21 +12,25 @@ export interface Translation {
     booking: string;
     manage: string;
   };
-  hero: { bookDirect: string; bookAirbnb: string };
+  hero: { subtitle: string; bookDirect: string; bookAirbnb: string };
+  story: { title: string; p1: string; p2: string };
   gallery: { title: string };
   details: {
     title: string;
     rating: string; // template, use {rating} and {count}
   };
-  amenities: { title: string };
+  amenities: { title: string; items: string[] };
   area: {
     title: string;
+    subtitle: string;
+    places: { name: string; distance: string }[];
     mapApartmentLabel: string;
     mapMetroLabel: string;
   };
   reviews: {
     title: string;
     subtitle: string;
+    items: { text: string; author: string }[];
     readMore: string;
   };
   booking: {
@@ -66,6 +71,7 @@ export interface Translation {
     error: string;
     datesUnavailable: string;
   };
+  footer: { copyright: string };
   payment: {
     eyebrow: string;
     title: string;

@@ -5,7 +5,7 @@ import { parseICalReservations, icalEventNights } from "@/lib/icalParser";
 import type { DayRate } from "@/data/availability";
 
 const AVAIL_PATH = "src/data/availability.json";
-const SETTINGS_PATH = "src/data/settings.json";
+const SETTINGS_PATH = "src/data/policies.json";
 
 export interface SyncConflict {
   date: string;
