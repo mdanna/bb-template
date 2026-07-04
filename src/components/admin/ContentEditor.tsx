@@ -576,7 +576,7 @@ export default function ContentEditor() {
     function setParagraphIt(idx: number, value: string) {
       const updated = content!.storyParagraphs.map((p, i) => {
         if (i !== idx) return p;
-        const base = typeof p === "string" ? { it: p as string } : p;
+        const base = typeof p === "string" ? { it: p as string, en: "", fr: "", de: "", es: "", pt: "", zh: "", ja: "", ko: "" } as L10n : p;
         return { ...base, [srcLang]: value };
       });
       set("storyParagraphs", updated);
