@@ -3,6 +3,7 @@ import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
 import { CONTENT } from "@/lib/siteContent";
 import { themeCss } from "@/lib/theme";
+import DemoBanner from "@/components/DemoBanner";
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -56,6 +57,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground">
         {/* Tema del cliente: sovrascrive le variabili colore di globals.css */}
         <style dangerouslySetInnerHTML={{ __html: themeCss() }} />
+        <DemoBanner />
         {children}
       </body>
     </html>

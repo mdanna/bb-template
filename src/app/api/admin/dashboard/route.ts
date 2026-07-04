@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { pool, ensureSchema } from "@/lib/db";
+import { DEMO_MODE, DEMO_QUARTERS } from "@/lib/demo";
 
 interface QuarterRow {
   year: number;
@@ -15,6 +16,8 @@ export async function GET() {
   if (!session) {
     return NextResponse.json({ error: "Non autenticato" }, { status: 401 });
   }
+
+  if (DEMO_MODE) return NextResponse.json({ quarters: DEMO_QUARTERS });
 
   await ensureSchema();
 

@@ -62,7 +62,8 @@ export default function AdminNav({ userName: _userName }: { userName?: string | 
     { href: "/admin/tema", label: t.nav.theme },
     { href: "/admin/bookings", label: t.nav.bookings },
     { href: "/admin/dashboard", label: t.nav.dashboard },
-    { href: "/admin/stripe", label: t.nav.stripe },
+    // In demo nascondiamo la sezione Stripe (sensibile e fuori contesto).
+    ...(process.env.NEXT_PUBLIC_DEMO_MODE === "true" ? [] : [{ href: "/admin/stripe", label: t.nav.stripe }]),
   ];
 
   function isActive(href: string) {

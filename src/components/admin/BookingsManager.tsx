@@ -53,6 +53,10 @@ export default function BookingsManager() {
   const [reason, setReason] = useState("");
   const [showArchived, setShowArchived] = useState(false);
   const [customPrices, setCustomPrices] = useState<Record<number, string>>({});
+  const DEMO = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+  function patchBooking(id: number, changes: Partial<Booking>) {
+    setBookings((bs) => (bs ? bs.map((b) => (b.id === id ? { ...b, ...changes } : b)) : bs));
+  }
 
   const dateLocale = locale === "it" ? "it-IT" : locale === "es" ? "es-ES" : locale === "fr" ? "fr-FR" : "en-GB";
 
@@ -131,6 +135,7 @@ export default function BookingsManager() {
     const customPrice = rawPrice && !isNaN(Number(rawPrice)) && Number(rawPrice) > 0
       ? Number(rawPrice)
       : null;
+    if (DEMO) { patchBooking(id, { status: "approved", ...(customPrice ? { total_price: String(customPrice) } : {}) }); setBusyId(null); return; }
     try {
       const res = await fetch(`/api/admin/bookings/${id}/approve`, {
         method: "POST",
@@ -151,6 +156,7 @@ export default function BookingsManager() {
     if (!reason.trim()) return;
     setBusyId(id);
     setError("");
+    if (DEMO) { patchBooking(id, { status: "rejected" }); setRejectingId(null); setReason(""); setBusyId(null); return; }
     try {
       const res = await fetch(`/api/admin/bookings/${id}/reject`, {
         method: "POST",
@@ -173,6 +179,7 @@ export default function BookingsManager() {
     if (!window.confirm(tb.confirmCancel)) return;
     setBusyId(id);
     setError("");
+    if (DEMO) { patchBooking(id, { status: "cancelled" }); setBusyId(null); return; }
     try {
       const res = await fetch(`/api/admin/bookings/${id}/cancel`, { method: "POST" });
       const data = await res.json();
@@ -189,6 +196,7 @@ export default function BookingsManager() {
     if (!window.confirm(tb.confirmCancel)) return;
     setBusyId(id);
     setError("");
+    if (DEMO) { setBookings((bs) => (bs ? bs.filter((b) => b.id !== id) : bs)); setBusyId(null); return; }
     try {
       const res = await fetch(`/api/admin/bookings/${id}/delete`, { method: "DELETE" });
       const data = await res.json();
@@ -204,6 +212,7 @@ export default function BookingsManager() {
   async function setArchived(id: number, archived: boolean) {
     setBusyId(id);
     setError("");
+    if (DEMO) { patchBooking(id, { archived }); setBusyId(null); return; }
     try {
       const res = await fetch(`/api/admin/bookings/${id}/archive`, {
         method: "POST",

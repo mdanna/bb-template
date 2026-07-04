@@ -1,3 +1,5 @@
+import { DEMO_MODE } from "@/lib/demo";
+
 const REPO_OWNER = process.env.GITHUB_REPO_OWNER ?? "your-github-username";
 const REPO_NAME = process.env.GITHUB_REPO_NAME ?? "your-repo-name";
 const DATA_BRANCH = process.env.GITHUB_DATA_BRANCH ?? "main";
@@ -30,6 +32,8 @@ export async function putFile(
   message: string,
   token: string
 ) {
+  // In demo non si scrive nulla su GitHub: successo simulato, nessun commit/redeploy.
+  if (DEMO_MODE) return { commitSha: undefined as string | undefined };
   const res = await fetch(
     `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,
     {
@@ -56,6 +60,7 @@ export async function deleteFile(
   message: string,
   token: string
 ) {
+  if (DEMO_MODE) return;
   const res = await fetch(
     `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,
     {
@@ -70,6 +75,7 @@ export async function deleteFile(
 }
 
 export function requireBotToken(): string {
+  if (DEMO_MODE) return "demo";
   const token = process.env.GITHUB_BOT_TOKEN;
   if (!token) {
     throw new Error("GITHUB_BOT_TOKEN non configurato");

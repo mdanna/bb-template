@@ -1,10 +1,12 @@
 import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
 import Resend from "next-auth/providers/resend";
+import Credentials from "next-auth/providers/credentials";
 import PostgresAdapter from "@auth/pg-adapter";
 import type { Adapter } from "next-auth/adapters";
 import { pool, ensureAuthSchema } from "@/lib/db";
 import { CONTENT } from "@/lib/siteContent";
+import { DEMO_MODE } from "@/lib/demo";
 
 // Allowlist admin: username GitHub e/o indirizzi email autorizzati.
 const ALLOWED_LOGINS = (process.env.ADMIN_GITHUB_LOGINS ?? "")
@@ -87,9 +89,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
       },
     }),
+    // Login demo pubblico: attivo SOLO nell'istanza demo (DEMO_MODE). Nessuna
+    // credenziale, nessuna scrittura possibile a valle (tutte le route sono no-op).
+    ...(DEMO_MODE
+      ? [Credentials({
+          id: "demo",
+          name: "Demo",
+          credentials: {},
+          async authorize() {
+            return { id: "demo", name: "Demo", email: "demo@dimorasuite.com" };
+          },
+        })]
+      : []),
   ],
   callbacks: {
     async signIn({ profile, user, account }) {
+      // Login demo: consentito solo con DEMO_MODE attivo.
+      if (account?.provider === "demo") return DEMO_MODE;
       // GitHub: autorizza per username.
       if (account?.provider === "github") {
         const login = (profile as { login?: string } | undefined)?.login?.toLowerCase();
