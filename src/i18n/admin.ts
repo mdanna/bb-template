@@ -162,6 +162,7 @@ export const adminTranslations = {
       noData: "Nessun dato disponibile.",
       optional: "opzionale",
       demoSaved: "Nel sito reale il salvataggio pubblicherebbe le modifiche.",
+      demoImage: "Anteprima demo — nel sito reale l'immagine verrebbe caricata.",
     },
     deploy: {
       building: "Pubblicazione in corso… il sito si sta aggiornando",
@@ -312,6 +313,7 @@ export const adminTranslations = {
       noData: "No data available.",
       optional: "optional",
       demoSaved: "On the real site, saving would publish your changes.",
+      demoImage: "Demo preview — on the real site the image would be uploaded.",
     },
     deploy: {
       building: "Publishing… the site is being updated",
@@ -462,6 +464,7 @@ export const adminTranslations = {
       noData: "No hay datos disponibles.",
       optional: "opcional",
       demoSaved: "En el sitio real, guardar publicaría los cambios.",
+      demoImage: "Vista previa demo — en el sitio real la imagen se subiría.",
     },
     deploy: {
       building: "Publicando… el sitio se está actualizando",
@@ -612,6 +615,7 @@ export const adminTranslations = {
       noData: "Aucune donnée disponible.",
       optional: "optionnel",
       demoSaved: "Sur le site réel, l'enregistrement publierait les modifications.",
+      demoImage: "Aperçu démo — sur le site réel l'image serait téléchargée.",
     },
     deploy: {
       building: "Publication en cours… le site est en cours de mise à jour",
@@ -630,6 +634,6 @@ export type AdminTranslation = {
   policy: { title: string; save: string; saving: string; saved: string };
   images: { title: string; upload: string; uploading: string; delete: string; deleting: string; noImages: string; hero: string; gallery: string };
   dashboard: { title: string; totalBookings: string; revenue: string; occupancy: string; upcomingBookings: string; noUpcoming: string; thisMonth: string; thisYear: string };
-  common: { yes: string; no: string; confirm: string; cancel: string; close: string; error: string; success: string; loading: string; noData: string; optional: string; demoSaved: string };
+  common: { yes: string; no: string; confirm: string; cancel: string; close: string; error: string; success: string; loading: string; noData: string; optional: string; demoSaved: string; demoImage: string };
   deploy: { building: string; ready: string; error: string };
 };

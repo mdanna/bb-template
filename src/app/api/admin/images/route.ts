@@ -1,12 +1,23 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getFile, deleteFile, requireBotToken } from "@/lib/githubContent";
+import { DEMO_MODE, demoWriteBlocked } from "@/lib/demo";
+import contentData from "@/data/content.json";
 
 const IMAGES_DIR = "public/images";
 
 export async function GET() {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Non autenticato" }, { status: 401 });
+
+  // In demo la lista arriva dai file già presenti nel repo (referenziati in content.json),
+  // non da GitHub: l'upload/delete sono poi gestiti in modo effimero lato client.
+  if (DEMO_MODE) {
+    const c = contentData as { heroImage?: string; galleryImages?: string[] };
+    const names = [c.heroImage, ...(c.galleryImages ?? [])].filter(Boolean) as string[];
+    const files = [...new Set(names)].map((name) => ({ name, sha: "demo" }));
+    return NextResponse.json({ files });
+  }
 
   try {
     const token = process.env.GITHUB_BOT_TOKEN ?? "";
@@ -47,6 +58,8 @@ export async function POST(request: Request) {
   const name = body.name as string;
   const base64 = body.base64 as string;
   const path = `${IMAGES_DIR}/${name}`;
+
+  if (DEMO_MODE) return demoWriteBlocked();
 
   try {
     const token = requireBotToken();
@@ -100,6 +113,8 @@ export async function DELETE(request: Request) {
 
   const name = body.name as string;
   const path = `${IMAGES_DIR}/${name}`;
+
+  if (DEMO_MODE) return demoWriteBlocked();
 
   try {
     const token = requireBotToken();

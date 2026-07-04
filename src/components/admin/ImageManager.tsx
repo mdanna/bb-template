@@ -8,6 +8,7 @@ import DeployToast from "@/components/admin/DeployToast";
 interface ImageFile {
   name: string;
   sha: string;
+  url?: string; // in demo: data URL effimero dell'immagine caricata (non persiste)
 }
 
 type UploadState = "idle" | "uploading" | "success" | "error";
@@ -113,15 +114,23 @@ export default function ImageManager() {
     setUploadState("uploading");
     setUploadError("");
     try {
-      const base64 = await new Promise<string>((resolve, reject) => {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = () => {
-          const result = reader.result as string;
-          resolve(result.split(",")[1] ?? "");
-        };
+        reader.onload = () => resolve(reader.result as string);
         reader.onerror = () => reject(new Error(t.common.error));
         reader.readAsDataURL(file);
       });
+      if (DEMO) {
+        // Anteprima effimera: l'immagine appare subito ma non viene salvata
+        // (nessuna scrittura su GitHub). Persa al refresh — coerente con la demo.
+        const name = images.some((i) => i.name === file.name) ? `${Date.now()}-${file.name}` : file.name;
+        setImages((prev) => [...prev, { name, sha: "demo", url: dataUrl }]);
+        setUploadState("success");
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        setTimeout(() => setUploadState("idle"), 4000);
+        return;
+      }
+      const base64 = dataUrl.split(",")[1] ?? "";
       const res = await fetch("/api/admin/images", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -141,6 +150,12 @@ export default function ImageManager() {
 
   async function handleDelete(name: string) {
     if (!confirm(`${ti.delete} "${name}"?`)) return;
+    if (DEMO) {
+      setImages((prev) => prev.filter((i) => i.name !== name));
+      if (heroImage === name) { setHeroImage(""); setSelectionDirty(true); }
+      if (galleryImages.includes(name)) { setGalleryImages((prev) => prev.filter((n) => n !== name)); setSelectionDirty(true); }
+      return;
+    }
     setDeletingName(name);
     try {
       const res = await fetch("/api/admin/images", {
@@ -203,7 +218,7 @@ export default function ImageManager() {
                 <div key={img.name} className="rounded-lg border border-gold/30 bg-card overflow-hidden">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={`/images/${img.name}`}
+                    src={img.url ?? `/images/${img.name}`}
                     alt={img.name}
                     className="h-28 w-full object-cover"
                     onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
@@ -260,7 +275,7 @@ export default function ImageManager() {
           className="block text-sm text-foreground/70 file:mr-4 file:rounded-full file:border file:border-gold/40 file:bg-gold/10 file:px-4 file:py-1.5 file:text-xs file:uppercase file:tracking-widest file:text-gold hover:file:bg-gold/20 disabled:opacity-50"
         />
         {uploadState === "uploading" && <p className="text-xs text-foreground/60">{ti.uploading}</p>}
-        {uploadState === "success" && <p className="text-xs text-green-700">{t.common.success}</p>}
+        {uploadState === "success" && <p className="text-xs text-green-700">{DEMO ? t.common.demoImage : t.common.success}</p>}
         {uploadState === "error" && <p className="text-xs text-red-600">{uploadError}</p>}
       </div>
 
