@@ -18,6 +18,7 @@ const MAX_GALLERY = 12;
 export default function ImageManager() {
   const { t } = useAdminLanguage();
   const ti = t.images;
+  const DEMO = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
   const [images, setImages] = useState<ImageFile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -180,7 +181,7 @@ export default function ImageManager() {
               >
                 {saveState === "saving" ? t.contents.saving : t.contents.save}
               </button>
-              {saveState === "success" && <span className="text-xs text-green-600">{t.contents.saved}</span>}
+              {saveState === "success" && <span className="text-xs text-green-600">{DEMO ? t.common.demoSaved : t.contents.saved}</span>}
               {saveState === "error" && <span className="text-xs text-red-600">{t.common.error}</span>}
             </div>
           )}

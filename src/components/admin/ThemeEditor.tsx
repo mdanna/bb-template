@@ -79,8 +79,9 @@ const LABELS = {
 } as const;
 
 export default function ThemeEditor() {
-  const { locale } = useAdminLanguage();
+  const { t, locale } = useAdminLanguage();
   const L = LABELS[locale] ?? LABELS.en;
+  const DEMO = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
   const [theme, setTheme] = useState<Theme | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("idle");
@@ -215,7 +216,7 @@ export default function ThemeEditor() {
           className="rounded-full border border-gold bg-gold px-6 py-2 text-xs uppercase tracking-widest text-[#faf6ec] transition hover:bg-transparent hover:text-gold disabled:opacity-50">
           {saveState === "saving" ? L.saving : L.save}
         </button>
-        {saveState === "success" && <span className="text-sm text-green-600">{L.saved}</span>}
+        {saveState === "success" && <span className="text-sm text-green-600">{DEMO ? t.common.demoSaved : L.saved}</span>}
         {saveState === "error" && <span className="text-sm text-red-600">{error}</span>}
       </div>
 

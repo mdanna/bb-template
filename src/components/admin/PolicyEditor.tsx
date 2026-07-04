@@ -54,6 +54,7 @@ export default function PolicyEditor() {
   const { t, locale } = useAdminLanguage();
   const tp = t.policy;
   const lbl = POLICY_LABELS[locale] ?? POLICY_LABELS.en;
+  const DEMO = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
   const [policies, setPolicies] = useState<Policies | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("idle");
@@ -163,7 +164,7 @@ export default function PolicyEditor() {
         >
           {saveState === "saving" ? tp.saving : tp.save}
         </button>
-        {saveState === "success" && <span className="text-sm text-green-600">{tp.saved}</span>}
+        {saveState === "success" && <span className="text-sm text-green-600">{DEMO ? t.common.demoSaved : tp.saved}</span>}
         {saveState === "error" && <span className="text-sm text-red-600">{error}</span>}
       </div>
 

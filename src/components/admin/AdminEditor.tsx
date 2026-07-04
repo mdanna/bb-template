@@ -112,6 +112,7 @@ function enumerateDates(start: string, end: string): string[] {
 export default function AdminEditor({ initialDefaultPrice, initialOverrides }: Props) {
   const { t, locale } = useAdminLanguage();
   const L = EDITOR_LABELS[locale] ?? EDITOR_LABELS.en;
+  const DEMO = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
   const [defaultPrice, setDefaultPrice] = useState(initialDefaultPrice);
   const [overrides, setOverrides] = useState<DayRate[]>(initialOverrides);
@@ -381,7 +382,7 @@ export default function AdminEditor({ initialDefaultPrice, initialOverrides }: P
             className="rounded-full border border-gold bg-gold px-8 py-3 text-sm font-medium uppercase tracking-widest text-[#faf6ec] transition hover:bg-transparent hover:text-gold disabled:cursor-not-allowed disabled:opacity-50">
             {saveState === "saving" ? L.saving : L.savePublish}
           </button>
-          {saveState === "success" && <p className="text-sm text-green-700">{L.saved}</p>}
+          {saveState === "success" && <p className="text-sm text-green-700">{DEMO ? t.common.demoSaved : L.saved}</p>}
           {saveState === "error" && <p className="text-sm text-red-600">{errorMessage}</p>}
         </section>
       </div>
