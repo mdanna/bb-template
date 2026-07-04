@@ -45,7 +45,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   // Senza questo, dietro il proxy di Vercel Auth.js non si fida dell'header Host del dominio
   // personalizzato e ricostruisce la callback URL usando il dominio *.vercel.app di default.
   trustHost: true,
-  adapter: ensuredAdapter(),
+  // In demo il login è solo Credentials+JWT: nessun adapter → nessun database richiesto.
+  adapter: DEMO_MODE ? undefined : ensuredAdapter(),
   session: { strategy: "jwt" },
   providers: [
     GitHub({
