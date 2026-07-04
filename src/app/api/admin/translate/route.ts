@@ -41,16 +41,22 @@ export async function POST(request: Request) {
     .map(([key, val]) => `- ${key}: ${JSON.stringify(val)}`)
     .join("\n");
 
-  // Build tool schema with one string property per field × per language
-  const localeProps = TARGET_LOCALES.reduce<Record<string, { type: "string" }>>((acc, l) => {
-    acc[l] = { type: "string" };
-    return acc;
-  }, {});
-
-  const fieldProps = fieldKeys.reduce<Record<string, { type: "object"; properties: typeof localeProps; required: string[] }>>((acc, key) => {
-    acc[key] = { type: "object", properties: localeProps, required: TARGET_LOCALES as string[] };
-    return acc;
-  }, {});
+  // Schema PIATTO: una proprietà stringa top-level per ogni coppia campo×lingua,
+  // nella forma `${campo}__${locale}`. Lo schema annidato (oggetto-di-oggetti)
+  // fa sì che Haiku, in modo non-deterministico (~50% dei casi), "spanda" una
+  // stringa in un oggetto a chiavi numeriche invece di riempire le lingue,
+  // lasciando il campo non tradotto. Con proprietà stringa piatte il problema
+  // sparisce (testato: 0 fallimenti su batch completi ripetuti).
+  const SEP = "__";
+  const flatProps: Record<string, { type: "string" }> = {};
+  const flatRequired: string[] = [];
+  for (const key of fieldKeys) {
+    for (const l of TARGET_LOCALES) {
+      const flatKey = `${key}${SEP}${l}`;
+      flatProps[flatKey] = { type: "string" };
+      flatRequired.push(flatKey);
+    }
+  }
 
   const sourceLangName = LOCALE_NAMES[sourceLang];
   const prompt = `You are a professional translator for a B&B accommodation website in Rome, Italy.
@@ -58,6 +64,8 @@ Translate the following ${sourceLangName} text fields into: ${TARGET_LOCALES.map
 
 ${sourceLangName} source texts:
 ${fieldsList}
+
+For each source field there is one property per target language, named "<field>${SEP}<lang>" (e.g. storyP0${SEP}en). Fill each one with the translation of that field into that language.
 
 Rules:
 - Keep proper nouns (Prati, Vaticano, San Pietro, Ottaviano, Morfeo) in their conventional translated form
@@ -67,15 +75,15 @@ Rules:
   try {
     const message = await client.messages.stream({
       model: "claude-haiku-4-5-20251001",
-      max_tokens: 32000,
+      max_tokens: 16000,
       tools: [
         {
           name: "save_translations",
-          description: "Save all translated fields",
+          description: "Save the translation of each field into each language as a plain string",
           input_schema: {
             type: "object" as const,
-            properties: fieldProps,
-            required: fieldKeys,
+            properties: flatProps,
+            required: flatRequired,
           },
         },
       ],
@@ -90,7 +98,17 @@ Rules:
     if (!toolUse || toolUse.type !== "tool_use") {
       throw new Error("Risposta non valida dall'API");
     }
-    const translations = toolUse.input as Record<string, Record<string, string>>;
+    // Ricostruisci la struttura annidata { campo: { locale: testo } } dalle chiavi piatte
+    const flat = toolUse.input as Record<string, unknown>;
+    const translations: Record<string, Record<string, string>> = {};
+    for (const key of fieldKeys) {
+      for (const l of TARGET_LOCALES) {
+        const v = flat[`${key}${SEP}${l}`];
+        if (typeof v === "string" && v.trim()) {
+          (translations[key] ??= {})[l] = v;
+        }
+      }
+    }
     return NextResponse.json({ translations });
   } catch (err) {
     return NextResponse.json(
