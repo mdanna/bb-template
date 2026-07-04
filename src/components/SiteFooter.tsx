@@ -16,6 +16,17 @@ export default function SiteFooter() {
       <a href="/privacy" className="underline hover:text-gold">
         Informativa sulla privacy
       </a>
+      <div className="mt-4 text-foreground/40">
+        Powered by{" "}
+        <a
+          href="https://dimorasuite.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-gold"
+        >
+          Dimora Suite
+        </a>
+      </div>
     </footer>
   );
 }
