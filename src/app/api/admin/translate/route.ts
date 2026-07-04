@@ -67,7 +67,7 @@ Rules:
   try {
     const message = await client.messages.create({
       model: "claude-haiku-4-5-20251001",
-      max_tokens: 8192,
+      max_tokens: 32000,
       tools: [
         {
           name: "save_translations",
@@ -83,6 +83,9 @@ Rules:
       messages: [{ role: "user", content: prompt }],
     });
 
+    if (message.stop_reason === "max_tokens") {
+      throw new Error("Testi troppo lunghi per una singola traduzione: riprova con meno contenuti");
+    }
     const toolUse = message.content.find((b) => b.type === "tool_use");
     if (!toolUse || toolUse.type !== "tool_use") {
       throw new Error("Risposta non valida dall'API");
