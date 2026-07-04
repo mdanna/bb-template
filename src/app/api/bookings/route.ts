@@ -8,6 +8,7 @@ import { checkRateLimit } from "@/lib/rateLimit";
 import { computePricingBreakdown, MIN_DEPOSIT_RATE, MAX_DEPOSIT_RATE, DEFAULT_DEPOSIT_RATE } from "@/lib/pricing";
 import { nightsBetween } from "@/lib/dateOnly";
 import { POLICIES } from "@/lib/policies";
+import { DEMO_MODE } from "@/lib/demo";
 
 const MAX_NAME_LENGTH = 100;
 const MAX_PHONE_LENGTH = 30;
@@ -80,6 +81,12 @@ export async function POST(request: Request) {
   const locale: LocaleCode = (localeOrder as string[]).includes(body.locale)
     ? (body.locale as LocaleCode)
     : "it";
+
+  // Demo: nessuna scrittura sul DB né invio email. Si simula il successo con un
+  // codice fittizio, così il form mostra la conferma della richiesta inviata.
+  if (DEMO_MODE) {
+    return NextResponse.json({ ok: true, code: generateBookingCode() });
+  }
 
   await ensureSchema();
 
