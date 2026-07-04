@@ -16,7 +16,7 @@ export function demoWriteBlocked(extra?: Record<string, unknown>) {
 export const DEMO_BOOKINGS = ([
   { id: 1, code: "VT-8F2A", first_name: "Marco", last_name: "Rossi", email: "marco.rossi@example.com", phone: "+39 340 1234567",
     guests: 2, checkin: "2026-07-18", checkout: "2026-07-21", total_price: 360, deposit_amount: 180, balance_due: 180, city_tax: 24,
-    message: "Arriviamo in tarda serata, possibile?", status: "pending", payment_method: null, paid_at: null,
+    message: "Arriviamo in tarda serata, possibile?", status: "approved", payment_method: null, paid_at: null,
     created_at: "2026-07-03T09:12:00Z", archived: false, locale: "it", deposit_rate: 0.5, balance_paid_at: null },
   { id: 2, code: "VT-1C7B", first_name: "Claire", last_name: "Dubois", email: "claire.dubois@example.com", phone: "+33 6 12 34 56 78",
     guests: 2, checkin: "2026-08-02", checkout: "2026-08-05", total_price: 420, deposit_amount: 210, balance_due: 210, city_tax: 24,
