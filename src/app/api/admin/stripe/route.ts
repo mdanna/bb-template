@@ -7,7 +7,6 @@ import { verifyUnlockToken, UNLOCK_COOKIE } from "@/lib/stripeUnlock";
 import { STRIPE_MODE, LIVE_KEY_CONFIGURED, stripeLive, WEBHOOK_SECRET_LIVE, type StripeMode } from "@/lib/stripe";
 
 const FILE_PATH = "src/data/stripe.json";
-export const LIVE_CONFIRM_PHRASE = "ATTIVA PAGAMENTI REALI";
 
 async function isUnlocked(): Promise<boolean> {
   const store = await cookies();
@@ -47,7 +46,7 @@ export async function POST(request: Request) {
   if (!(await isUnlocked())) return NextResponse.json({ error: "Sezione bloccata" }, { status: 403 });
 
   const body = await request.json().catch(() => null) as
-    { mode?: string; code?: string; confirmPhrase?: string } | null;
+    { mode?: string; code?: string; acknowledge?: boolean } | null;
   const mode = body?.mode as StripeMode | undefined;
   if (mode !== "test" && mode !== "live") {
     return NextResponse.json({ error: "Modalità non valida" }, { status: 400 });
@@ -65,9 +64,9 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-    if (body?.confirmPhrase !== LIVE_CONFIRM_PHRASE) {
+    if (body?.acknowledge !== true) {
       return NextResponse.json(
-        { error: `Per attivare i pagamenti reali digita esattamente: ${LIVE_CONFIRM_PHRASE}` },
+        { error: "Conferma richiesta: spunta la casella per attivare i pagamenti reali." },
         { status: 400 }
       );
     }

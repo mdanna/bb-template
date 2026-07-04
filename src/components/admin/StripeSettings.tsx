@@ -5,8 +5,6 @@ import Image from "next/image";
 import { useAdminLanguage } from "@/i18n/AdminLanguageContext";
 import DeployToast from "@/components/admin/DeployToast";
 
-const LIVE_CONFIRM_PHRASE = "ATTIVA PAGAMENTI REALI";
-
 type Phase = "loading" | "enroll" | "locked" | "unlocked";
 type Mode = "test" | "live";
 interface Health {
@@ -41,7 +39,8 @@ const LABELS = {
     switchLive: "Attiva pagamenti reali (produzione)",
     switchTest: "Torna in modalità test",
     freshCode: "Codice authenticator (6 cifre)",
-    phraseLabel: "Per confermare digita:",
+    liveExplain: "Stai per attivare i pagamenti reali: da questo momento gli ospiti verranno addebitati davvero sul tuo account Stripe di produzione.",
+    ackCheckbox: "Ho capito e voglio attivare i pagamenti reali",
     apply: "Applica",
     reset: "Ho perso il telefono / resetta authenticator",
     resetPrompt: "Passphrase di recupero (se configurata)",
@@ -73,7 +72,8 @@ const LABELS = {
     switchLive: "Enable real payments (production)",
     switchTest: "Back to test mode",
     freshCode: "Authenticator code (6 digits)",
-    phraseLabel: "To confirm, type:",
+    liveExplain: "You're about to enable real payments: from now on guests will be charged for real on your live Stripe account.",
+    ackCheckbox: "I understand and want to enable real payments",
     apply: "Apply",
     reset: "Lost my phone / reset authenticator",
     resetPrompt: "Recovery passphrase (if configured)",
@@ -105,7 +105,8 @@ const LABELS = {
     switchLive: "Activar pagos reales (producción)",
     switchTest: "Volver al modo de prueba",
     freshCode: "Código authenticator (6 dígitos)",
-    phraseLabel: "Para confirmar escribe:",
+    liveExplain: "Estás a punto de activar los pagos reales: a partir de ahora se cobrará de verdad a los huéspedes en tu cuenta de Stripe de producción.",
+    ackCheckbox: "Entiendo y quiero activar los pagos reales",
     apply: "Aplicar",
     reset: "Perdí el teléfono / restablecer authenticator",
     resetPrompt: "Frase de recuperación (si está configurada)",
@@ -137,7 +138,8 @@ const LABELS = {
     switchLive: "Activer les paiements réels (production)",
     switchTest: "Revenir en mode test",
     freshCode: "Code authenticator (6 chiffres)",
-    phraseLabel: "Pour confirmer, tapez :",
+    liveExplain: "Vous êtes sur le point d'activer les paiements réels : désormais les clients seront débités pour de vrai sur votre compte Stripe de production.",
+    ackCheckbox: "Je comprends et je veux activer les paiements réels",
     apply: "Appliquer",
     reset: "Téléphone perdu / réinitialiser l'authenticator",
     resetPrompt: "Phrase de récupération (si configurée)",
@@ -163,7 +165,7 @@ export default function StripeSettings() {
   // health + toggle
   const [health, setHealth] = useState<Health | null>(null);
   const [actionCode, setActionCode] = useState("");
-  const [phrase, setPhrase] = useState("");
+  const [acknowledge, setAcknowledge] = useState(false);
   const [deploySha, setDeploySha] = useState<string | null>(null);
   // reset
   const [showReset, setShowReset] = useState(false);
@@ -233,11 +235,11 @@ export default function StripeSettings() {
     try {
       const res = await fetch("/api/admin/stripe", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode: target, code: actionCode.trim(), confirmPhrase: phrase }),
+        body: JSON.stringify({ mode: target, code: actionCode.trim(), acknowledge }),
       });
       const d = await res.json();
       if (!res.ok) throw new Error(d.error);
-      setActionCode(""); setPhrase("");
+      setActionCode(""); setAcknowledge(false);
       if (d.commitSha) setDeploySha(d.commitSha);
       await loadHealth();
     } catch (e) { setError(e instanceof Error ? e.message : L.genericError); }
@@ -341,11 +343,14 @@ export default function StripeSettings() {
               className={codeCls} placeholder={L.freshCode} />
 
             {health.mode === "test" ? (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {!health.liveKeyValid && <p className="text-xs text-amber-700">{L.liveNotReady}</p>}
-                <p className="text-xs text-foreground/60">{L.phraseLabel} <code className="select-all font-bold">{LIVE_CONFIRM_PHRASE}</code></p>
-                <input value={phrase} onChange={(e) => setPhrase(e.target.value)} className={inputCls} placeholder={LIVE_CONFIRM_PHRASE} />
-                <button onClick={() => applyMode("live")} disabled={busy || actionCode.length !== 6 || !health.liveKeyValid}
+                <p className="rounded bg-red-50 px-3 py-2 text-xs text-red-800">{L.liveExplain}</p>
+                <label className="flex items-start gap-2 text-xs text-foreground/80">
+                  <input type="checkbox" checked={acknowledge} onChange={(e) => setAcknowledge(e.target.checked)} className="mt-0.5 accent-red-600" />
+                  <span>{L.ackCheckbox}</span>
+                </label>
+                <button onClick={() => applyMode("live")} disabled={busy || actionCode.length !== 6 || !health.liveKeyValid || !acknowledge}
                   className="rounded-full bg-red-600 px-5 py-2 text-xs uppercase tracking-widest text-white transition hover:bg-red-700 disabled:opacity-50">
                   {L.switchLive}
                 </button>
