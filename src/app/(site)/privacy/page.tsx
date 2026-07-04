@@ -15,8 +15,8 @@ export default function PrivacyPage() {
           <section>
             <h2 className="font-serif-display text-xl italic text-foreground">Titolare del trattamento</h2>
             <p className="mt-2">
-              {CONTENT.hostName}, host di &ldquo;{CONTENT.siteTitle.it}&rdquo; — Roma,
-              Italia. Per qualsiasi richiesta relativa ai tuoi dati personali puoi scrivere a{" "}
+              {CONTENT.hostName}, host di &ldquo;{CONTENT.siteTitle.it}&rdquo; — {CONTENT.city}.
+              Per qualsiasi richiesta relativa ai tuoi dati personali puoi scrivere a{" "}
               <a href={`mailto:${CONTENT.email}`} className="text-gold underline">
                 {CONTENT.email}
               </a>

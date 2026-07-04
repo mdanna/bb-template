@@ -8,7 +8,7 @@ import { CONTENT } from "@/lib/siteContent";
 import { verifyAccessToken } from "@/lib/accessToken";
 
 function siteUrl() {
-  return process.env.NEXT_PUBLIC_SITE_URL ?? "https://lacasamisteriosa.com";
+  return process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.com";
 }
 
 export async function POST(

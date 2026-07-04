@@ -494,7 +494,7 @@ export async function sendBalanceReceiptEmail(params: {
 }
 
 function siteUrl() {
-  return process.env.NEXT_PUBLIC_SITE_URL ?? "https://lacasamisteriosa.com";
+  return process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.com";
 }
 
 function fmtDate(d: string | Date): string {

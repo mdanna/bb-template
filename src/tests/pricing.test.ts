@@ -51,9 +51,9 @@ describe("computePricingBreakdown", () => {
   });
 
   it("gestisce più ospiti", () => {
-    // 6€ × 4 ospiti × 3 notti = 72€
+    // tariffa × 4 ospiti × 3 notti (rate-agnostico: non dipende dal valore in policies)
     const result = computePricingBreakdown(600, 4, "2025-07-10", "2025-07-13");
-    expect(result.cityTax).toBe(72);
+    expect(result.cityTax).toBe(CITY_TAX_PER_PERSON_PER_NIGHT * 4 * 3);
   });
 
   it("restituisce il totalPrice invariato", () => {

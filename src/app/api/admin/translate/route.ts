@@ -68,7 +68,7 @@ ${fieldsList}
 For each source field there is one property per target language, named "<field>${SEP}<lang>" (e.g. storyP0${SEP}en). Fill each one with the translation of that field into that language.
 
 Rules:
-- Keep proper nouns (Prati, Vaticano, San Pietro, Ottaviano, Morfeo) in their conventional translated form
+- Keep proper nouns (place names, landmarks, and personal names) in their conventional translated form
 - Maintain the warm, elegant tone of a boutique B&B
 - Do not add or remove sentences`;
 

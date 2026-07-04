@@ -6,8 +6,8 @@ const ALL_LOCALES: LocaleCode[] = ["it", "en", "fr", "de", "es", "pt", "zh", "ja
 
 const APPROVAL_PARAMS = {
   code: "CM-TEST1",
-  payUrl: "https://lacasamisteriosa.com/pay/CM-TEST1?t=tok",
-  manageUrl: "https://lacasamisteriosa.com/gestione-prenotazione/CM-TEST1?t=tok",
+  payUrl: "https://example.com/pay/CM-TEST1?t=tok",
+  manageUrl: "https://example.com/gestione-prenotazione/CM-TEST1?t=tok",
   totalPrice: 300,
   depositAmount: 150,
   balanceDue: 150, // totalPrice - depositAmount (city tax excluded)
@@ -32,8 +32,8 @@ const PAYMENT_PARAMS = {
   cityTax: 48,
   guests: 2,
   paymentMethod: "Carta di credito",
-  confirmationUrl: "https://lacasamisteriosa.com/confirmation/CM-TEST3?t=tok",
-  manageUrl: "https://lacasamisteriosa.com/gestione-prenotazione/CM-TEST3?t=tok",
+  confirmationUrl: "https://example.com/confirmation/CM-TEST3?t=tok",
+  manageUrl: "https://example.com/gestione-prenotazione/CM-TEST3?t=tok",
 };
 
 describe("emailTemplates — tutte le 9 lingue", () => {

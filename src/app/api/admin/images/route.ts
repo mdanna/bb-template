@@ -11,7 +11,7 @@ export async function GET() {
   try {
     const token = process.env.GITHUB_BOT_TOKEN ?? "";
     const res = await fetch(
-      `https://api.github.com/repos/${process.env.GITHUB_REPO_OWNER ?? "mdanna"}/${process.env.GITHUB_REPO_NAME ?? "la-casa-misteriosa"}/contents/${IMAGES_DIR}?ref=${process.env.GITHUB_DATA_BRANCH ?? "main"}`,
+      `https://api.github.com/repos/${process.env.GITHUB_REPO_OWNER ?? "your-github-username"}/${process.env.GITHUB_REPO_NAME ?? "your-repo-name"}/contents/${IMAGES_DIR}?ref=${process.env.GITHUB_DATA_BRANCH ?? "main"}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -58,8 +58,8 @@ export async function POST(request: Request) {
     }
     // putFile encodes utf-8 content to base64, but we already have binary base64.
     // Use raw GitHub API call instead.
-    const REPO_OWNER = process.env.GITHUB_REPO_OWNER ?? "mdanna";
-    const REPO_NAME = process.env.GITHUB_REPO_NAME ?? "la-casa-misteriosa";
+    const REPO_OWNER = process.env.GITHUB_REPO_OWNER ?? "your-github-username";
+    const REPO_NAME = process.env.GITHUB_REPO_NAME ?? "your-repo-name";
     const DATA_BRANCH = process.env.GITHUB_DATA_BRANCH ?? "main";
     const res = await fetch(
       `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,

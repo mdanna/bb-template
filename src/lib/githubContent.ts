@@ -1,5 +1,5 @@
-const REPO_OWNER = process.env.GITHUB_REPO_OWNER ?? "mdanna";
-const REPO_NAME = process.env.GITHUB_REPO_NAME ?? "la-casa-misteriosa";
+const REPO_OWNER = process.env.GITHUB_REPO_OWNER ?? "your-github-username";
+const REPO_NAME = process.env.GITHUB_REPO_NAME ?? "your-repo-name";
 const DATA_BRANCH = process.env.GITHUB_DATA_BRANCH ?? "main";
 
 function headers(token: string) {

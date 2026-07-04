@@ -5,7 +5,7 @@ import { sendBalanceReminderEmail } from "@/lib/email";
 import { POLICIES } from "@/lib/policies";
 
 function siteUrl() {
-  return process.env.NEXT_PUBLIC_SITE_URL ?? "https://lacasamisteriosa.com";
+  return process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.com";
 }
 
 async function sendReminder(booking: Booking): Promise<void> {
