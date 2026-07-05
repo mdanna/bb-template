@@ -170,6 +170,24 @@ export const adminTranslations = {
       ready: "Sito aggiornato!",
       error: "Errore nella pubblicazione del sito",
     },
+    login: {
+      title: "Amministrazione",
+      subtitle: "Accedi per gestire prezzi e disponibilità. Scegli il metodo che preferisci.",
+      backToSite: "Torna al sito",
+      github: "Accedi con GitHub",
+      or: "oppure",
+      emailPlaceholder: "La tua email",
+      emailSubmit: "Inviami un link di accesso",
+      emailSending: "Invio in corso…",
+      emailEmpty: "Inserisci un indirizzo email.",
+      emailSent: "Se l'indirizzo è autorizzato, riceverai un'email con il link di accesso. Controlla la posta (anche lo spam).",
+      emailError: "Non è stato possibile inviare il link. Riprova tra poco.",
+      demoEyebrow: "Demo interattiva",
+      demoTitle: "Il pannello di Dimora Suite",
+      demoDesc: "Esplora liberamente il pannello di gestione di una struttura di esempio: prenotazioni, contenuti, colori del sito, incassi. Modifica quello che vuoi — ",
+      demoNotSaved: "le modifiche non vengono salvate",
+      demoEnter: "Entra nella demo",
+    },
   },
 
   en: {
@@ -321,6 +339,24 @@ export const adminTranslations = {
       building: "Publishing… the site is being updated",
       ready: "Site updated!",
       error: "Site publishing failed",
+    },
+    login: {
+      title: "Administration",
+      subtitle: "Sign in to manage prices and availability. Choose your preferred method.",
+      backToSite: "Back to the site",
+      github: "Sign in with GitHub",
+      or: "or",
+      emailPlaceholder: "Your email",
+      emailSubmit: "Send me a login link",
+      emailSending: "Sending…",
+      emailEmpty: "Enter an email address.",
+      emailSent: "If the address is authorized, you'll receive an email with the login link. Check your inbox (and spam).",
+      emailError: "The link couldn't be sent. Please try again shortly.",
+      demoEyebrow: "Interactive demo",
+      demoTitle: "The Dimora Suite panel",
+      demoDesc: "Freely explore the management panel of a sample property: bookings, content, site colors, revenue. Change whatever you like — ",
+      demoNotSaved: "changes are not saved",
+      demoEnter: "Enter the demo",
     },
   },
 
@@ -474,6 +510,24 @@ export const adminTranslations = {
       ready: "¡Sitio actualizado!",
       error: "Error al publicar el sitio",
     },
+    login: {
+      title: "Administración",
+      subtitle: "Inicia sesión para gestionar precios y disponibilidad. Elige el método que prefieras.",
+      backToSite: "Volver al sitio",
+      github: "Iniciar sesión con GitHub",
+      or: "o",
+      emailPlaceholder: "Tu correo",
+      emailSubmit: "Envíame un enlace de acceso",
+      emailSending: "Enviando…",
+      emailEmpty: "Introduce una dirección de correo.",
+      emailSent: "Si la dirección está autorizada, recibirás un correo con el enlace de acceso. Revisa tu bandeja (también el spam).",
+      emailError: "No se pudo enviar el enlace. Inténtalo de nuevo en unos momentos.",
+      demoEyebrow: "Demo interactiva",
+      demoTitle: "El panel de Dimora Suite",
+      demoDesc: "Explora libremente el panel de gestión de un alojamiento de ejemplo: reservas, contenidos, colores del sitio, ingresos. Cambia lo que quieras — ",
+      demoNotSaved: "los cambios no se guardan",
+      demoEnter: "Entrar en la demo",
+    },
   },
 
   fr: {
@@ -626,6 +680,24 @@ export const adminTranslations = {
       ready: "Site mis à jour !",
       error: "Échec de la publication du site",
     },
+    login: {
+      title: "Administration",
+      subtitle: "Connectez-vous pour gérer les prix et les disponibilités. Choisissez la méthode que vous préférez.",
+      backToSite: "Retour au site",
+      github: "Se connecter avec GitHub",
+      or: "ou",
+      emailPlaceholder: "Votre e-mail",
+      emailSubmit: "Envoyez-moi un lien de connexion",
+      emailSending: "Envoi…",
+      emailEmpty: "Saisissez une adresse e-mail.",
+      emailSent: "Si l'adresse est autorisée, vous recevrez un e-mail avec le lien de connexion. Vérifiez votre boîte (et les spams).",
+      emailError: "Le lien n'a pas pu être envoyé. Réessayez dans un instant.",
+      demoEyebrow: "Démo interactive",
+      demoTitle: "Le panneau de Dimora Suite",
+      demoDesc: "Explorez librement le panneau de gestion d'un logement d'exemple : réservations, contenus, couleurs du site, revenus. Modifiez ce que vous voulez — ",
+      demoNotSaved: "les modifications ne sont pas enregistrées",
+      demoEnter: "Entrer dans la démo",
+    },
   },
 } as const;
 
@@ -640,4 +712,5 @@ export type AdminTranslation = {
   dashboard: { title: string; totalBookings: string; revenue: string; occupancy: string; upcomingBookings: string; noUpcoming: string; thisMonth: string; thisYear: string };
   common: { yes: string; no: string; confirm: string; cancel: string; close: string; error: string; success: string; loading: string; noData: string; optional: string; demoSaved: string; demoImage: string };
   deploy: { building: string; ready: string; error: string };
+  login: { title: string; subtitle: string; backToSite: string; github: string; or: string; emailPlaceholder: string; emailSubmit: string; emailSending: string; emailEmpty: string; emailSent: string; emailError: string; demoEyebrow: string; demoTitle: string; demoDesc: string; demoNotSaved: string; demoEnter: string };
 };

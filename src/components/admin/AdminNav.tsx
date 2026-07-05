@@ -7,7 +7,7 @@ import { signOut } from "next-auth/react";
 import { useAdminLanguage } from "@/i18n/AdminLanguageContext";
 import { adminLocaleOrder, adminFlags, adminTranslations, type AdminLocaleCode } from "@/i18n/admin";
 
-function AdminLanguagePicker({
+export function AdminLanguagePicker({
   locale,
   setLocale,
 }: {

@@ -2,12 +2,22 @@
 
 import { useActionState } from "react";
 import { requestMagicLink, type LoginState } from "@/app/admin/actions";
+import { useAdminLanguage } from "@/i18n/AdminLanguageContext";
 
 export default function EmailLoginForm() {
+  const { t } = useAdminLanguage();
   const [state, formAction, pending] = useActionState<LoginState, FormData>(
     requestMagicLink,
     null,
   );
+
+  const message = state
+    ? state.status === "sent"
+      ? t.login.emailSent
+      : state.status === "empty"
+        ? t.login.emailEmpty
+        : t.login.emailError
+    : null;
 
   return (
     <form action={formAction} className="flex w-full max-w-sm flex-col gap-3">
@@ -15,7 +25,7 @@ export default function EmailLoginForm() {
         type="email"
         name="email"
         required
-        placeholder="La tua email"
+        placeholder={t.login.emailPlaceholder}
         className="rounded-full border border-foreground/20 bg-transparent px-6 py-3 text-sm text-foreground outline-none transition focus:border-gold"
       />
       <button
@@ -23,7 +33,7 @@ export default function EmailLoginForm() {
         disabled={pending}
         className="rounded-full border border-foreground/30 px-8 py-3 text-sm font-medium uppercase tracking-widest text-foreground transition hover:border-gold hover:text-gold disabled:opacity-50"
       >
-        {pending ? "Invio in corso…" : "Inviami un link di accesso"}
+        {pending ? t.login.emailSending : t.login.emailSubmit}
       </button>
 
       {state && (
@@ -35,7 +45,7 @@ export default function EmailLoginForm() {
               : "border-red-400/40 bg-red-400/10 text-red-700"
           }`}
         >
-          {state.message}
+          {message}
         </div>
       )}
     </form>
