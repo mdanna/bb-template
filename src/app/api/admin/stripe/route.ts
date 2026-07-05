@@ -1,23 +1,17 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { auth } from "@/auth";
 import { getFile, putFile, requireBotToken } from "@/lib/githubContent";
 import { verifyCode } from "@/lib/totp";
-import { verifyUnlockToken, UNLOCK_COOKIE } from "@/lib/stripeUnlock";
 import { STRIPE_MODE, LIVE_KEY_CONFIGURED, stripeLive, WEBHOOK_SECRET_LIVE, type StripeMode } from "@/lib/stripe";
 
 const FILE_PATH = "src/data/stripe.json";
 
-async function isUnlocked(): Promise<boolean> {
-  const store = await cookies();
-  return verifyUnlockToken(store.get(UNLOCK_COOKIE)?.value);
-}
-
-// GET → stato corrente + health-check (richiede unlock). Non espone mai le chiavi.
+// GET → stato corrente + health-check. Non espone mai le chiavi segrete (solo
+// modalità + booleani), quindi basta il login admin: nessun secondo fattore per
+// la sola visualizzazione. Il TOTP è richiesto una volta sola, allo switch (POST).
 export async function GET() {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Non autenticato" }, { status: 401 });
-  if (!(await isUnlocked())) return NextResponse.json({ error: "Sezione bloccata" }, { status: 403 });
 
   // Valida la live key facendo una chiamata autenticata leggera, senza rivelarla.
   let liveKeyValid = false;
@@ -38,12 +32,12 @@ export async function GET() {
   });
 }
 
-// POST { mode, code, confirmPhrase } → cambia modalità (richiede unlock + TOTP fresco;
-// verso "live" anche la frase di conferma). Committa stripe.json → redeploy.
+// POST { mode, code, acknowledge } → cambia modalità. Richiede UN codice TOTP fresco
+// (single-use, verificato qui) e, verso "live", la spunta di conferma. Committa
+// stripe.json → redeploy.
 export async function POST(request: Request) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Non autenticato" }, { status: 401 });
-  if (!(await isUnlocked())) return NextResponse.json({ error: "Sezione bloccata" }, { status: 403 });
 
   const body = await request.json().catch(() => null) as
     { mode?: string; code?: string; acknowledge?: boolean } | null;

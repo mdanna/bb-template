@@ -3,18 +3,6 @@ import { timingSafeEqual } from "crypto";
 import QRCode from "qrcode";
 import { auth } from "@/auth";
 import { getStatus, startEnrollment, confirmEnrollment, resetEnrollment } from "@/lib/totp";
-import { generateUnlockToken, UNLOCK_COOKIE } from "@/lib/stripeUnlock";
-
-const UNLOCK_MAXAGE = 15 * 60;
-function unlockCookie(res: NextResponse) {
-  res.cookies.set(UNLOCK_COOKIE, generateUnlockToken(), {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    path: "/",
-    maxAge: UNLOCK_MAXAGE,
-  });
-}
 
 function safeEqual(a: string, b: string): boolean {
   const ba = Buffer.from(a);
@@ -65,9 +53,7 @@ export async function POST(request: Request) {
     if (!/^\d{6}$/.test(code) || !(await confirmEnrollment(code))) {
       return NextResponse.json({ error: "Codice non valido" }, { status: 400 });
     }
-    const res = NextResponse.json({ ok: true });
-    unlockCookie(res);
-    return res;
+    return NextResponse.json({ ok: true });
   }
 
   if (action === "reset") {

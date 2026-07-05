@@ -10,6 +10,7 @@ import { CONTENT } from "@/lib/siteContent";
 
 const ISSUER = CONTENT.siteTitle.it || "B&B Admin";
 const LABEL = `${ISSUER} · Stripe`;
+const PERIOD = 30;
 
 function buildTotp(base32: string): OTPAuth.TOTP {
   return new OTPAuth.TOTP({
@@ -17,9 +18,14 @@ function buildTotp(base32: string): OTPAuth.TOTP {
     label: LABEL,
     algorithm: "SHA1",
     digits: 6,
-    period: 30,
+    period: PERIOD,
     secret: OTPAuth.Secret.fromBase32(base32),
   });
+}
+
+// Step assoluto (contatore RFC 6238) del codice accettato, dato il delta di validate().
+function acceptedStep(delta: number): number {
+  return Math.floor(Date.now() / 1000 / PERIOD) + delta;
 }
 
 // --- cifratura a riposo (opzionale) ---
@@ -54,10 +60,10 @@ function decryptSecret(stored: string): string {
 
 export type TotpStatus = "none" | "pending" | "confirmed";
 
-async function readRow(): Promise<{ secret: string | null; confirmed: boolean } | null> {
+async function readRow(): Promise<{ secret: string | null; confirmed: boolean; last_used_step: string | number | null } | null> {
   await ensureStripeAdminSchema();
-  const res = await pool.query<{ secret: string | null; confirmed: boolean }>(
-    `SELECT secret, confirmed FROM stripe_admin_totp WHERE id = 1`
+  const res = await pool.query<{ secret: string | null; confirmed: boolean; last_used_step: string | number | null }>(
+    `SELECT secret, confirmed, last_used_step FROM stripe_admin_totp WHERE id = 1`
   );
   return res.rows[0] ?? null;
 }
@@ -85,22 +91,34 @@ export async function startEnrollment(): Promise<{ base32: string; uri: string }
 }
 
 // Verifica un codice contro il secret pending e, se valido, conferma l'enrollment.
+// Consuma anche lo step (last_used_step) così il codice di enrollment non è riusabile.
 export async function confirmEnrollment(code: string): Promise<boolean> {
   const row = await readRow();
   if (!row || !row.secret) return false;
   const base32 = decryptSecret(row.secret);
   const delta = buildTotp(base32).validate({ token: code, window: 1 });
   if (delta === null) return false;
-  await pool.query(`UPDATE stripe_admin_totp SET confirmed = true, confirmed_at = now() WHERE id = 1`);
+  await pool.query(
+    `UPDATE stripe_admin_totp SET confirmed = true, confirmed_at = now(), last_used_step = $1 WHERE id = 1`,
+    [acceptedStep(delta)]
+  );
   return true;
 }
 
-// Verifica un codice contro il secret CONFERMATO (uso normale: unlock / azioni).
+// Verifica un codice contro il secret CONFERMATO (usato per lo switch di modalità).
+// SINGLE-USE: uno step già consumato (o più vecchio) viene rifiutato, così un codice
+// catturato non è riusabile per l'azione entro la sua finestra di validità (~30-90s).
 export async function verifyCode(code: string): Promise<boolean> {
   const row = await readRow();
   if (!row || !row.secret || !row.confirmed) return false;
   const base32 = decryptSecret(row.secret);
-  return buildTotp(base32).validate({ token: code, window: 1 }) !== null;
+  const delta = buildTotp(base32).validate({ token: code, window: 1 });
+  if (delta === null) return false;
+  const step = acceptedStep(delta);
+  const lastUsed = row.last_used_step === null ? null : Number(row.last_used_step);
+  if (lastUsed !== null && step <= lastUsed) return false;
+  await pool.query(`UPDATE stripe_admin_totp SET last_used_step = $1 WHERE id = 1`, [step]);
+  return true;
 }
 
 // Azzera l'enrollment (recupero telefono perso). Protetto a monte da un fattore diverso.

@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useAdminLanguage } from "@/i18n/AdminLanguageContext";
 import DeployToast from "@/components/admin/DeployToast";
 
-type Phase = "loading" | "enroll" | "locked" | "unlocked";
+type Phase = "loading" | "enroll" | "unlocked";
 type Mode = "test" | "live";
 interface Health {
   mode: Mode;
@@ -168,8 +168,6 @@ export default function StripeSettings() {
   // enrollment
   const [enrollData, setEnrollData] = useState<{ qr: string; base32: string } | null>(null);
   const [confirmCode, setConfirmCode] = useState("");
-  // unlock
-  const [unlockCode, setUnlockCode] = useState("");
   // health + toggle
   const [health, setHealth] = useState<Health | null>(null);
   const [actionCode, setActionCode] = useState("");
@@ -184,9 +182,13 @@ export default function StripeSettings() {
     fetch("/api/admin/stripe/totp")
       .then((r) => r.json())
       .then((d: { status?: string }) => {
-        setPhase(d.status === "confirmed" ? "locked" : "enroll");
+        // Registrato → vai direttamente alla vista (nessun codice per guardare).
+        // Il TOTP verrà chiesto una sola volta, allo switch.
+        if (d.status === "confirmed") loadHealth();
+        else setPhase("enroll");
       })
       .catch(() => setPhase("enroll"));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadHealth() {
@@ -217,20 +219,6 @@ export default function StripeSettings() {
       const res = await fetch("/api/admin/stripe/totp", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "confirm", code: confirmCode.trim() }),
-      });
-      const d = await res.json();
-      if (!res.ok) throw new Error(d.error);
-      await loadHealth();
-    } catch (e) { setError(e instanceof Error ? e.message : L.genericError); }
-    finally { setBusy(false); }
-  }
-
-  async function doUnlock() {
-    setBusy(true); setError("");
-    try {
-      const res = await fetch("/api/admin/stripe/unlock", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: unlockCode.trim() }),
       });
       const d = await res.json();
       if (!res.ok) throw new Error(d.error);
@@ -311,25 +299,6 @@ export default function StripeSettings() {
         </div>
       )}
 
-      {/* LOCKED */}
-      {phase === "locked" && (
-        <div className="space-y-4">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-foreground/50">{L.lockedTitle}</h2>
-          <p className="text-sm text-foreground/70">{L.lockedIntro}</p>
-          <input inputMode="numeric" maxLength={6} value={unlockCode}
-            onChange={(e) => setUnlockCode(e.target.value.replace(/\D/g, ""))}
-            className={codeCls} placeholder="000000" />
-          <button onClick={doUnlock} disabled={busy || unlockCode.length !== 6} className={btnCls}>{L.unlock}</button>
-          <button onClick={() => setShowReset((v) => !v)} className="block text-xs text-foreground/40 underline">{L.reset}</button>
-          {showReset && (
-            <div className="space-y-2 rounded border border-red-200 bg-red-50 p-3">
-              <input value={recovery} onChange={(e) => setRecovery(e.target.value)} className={inputCls} placeholder={L.resetPrompt} />
-              <button onClick={doReset} disabled={busy} className="rounded-full border border-red-400 px-4 py-1.5 text-xs text-red-700">{L.resetConfirm}</button>
-            </div>
-          )}
-        </div>
-      )}
-
       {/* UNLOCKED: health + toggle */}
       {phase === "unlocked" && health && (
         <div className="space-y-5">
@@ -379,6 +348,17 @@ export default function StripeSettings() {
               </button>
             )}
             </>
+            )}
+          </div>
+
+          {/* Reset authenticator (telefono perso) */}
+          <div>
+            <button onClick={() => setShowReset((v) => !v)} className="block text-xs text-foreground/40 underline">{L.reset}</button>
+            {showReset && (
+              <div className="mt-2 space-y-2 rounded border border-red-200 bg-red-50 p-3">
+                <input value={recovery} onChange={(e) => setRecovery(e.target.value)} className={inputCls} placeholder={L.resetPrompt} />
+                <button onClick={doReset} disabled={busy} className="rounded-full border border-red-400 px-4 py-1.5 text-xs text-red-700">{L.resetConfirm}</button>
+              </div>
             )}
           </div>
         </div>

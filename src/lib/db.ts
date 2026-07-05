@@ -79,9 +79,12 @@ export async function ensureStripeAdminSchema() {
       confirmed BOOLEAN NOT NULL DEFAULT false,
       created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
       confirmed_at TIMESTAMPTZ,
+      last_used_step BIGINT,
       CONSTRAINT stripe_admin_totp_singleton CHECK (id = 1)
     );
   `);
+  // Migrazione idempotente per tabelle già esistenti: single-use anti-replay del TOTP.
+  await pool.query(`ALTER TABLE stripe_admin_totp ADD COLUMN IF NOT EXISTS last_used_step BIGINT`);
   totpInitialized = true;
 }
 
