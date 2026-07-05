@@ -168,9 +168,10 @@ export default function BookingManagementPage({ code, token }: { code: string; t
     : days >= CANCEL_HALF_REFUND_DAYS ? "half"
     : "none";
   const fee = refundReason !== "none" ? Math.round(totalPaid * CANCEL_FEE_PERCENT) / 100 : 0;
+  const grossHalf = Math.round(totalPaid * CANCEL_PARTIAL_REFUND_PCT) / 100; // rimborso lordo (prima della trattenuta)
   const refundAmount =
     refundReason === "full" ? totalPaid - fee
-    : refundReason === "half" ? Math.round(totalPaid * CANCEL_PARTIAL_REFUND_PCT) / 100 - fee
+    : refundReason === "half" ? grossHalf - fee
     : 0;
 
   const statusLabel: Record<string, string> = {
@@ -334,11 +335,16 @@ export default function BookingManagementPage({ code, token }: { code: string; t
                       days: String(days),
                       halfThreshold: String(CANCEL_HALF_REFUND_DAYS),
                       fullThreshold: String(CANCEL_FULL_REFUND_DAYS),
+                      pct: String(CANCEL_PARTIAL_REFUND_PCT),
                     })}
                   </p>
                   <p>
                     {format(m.cancelHalfRefundDetail, {
                       paid: totalPaid.toFixed(2),
+                      pct: String(CANCEL_PARTIAL_REFUND_PCT),
+                      gross: grossHalf.toFixed(2),
+                      fee_pct: String(CANCEL_FEE_PERCENT),
+                      fee: fee.toFixed(2),
                       refund: refundAmount.toFixed(2),
                     })}
                   </p>
