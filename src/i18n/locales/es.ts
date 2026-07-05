@@ -16,6 +16,8 @@ const es: Translation = {
     subtitle: "Un apartamento acogedor en el corazón de la ciudad.",
     bookDirect: "Reserva aquí",
     bookAirbnb: "Reservar en Airbnb",
+    bookOn: "Reserva en {platform}",
+    alsoOn: "También en",
   },
   story: {
     title: "Nuestra historia",

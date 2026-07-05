@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { CONTENT } from "@/lib/siteContent";
+import { getBookingLinks } from "@/lib/bookingLinks";
+import { format } from "@/i18n/format";
 
 function Diamond() {
   return <div className="divider-diamond text-gold">◆</div>;
@@ -11,6 +13,7 @@ function Diamond() {
 
 export default function Home() {
   const { t, locale } = useLanguage();
+  const { primary: bookPrimary, others: bookOthers } = getBookingLinks();
 
   return (
     <div className="flex flex-1 flex-col">
@@ -44,15 +47,30 @@ export default function Home() {
             >
               {t.hero.bookDirect}
             </Link>
-            <a
-              href={CONTENT.airbnbUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-full border border-gold bg-gold px-8 py-3 text-sm font-medium uppercase tracking-widest text-[#faf6ec] transition hover:bg-transparent hover:text-gold"
-            >
-              {t.hero.bookAirbnb}
-            </a>
+            {bookPrimary && (
+              <a
+                href={bookPrimary.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-full border border-gold bg-gold px-8 py-3 text-sm font-medium uppercase tracking-widest text-[#faf6ec] transition hover:bg-transparent hover:text-gold"
+              >
+                {format(t.hero.bookOn, { platform: bookPrimary.name })}
+              </a>
+            )}
           </div>
+          {bookOthers.length > 0 && (
+            <p className="mt-5 text-sm text-foreground/60">
+              {t.hero.alsoOn}{" "}
+              {bookOthers.map((o, i) => (
+                <span key={o.platform}>
+                  {i > 0 && " · "}
+                  <a href={o.url} target="_blank" rel="noopener noreferrer" className="text-gold underline underline-offset-2 hover:text-gold/80">
+                    {o.name}
+                  </a>
+                </span>
+              ))}
+            </p>
+          )}
         </div>
       </header>
 

@@ -32,6 +32,11 @@ const LABELS = {
     changed: "Sincronizzazione completata — il sito si aggiornerà tra qualche secondo.",
     unchanged: "Sincronizzazione completata — nessuna modifica.",
     demo: "In demo la sincronizzazione non viene eseguita.",
+    extTitle: "Prenotazione esterna",
+    extDesc: "Se un ospite preferisce prenotare fuori da Dimora, il bottone “Prenota su…” in home lo porta alla piattaforma scelta. L'URL dell'annuncio Airbnb si imposta in Contenuti.",
+    bookingListing: "URL annuncio Booking.com",
+    vrboListing: "URL annuncio Vrbo",
+    defaultLabel: "Piattaforma predefinita del bottone",
   },
   en: {
     title: "Calendar sync",
@@ -48,6 +53,11 @@ const LABELS = {
     changed: "Sync complete — the site will update in a few seconds.",
     unchanged: "Sync complete — no changes.",
     demo: "In the demo, sync is not performed.",
+    extTitle: "External booking",
+    extDesc: "If a guest prefers to book outside Dimora, the “Book on…” button on the homepage sends them to the chosen platform. The Airbnb listing URL is set in Contents.",
+    bookingListing: "Booking.com listing URL",
+    vrboListing: "Vrbo listing URL",
+    defaultLabel: "Default platform for the button",
   },
   es: {
     title: "Sincronización de calendarios",
@@ -64,6 +74,11 @@ const LABELS = {
     changed: "Sincronización completa — el sitio se actualizará en unos segundos.",
     unchanged: "Sincronización completa — sin cambios.",
     demo: "En la demo la sincronización no se ejecuta.",
+    extTitle: "Reserva externa",
+    extDesc: "Si un huésped prefiere reservar fuera de Dimora, el botón «Reserva en…» de la home lo lleva a la plataforma elegida. La URL del anuncio de Airbnb se configura en Contenidos.",
+    bookingListing: "URL del anuncio de Booking.com",
+    vrboListing: "URL del anuncio de Vrbo",
+    defaultLabel: "Plataforma predeterminada del botón",
   },
   fr: {
     title: "Synchronisation des calendriers",
@@ -80,6 +95,11 @@ const LABELS = {
     changed: "Synchronisation terminée — le site se mettra à jour dans quelques secondes.",
     unchanged: "Synchronisation terminée — aucun changement.",
     demo: "Dans la démo, la synchronisation n'est pas exécutée.",
+    extTitle: "Réservation externe",
+    extDesc: "Si un voyageur préfère réserver hors de Dimora, le bouton « Réserver sur… » de l'accueil l'envoie vers la plateforme choisie. L'URL de l'annonce Airbnb se règle dans Contenus.",
+    bookingListing: "URL de l'annonce Booking.com",
+    vrboListing: "URL de l'annonce Vrbo",
+    defaultLabel: "Plateforme par défaut du bouton",
   },
 } as const;
 
@@ -95,15 +115,31 @@ export default function SettingsManager() {
   const [syncError, setSyncError] = useState("");
   const [result, setResult] = useState<CalendarSyncResult | null>(null);
   const [demoDone, setDemoDone] = useState(false);
+  const [ext, setExt] = useState<{ bookingUrl: string; vrboUrl: string; defaultBookingPlatform: OtaPlatform }>({ bookingUrl: "", vrboUrl: "", defaultBookingPlatform: "airbnb" });
+  const [extSaveState, setExtSaveState] = useState<State>("idle");
 
   useEffect(() => {
     fetch("/api/admin/settings")
       .then((r) => r.json())
-      .then((d: { calendars?: Record<OtaPlatform, string> }) => {
+      .then((d: { calendars?: Record<OtaPlatform, string>; bookingUrl?: string; vrboUrl?: string; defaultBookingPlatform?: OtaPlatform }) => {
         if (d.calendars) setUrls({ airbnb: d.calendars.airbnb ?? "", booking: d.calendars.booking ?? "", vrbo: d.calendars.vrbo ?? "" });
+        setExt({ bookingUrl: d.bookingUrl ?? "", vrboUrl: d.vrboUrl ?? "", defaultBookingPlatform: d.defaultBookingPlatform ?? "airbnb" });
       })
       .catch(() => {});
   }, []);
+
+  async function saveExternal() {
+    setExtSaveState("saving");
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingUrl: ext.bookingUrl, vrboUrl: ext.vrboUrl, defaultBookingPlatform: ext.defaultBookingPlatform }),
+      });
+      if (!res.ok) throw new Error();
+      setExtSaveState("success");
+      setTimeout(() => setExtSaveState("idle"), 3000);
+    } catch { setExtSaveState("error"); }
+  }
 
   const anyUrl = PLATFORMS.some((p) => urls[p].trim());
 
@@ -220,6 +256,47 @@ export default function SettingsManager() {
             )}
           </div>
         )}
+      </div>
+
+      <div className="rounded-lg border border-gold/40 bg-card p-5 space-y-4">
+        <div>
+          <h2 className="font-serif-display text-2xl italic text-foreground">{L.extTitle}</h2>
+          <p className="mt-1 text-sm text-foreground/60">{L.extDesc}</p>
+        </div>
+        <div>
+          <label className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-foreground/50">
+            <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: PLATFORM_COLOR.booking }} />{L.bookingListing}
+          </label>
+          <input type="url" value={ext.bookingUrl}
+            onChange={(e) => { setExt((x) => ({ ...x, bookingUrl: e.target.value })); setExtSaveState("idle"); }}
+            placeholder="https://www.booking.com/hotel/…"
+            className="mt-1 w-full rounded border border-gold/40 bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-gold font-mono" />
+        </div>
+        <div>
+          <label className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-foreground/50">
+            <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: PLATFORM_COLOR.vrbo }} />{L.vrboListing}
+          </label>
+          <input type="url" value={ext.vrboUrl}
+            onChange={(e) => { setExt((x) => ({ ...x, vrboUrl: e.target.value })); setExtSaveState("idle"); }}
+            placeholder="https://www.vrbo.com/…"
+            className="mt-1 w-full rounded border border-gold/40 bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-gold font-mono" />
+        </div>
+        <div>
+          <label className="text-[11px] uppercase tracking-widest text-foreground/50">{L.defaultLabel}</label>
+          <select value={ext.defaultBookingPlatform}
+            onChange={(e) => { setExt((x) => ({ ...x, defaultBookingPlatform: e.target.value as OtaPlatform })); setExtSaveState("idle"); }}
+            className="mt-1 block rounded border border-gold/40 bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-gold">
+            {PLATFORMS.map((p) => <option key={p} value={p}>{PLATFORM_NAME[p]}</option>)}
+          </select>
+        </div>
+        <div className="flex items-center gap-3 pt-1">
+          <button onClick={saveExternal} disabled={extSaveState === "saving"}
+            className="rounded-full border border-gold/40 px-5 py-2 text-xs uppercase tracking-widest text-foreground/70 transition hover:bg-gold/10 disabled:opacity-50">
+            {extSaveState === "saving" ? L.saving : L.save}
+          </button>
+          {extSaveState === "success" && <span className="text-xs text-green-700">{DEMO ? L.demo : L.saved}</span>}
+          {extSaveState === "error" && <span className="text-xs text-red-600">{L.saveError}</span>}
+        </div>
       </div>
     </div>
   );

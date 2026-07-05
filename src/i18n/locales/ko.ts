@@ -16,6 +16,8 @@ const ko: Translation = {
     subtitle: "도시 중심부의 아늑한 아파트.",
     bookDirect: "여기서 예약하기",
     bookAirbnb: "에어비앤비에서 예약하기",
+    bookOn: "{platform}에서 예약하기",
+    alsoOn: "다음에서도 예약 가능:",
   },
   story: {
     title: "우리의 이야기",

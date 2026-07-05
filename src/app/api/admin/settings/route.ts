@@ -1,23 +1,11 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getFile, putFile, requireBotToken } from "@/lib/githubContent";
-import { calendarUrlsFromPolicies, type CalendarUrls, type Policies } from "@/lib/policies";
+import { calendarUrlsFromPolicies, type Policies } from "@/lib/policies";
 import type { OtaPlatform } from "@/data/availability";
 
 const FILE_PATH = "src/data/policies.json";
 const PLATFORMS: OtaPlatform[] = ["airbnb", "booking", "vrbo"];
-
-export interface AppSettings {
-  calendars: CalendarUrls;
-}
-
-function isValidSettings(body: unknown): body is AppSettings {
-  if (!body || typeof body !== "object") return false;
-  const c = (body as { calendars?: unknown }).calendars;
-  if (!c || typeof c !== "object") return false;
-  const cal = c as Record<string, unknown>;
-  return PLATFORMS.every((p) => cal[p] === undefined || typeof cal[p] === "string");
-}
 
 export async function GET() {
   const session = await auth();
@@ -26,21 +14,52 @@ export async function GET() {
   try {
     const token = process.env.GITHUB_BOT_TOKEN ?? "";
     const { content } = await getFile(FILE_PATH, token);
-    const policies: Policies = JSON.parse(content);
-    return NextResponse.json({ calendars: calendarUrlsFromPolicies(policies) });
+    const p: Policies = JSON.parse(content);
+    return NextResponse.json({
+      calendars: calendarUrlsFromPolicies(p),
+      bookingUrl: p.bookingUrl ?? "",
+      vrboUrl: p.vrboUrl ?? "",
+      defaultBookingPlatform: p.defaultBookingPlatform ?? "airbnb",
+    });
   } catch {
-    return NextResponse.json({ calendars: { airbnb: "", booking: "", vrbo: "" } });
+    return NextResponse.json({ calendars: { airbnb: "", booking: "", vrbo: "" }, bookingUrl: "", vrboUrl: "", defaultBookingPlatform: "airbnb" });
   }
+}
+
+// Costruisce un update parziale validato: aggiorna solo i campi presenti nel body.
+function buildUpdate(body: unknown): Partial<Policies> | null {
+  if (!body || typeof body !== "object") return null;
+  const b = body as Record<string, unknown>;
+  const update: Partial<Policies> = {};
+
+  if ("calendars" in b) {
+    const c = b.calendars;
+    if (!c || typeof c !== "object") return null;
+    const cal = c as Record<string, unknown>;
+    if (!PLATFORMS.every((p) => cal[p] === undefined || typeof cal[p] === "string")) return null;
+    update.calendars = { airbnb: String(cal.airbnb ?? "").trim(), booking: String(cal.booking ?? "").trim(), vrbo: String(cal.vrbo ?? "").trim() };
+  }
+  if ("bookingUrl" in b) {
+    if (typeof b.bookingUrl !== "string") return null;
+    update.bookingUrl = b.bookingUrl.trim();
+  }
+  if ("vrboUrl" in b) {
+    if (typeof b.vrboUrl !== "string") return null;
+    update.vrboUrl = b.vrboUrl.trim();
+  }
+  if ("defaultBookingPlatform" in b) {
+    if (!PLATFORMS.includes(b.defaultBookingPlatform as OtaPlatform)) return null;
+    update.defaultBookingPlatform = b.defaultBookingPlatform as OtaPlatform;
+  }
+  return Object.keys(update).length > 0 ? update : null;
 }
 
 export async function POST(request: Request) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Non autenticato" }, { status: 401 });
 
-  const body = await request.json().catch(() => null);
-  if (!isValidSettings(body)) {
-    return NextResponse.json({ error: "Dati non validi" }, { status: 400 });
-  }
+  const update = buildUpdate(await request.json().catch(() => null));
+  if (!update) return NextResponse.json({ error: "Dati non validi" }, { status: 400 });
 
   try {
     const token = requireBotToken();
@@ -55,16 +74,10 @@ export async function POST(request: Request) {
       const { POLICIES } = await import("@/lib/policies");
       currentPolicies = POLICIES;
     }
-    // Normalizza i 3 URL e rimuovi il vecchio campo legacy.
-    const calendars: CalendarUrls = {
-      airbnb: (body.calendars.airbnb ?? "").trim(),
-      booking: (body.calendars.booking ?? "").trim(),
-      vrbo: (body.calendars.vrbo ?? "").trim(),
-    };
-    const updated: Policies = { ...currentPolicies, calendars };
-    delete updated.airbnbIcalUrl;
+    const updated: Policies = { ...currentPolicies, ...update };
+    if (update.calendars) delete updated.airbnbIcalUrl; // migra via dal campo legacy
     const content = JSON.stringify(updated, null, 2) + "\n";
-    await putFile(FILE_PATH, content, sha, "Update calendar iCal URLs", token);
+    await putFile(FILE_PATH, content, sha, "Update settings", token);
     return NextResponse.json({ ok: true });
   } catch (err) {
     return NextResponse.json(

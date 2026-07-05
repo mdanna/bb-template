@@ -16,6 +16,8 @@ const zh: Translation = {
     subtitle: "城市中心的温馨公寓。",
     bookDirect: "在此预订",
     bookAirbnb: "在 Airbnb 上预订",
+    bookOn: "在 {platform} 上预订",
+    alsoOn: "也可在",
   },
   story: {
     title: "我们的故事",
