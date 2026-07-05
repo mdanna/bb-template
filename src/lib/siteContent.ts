@@ -39,7 +39,7 @@ export interface SiteContent {
   cin: string;
   metaDescription: string;
   hostName: string;
-  airbnbUrl: string;
+  airbnbUrl?: string; // legacy: l'URL annuncio Airbnb si gestisce ora in Impostazioni
   airbnbRating: number;
   airbnbReviewCount: number;
   mapLat: number;

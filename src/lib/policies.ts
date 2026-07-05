@@ -6,8 +6,10 @@ export type CalendarUrls = Record<OtaPlatform, string>; // { airbnb, booking, vr
 export interface Policies {
   airbnbIcalUrl?: string; // legacy: singolo URL Airbnb (letto come calendars.airbnb)
   calendars?: Partial<CalendarUrls>;
-  // Prenotazione esterna (bottone pubblico "Prenota su…"). L'URL annuncio Airbnb
-  // resta in content.json (`airbnbUrl`); qui le altre piattaforme + il default.
+  // Prenotazione esterna (bottone pubblico "Prenota su…"): URL degli annunci sulle
+  // OTA + piattaforma di default. `airbnbUrl` legge in fallback il vecchio
+  // `content.airbnbUrl` finché non viene salvato qui (vedi bookingLinks.ts).
+  airbnbUrl?: string;
   bookingUrl?: string;
   vrboUrl?: string;
   defaultBookingPlatform?: OtaPlatform;

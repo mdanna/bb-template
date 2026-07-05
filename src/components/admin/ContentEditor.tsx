@@ -498,16 +498,7 @@ export default function ContentEditor() {
         {/* Airbnb card */}
         <div className="rounded-lg border border-gold/30 bg-background p-6">
           <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-foreground/50">Airbnb</h3>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <label className={`${labelCls} sm:col-span-3`}>
-              <FieldLabel>{L.airbnbUrl}</FieldLabel>
-              <input
-                type="text"
-                value={content.airbnbUrl}
-                onChange={(e) => set("airbnbUrl", e.target.value)}
-                className={inputCls}
-              />
-            </label>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <label className={labelCls}>
               <FieldLabel>{L.rating}</FieldLabel>
               <input

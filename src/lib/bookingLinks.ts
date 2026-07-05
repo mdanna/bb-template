@@ -10,15 +10,21 @@ export interface BookingLink {
   name: string;
 }
 
-// Risolve il bottone "Prenota su…" pubblico: la piattaforma di default (con URL
-// impostato) come `primary`, le altre configurate come `others` (per i link "anche su").
-// L'URL Airbnb viene da content.json; Booking/Vrbo dalle policy (Impostazioni).
-export function getBookingLinks(): { primary: BookingLink | null; others: BookingLink[] } {
-  const urls: Record<OtaPlatform, string> = {
-    airbnb: (CONTENT.airbnbUrl ?? "").trim(),
+// URL pubblici degli annunci OTA, tutti gestiti in Impostazioni (policies).
+// `airbnb` legge in fallback il vecchio `content.airbnbUrl` finché non è salvato
+// nei settings, così la migrazione è trasparente.
+export function listingUrls(): Record<OtaPlatform, string> {
+  return {
+    airbnb: (POLICIES.airbnbUrl ?? CONTENT.airbnbUrl ?? "").trim(),
     booking: (POLICIES.bookingUrl ?? "").trim(),
     vrbo: (POLICIES.vrboUrl ?? "").trim(),
   };
+}
+
+// Risolve il bottone "Prenota su…" pubblico: la piattaforma di default (con URL
+// impostato) come `primary`, le altre configurate come `others` (per i link "anche su").
+export function getBookingLinks(): { primary: BookingLink | null; others: BookingLink[] } {
+  const urls = listingUrls();
   const order: OtaPlatform[] = ["airbnb", "booking", "vrbo"];
   const def = POLICIES.defaultBookingPlatform ?? "airbnb";
   const primaryPlatform: OtaPlatform | null = urls[def] ? def : (order.find((p) => urls[p]) ?? null);

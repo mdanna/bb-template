@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getFile, putFile, requireBotToken } from "@/lib/githubContent";
 import { calendarUrlsFromPolicies, type Policies } from "@/lib/policies";
+import { CONTENT } from "@/lib/siteContent";
 import type { OtaPlatform } from "@/data/availability";
 
 const FILE_PATH = "src/data/policies.json";
@@ -17,12 +18,13 @@ export async function GET() {
     const p: Policies = JSON.parse(content);
     return NextResponse.json({
       calendars: calendarUrlsFromPolicies(p),
+      airbnbUrl: p.airbnbUrl ?? CONTENT.airbnbUrl ?? "", // fallback dal vecchio content.airbnbUrl
       bookingUrl: p.bookingUrl ?? "",
       vrboUrl: p.vrboUrl ?? "",
       defaultBookingPlatform: p.defaultBookingPlatform ?? "airbnb",
     });
   } catch {
-    return NextResponse.json({ calendars: { airbnb: "", booking: "", vrbo: "" }, bookingUrl: "", vrboUrl: "", defaultBookingPlatform: "airbnb" });
+    return NextResponse.json({ calendars: { airbnb: "", booking: "", vrbo: "" }, airbnbUrl: "", bookingUrl: "", vrboUrl: "", defaultBookingPlatform: "airbnb" });
   }
 }
 
@@ -38,6 +40,10 @@ function buildUpdate(body: unknown): Partial<Policies> | null {
     const cal = c as Record<string, unknown>;
     if (!PLATFORMS.every((p) => cal[p] === undefined || typeof cal[p] === "string")) return null;
     update.calendars = { airbnb: String(cal.airbnb ?? "").trim(), booking: String(cal.booking ?? "").trim(), vrbo: String(cal.vrbo ?? "").trim() };
+  }
+  if ("airbnbUrl" in b) {
+    if (typeof b.airbnbUrl !== "string") return null;
+    update.airbnbUrl = b.airbnbUrl.trim();
   }
   if ("bookingUrl" in b) {
     if (typeof b.bookingUrl !== "string") return null;

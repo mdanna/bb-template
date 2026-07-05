@@ -3,6 +3,7 @@
 import { useLanguage } from "@/i18n/LanguageContext";
 import { format } from "@/i18n/format";
 import { CONTENT } from "@/lib/siteContent";
+import { listingUrls } from "@/lib/bookingLinks";
 
 function Diamond() {
   return <div className="divider-diamond text-gold">◆</div>;
@@ -10,6 +11,7 @@ function Diamond() {
 
 export default function RecensioniPage() {
   const { t, locale } = useLanguage();
+  const airbnbUrl = listingUrls().airbnb;
 
   return (
     <section className="px-6 py-20">
@@ -35,16 +37,18 @@ export default function RecensioniPage() {
           </blockquote>
         ))}
       </div>
-      <p className="mx-auto mt-4 max-w-5xl text-center text-xs">
-        <a
-          href={CONTENT.airbnbUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-gold underline"
-        >
-          {t.reviews.readMore}
-        </a>
-      </p>
+      {airbnbUrl && (
+        <p className="mx-auto mt-4 max-w-5xl text-center text-xs">
+          <a
+            href={airbnbUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gold underline"
+          >
+            {t.reviews.readMore}
+          </a>
+        </p>
+      )}
     </section>
   );
 }

@@ -14,7 +14,7 @@ function isValidContent(body: unknown): body is SiteContent {
     typeof b.phone === "string" &&
     typeof b.email === "string" &&
     typeof b.hostName === "string" &&
-    typeof b.airbnbUrl === "string" &&
+    (!("airbnbUrl" in b) || typeof b.airbnbUrl === "string") &&
     typeof b.airbnbRating === "number" &&
     typeof b.airbnbReviewCount === "number" &&
     typeof b.mapLat === "number" &&
@@ -59,12 +59,18 @@ export async function POST(request: Request) {
   try {
     const token = requireBotToken();
     let sha: string;
+    let current: SiteContent = CONTENT;
     try {
-      ({ sha } = await getFile(FILE_PATH, token));
+      const { content: cur, sha: fileSha } = await getFile(FILE_PATH, token);
+      sha = fileSha;
+      current = JSON.parse(cur);
     } catch {
       sha = "";
     }
-    const content = JSON.stringify(body, null, 2) + "\n";
+    // Merge: preserva i campi non inviati dall'editor (es. `airbnbUrl`, ora gestito
+    // nelle Impostazioni) invece di sovrascrivere l'intero file.
+    const merged: SiteContent = { ...current, ...body };
+    const content = JSON.stringify(merged, null, 2) + "\n";
     const { commitSha } = await putFile(FILE_PATH, content, sha, "Update site content", token);
     return NextResponse.json({ ok: true, commitSha });
   } catch (err) {
