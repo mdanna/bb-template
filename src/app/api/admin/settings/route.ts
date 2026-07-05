@@ -1,18 +1,22 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getFile, putFile, requireBotToken } from "@/lib/githubContent";
-import type { Policies } from "@/lib/policies";
+import { calendarUrlsFromPolicies, type CalendarUrls, type Policies } from "@/lib/policies";
+import type { OtaPlatform } from "@/data/availability";
 
 const FILE_PATH = "src/data/policies.json";
+const PLATFORMS: OtaPlatform[] = ["airbnb", "booking", "vrbo"];
 
 export interface AppSettings {
-  airbnbIcalUrl: string;
+  calendars: CalendarUrls;
 }
 
 function isValidSettings(body: unknown): body is AppSettings {
   if (!body || typeof body !== "object") return false;
-  const b = body as Record<string, unknown>;
-  return typeof b.airbnbIcalUrl === "string";
+  const c = (body as { calendars?: unknown }).calendars;
+  if (!c || typeof c !== "object") return false;
+  const cal = c as Record<string, unknown>;
+  return PLATFORMS.every((p) => cal[p] === undefined || typeof cal[p] === "string");
 }
 
 export async function GET() {
@@ -23,9 +27,9 @@ export async function GET() {
     const token = process.env.GITHUB_BOT_TOKEN ?? "";
     const { content } = await getFile(FILE_PATH, token);
     const policies: Policies = JSON.parse(content);
-    return NextResponse.json({ airbnbIcalUrl: policies.airbnbIcalUrl });
+    return NextResponse.json({ calendars: calendarUrlsFromPolicies(policies) });
   } catch {
-    return NextResponse.json({ airbnbIcalUrl: "" });
+    return NextResponse.json({ calendars: { airbnb: "", booking: "", vrbo: "" } });
   }
 }
 
@@ -51,9 +55,16 @@ export async function POST(request: Request) {
       const { POLICIES } = await import("@/lib/policies");
       currentPolicies = POLICIES;
     }
-    const updated = { ...currentPolicies, airbnbIcalUrl: body.airbnbIcalUrl };
+    // Normalizza i 3 URL e rimuovi il vecchio campo legacy.
+    const calendars: CalendarUrls = {
+      airbnb: (body.calendars.airbnb ?? "").trim(),
+      booking: (body.calendars.booking ?? "").trim(),
+      vrbo: (body.calendars.vrbo ?? "").trim(),
+    };
+    const updated: Policies = { ...currentPolicies, calendars };
+    delete updated.airbnbIcalUrl;
     const content = JSON.stringify(updated, null, 2) + "\n";
-    await putFile(FILE_PATH, content, sha, "Update airbnb iCal URL", token);
+    await putFile(FILE_PATH, content, sha, "Update calendar iCal URLs", token);
     return NextResponse.json({ ok: true });
   } catch (err) {
     return NextResponse.json(

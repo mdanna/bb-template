@@ -1,7 +1,19 @@
 import raw from "./availability.json";
 
 export type DayStatus = "available" | "booked";
-export type DaySource = "airbnb" | "airbnb-blocked" | "app" | "blocked" | "direct";
+
+// OTA con calendario iCal importabile.
+export type OtaPlatform = "airbnb" | "booking" | "vrbo";
+
+// Prenotazioni: airbnb/booking/vrbo (OTA), app (dal sito), direct (manuale).
+// Blocchi: "blocked" = manuale (viola chiaro, editabile), "imported" = blocco
+// importato da una OTA (grigio, non editabile). Legacy: "airbnb-blocked" viene
+// trattato come "imported" (riscritto al primo sync).
+export type DaySource =
+  | "airbnb" | "booking" | "vrbo"
+  | "app" | "direct"
+  | "blocked" | "imported"
+  | "airbnb-blocked";
 
 export interface DayRate {
   date: string; // YYYY-MM-DD
@@ -9,7 +21,9 @@ export interface DayRate {
   status: DayStatus;
   source?: DaySource; // undefined = "blocked" (backward compat)
   note?: string;
-  conflict?: boolean; // true when airbnb + app both claim this night
+  conflict?: boolean; // true = overbooking (≥2 prenotazioni indipendenti sulla notte)
+  blockedBy?: OtaPlatform[]; // per i blocchi "imported": su quali calendari OTA è bloccata
+  conflictWith?: OtaPlatform[]; // per l'overbooking: quali OTA rivendicano la notte
 }
 
 export interface AvailabilityData {

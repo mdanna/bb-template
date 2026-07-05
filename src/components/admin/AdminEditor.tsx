@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { DayRate } from "@/data/availability";
 import AdminCalendar from "./AdminCalendar";
-import type { SyncResult, SyncConflict } from "@/app/api/admin/airbnb-sync/route";
 import { useAdminLanguage } from "@/i18n/AdminLanguageContext";
 import DeployToast from "@/components/admin/DeployToast";
 
@@ -13,7 +12,6 @@ interface Props {
 }
 
 type SaveState = "idle" | "saving" | "success" | "error";
-type SyncState = "idle" | "syncing" | "success" | "error";
 type RangeMode = "price" | "booked" | "direct";
 
 const EDITOR_LABELS = {
@@ -120,56 +118,12 @@ export default function AdminEditor({ initialDefaultPrice, initialOverrides }: P
   const [deploySha, setDeploySha] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const today = toLocalISODate(new Date());
-  const [airbnbIcalUrl, setAirbnbIcalUrl] = useState("");
-  const [urlSaveState, setUrlSaveState] = useState<SaveState>("idle");
-  const [syncState, setSyncState] = useState<SyncState>("idle");
-  const [syncResult, setSyncResult] = useState<SyncResult | null>(null);
-  const [syncError, setSyncError] = useState("");
   const [rangeStart, setRangeStart] = useState(today);
   const [rangeEnd, setRangeEnd] = useState(today);
   const [rangeMode, setRangeMode] = useState<RangeMode>("price");
   const [rangePrice, setRangePrice] = useState(initialDefaultPrice);
   const [airbnbNote, setAirbnbNote] = useState("");
   const [rangeError, setRangeError] = useState("");
-
-  useEffect(() => {
-    fetch("/api/admin/settings")
-      .then((r) => r.json())
-      .then((d: { airbnbIcalUrl?: string }) => { if (d.airbnbIcalUrl) setAirbnbIcalUrl(d.airbnbIcalUrl); })
-      .catch(() => {});
-  }, []);
-
-  async function saveAirbnbUrl() {
-    setUrlSaveState("saving");
-    try {
-      const res = await fetch("/api/admin/settings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ airbnbIcalUrl: airbnbIcalUrl.trim() }),
-      });
-      if (!res.ok) throw new Error(((await res.json()) as { error?: string }).error ?? t.common.error);
-      setUrlSaveState("success");
-    } catch {
-      setUrlSaveState("error");
-    }
-  }
-
-  async function runAirbnbSync() {
-    setSyncState("syncing");
-    setSyncResult(null);
-    setSyncError("");
-    try {
-      const res = await fetch("/api/admin/airbnb-sync", { method: "POST" });
-      const data = await res.json() as SyncResult & { error?: string; overrides?: DayRate[] };
-      if (!res.ok) throw new Error(data.error ?? t.common.error);
-      setSyncResult(data as SyncResult);
-      setSyncState("success");
-      if (data.overrides) setOverrides(data.overrides);
-    } catch (err) {
-      setSyncError(err instanceof Error ? err.message : t.common.error);
-      setSyncState("error");
-    }
-  }
 
   function deleteRun(dates: string[]) {
     setOverrides((prev) => prev.filter((o) => !dates.includes(o.date)));
@@ -319,54 +273,6 @@ export default function AdminEditor({ initialDefaultPrice, initialOverrides }: P
           </button>
           {rangeEnd < rangeStart && <p className="mt-2 text-xs text-red-600">{L.dateError}</p>}
           {rangeError && <p className="mt-2 text-xs text-red-600">{rangeError}</p>}
-        </section>
-
-        <section className="rounded-lg border border-[#FF5A5F]/30 bg-card p-5 space-y-4">
-          <div>
-            <h2 className="font-serif-display text-xl italic text-foreground flex items-center gap-2">
-              <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: "#FF5A5F" }} />
-              {L.airbnbSync}
-            </h2>
-            <p className="mt-1 text-sm text-foreground/60">{L.airbnbDesc}</p>
-          </div>
-          <div className="flex flex-wrap items-end gap-3">
-            <div className="flex-1 min-w-64">
-              <label className="text-[10px] uppercase tracking-widest text-foreground/40">{L.icalUrl}</label>
-              <input type="url" value={airbnbIcalUrl}
-                onChange={(e) => { setAirbnbIcalUrl(e.target.value); setUrlSaveState("idle"); }}
-                placeholder="https://www.airbnb.com/calendar/ical/…"
-                className="mt-1 w-full rounded border border-gold/40 bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-gold font-mono" />
-            </div>
-            <button onClick={saveAirbnbUrl} disabled={urlSaveState === "saving" || !airbnbIcalUrl.trim()}
-              className="rounded-full border border-gold/40 px-5 py-2 text-xs uppercase tracking-widest text-foreground/70 transition hover:bg-gold/10 disabled:opacity-50">
-              {urlSaveState === "saving" ? L.savingUrl : L.saveUrl}
-            </button>
-          </div>
-          {urlSaveState === "success" && <p className="text-xs text-green-700">{L.urlSaved}</p>}
-          {urlSaveState === "error" && <p className="text-xs text-red-600">{L.urlError}</p>}
-          <button onClick={runAirbnbSync} disabled={syncState === "syncing" || !airbnbIcalUrl.trim()}
-            className="rounded-full border border-[#FF5A5F] bg-[#FF5A5F]/10 px-6 py-2 text-xs uppercase tracking-widest text-[#FF5A5F] transition hover:bg-[#FF5A5F]/20 disabled:opacity-50 disabled:cursor-not-allowed">
-            {syncState === "syncing" ? L.syncing : L.syncNow}
-          </button>
-          {syncState === "error" && <p className="text-sm text-red-600">{syncError}</p>}
-          {syncState === "success" && syncResult && (
-            <div className="space-y-3">
-              <p className="text-sm text-green-700">{L.syncDone(syncResult.imported, syncResult.removed)}</p>
-              {syncResult.conflicts.length > 0 && (
-                <div className="rounded-md border border-red-400/60 bg-red-50 p-4 space-y-2">
-                  <p className="text-sm font-semibold text-red-700">{L.conflicts(syncResult.conflicts.length)}</p>
-                  <p className="text-xs text-red-600">{L.conflictDesc}</p>
-                  <ul className="mt-2 space-y-1">
-                    {syncResult.conflicts.map((c: SyncConflict) => (
-                      <li key={c.date} className="text-xs text-red-700 font-mono">
-                        {c.date}{c.appNote ? ` · ${c.appNote}` : ""}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
         </section>
 
         <section>

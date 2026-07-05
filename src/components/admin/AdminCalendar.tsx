@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { DayRate, DaySource } from "@/data/availability";
+import type { DayRate, DaySource, OtaPlatform } from "@/data/availability";
 import { useAdminLanguage } from "@/i18n/AdminLanguageContext";
 
 const MONTH_NAMES = {
@@ -24,16 +24,49 @@ const WEEKDAYS = {
 };
 
 const LEGEND = {
-  it: { airbnb: "Airbnb", app: "Prenotazione app", direct: "Diretta", airbnbBlocked: "Airbnb (bloccato)", manualBlock: "Blocco manuale (cliccabile)", customPrice: "Prezzo personalizzato", overbooking: "⚠ Overbooking" },
-  en: { airbnb: "Airbnb", app: "App booking", direct: "Direct", airbnbBlocked: "Airbnb (blocked)", manualBlock: "Manual block (clickable)", customPrice: "Custom price", overbooking: "⚠ Overbooking" },
-  es: { airbnb: "Airbnb", app: "Reserva app", direct: "Directa", airbnbBlocked: "Airbnb (bloqueado)", manualBlock: "Bloqueo manual (cliccable)", customPrice: "Precio personalizado", overbooking: "⚠ Overbooking" },
-  fr: { airbnb: "Airbnb", app: "Réservation app", direct: "Directe", airbnbBlocked: "Airbnb (bloqué)", manualBlock: "Blocage manuel (cliquable)", customPrice: "Prix personnalisé", overbooking: "⚠ Overbooking" },
+  it: { airbnb: "Airbnb", booking: "Booking.com", vrbo: "Vrbo", app: "Prenotazione app", direct: "Diretta", importedBlock: "Bloccata (OTA)", manualBlock: "Blocco manuale (cliccabile)", customPrice: "Prezzo personalizzato", overbooking: "⚠ Overbooking", blockedOn: "Bloccata su" },
+  en: { airbnb: "Airbnb", booking: "Booking.com", vrbo: "Vrbo", app: "App booking", direct: "Direct", importedBlock: "Blocked (OTA)", manualBlock: "Manual block (clickable)", customPrice: "Custom price", overbooking: "⚠ Overbooking", blockedOn: "Blocked on" },
+  es: { airbnb: "Airbnb", booking: "Booking.com", vrbo: "Vrbo", app: "Reserva app", direct: "Directa", importedBlock: "Bloqueada (OTA)", manualBlock: "Bloqueo manual (cliccable)", customPrice: "Precio personalizado", overbooking: "⚠ Overbooking", blockedOn: "Bloqueada en" },
+  fr: { airbnb: "Airbnb", booking: "Booking.com", vrbo: "Vrbo", app: "Réservation app", direct: "Directe", importedBlock: "Bloquée (OTA)", manualBlock: "Blocage manuel (cliquable)", customPrice: "Prix personnalisé", overbooking: "⚠ Overbooking", blockedOn: "Bloquée sur" },
 };
 
 const AIRBNB_COLOR = "#FF5A5F";
-const AIRBNB_BLOCKED_COLOR = "#FFCDD0";
+const BOOKING_COLOR = "#003580";
+const VRBO_COLOR = "#0D9488";
+const APP_COLOR = "rgb(96 165 250)";
 const DIRECT_COLOR = "#A78BFA";
-const CONFLICT_GRADIENT = `linear-gradient(to bottom, ${AIRBNB_COLOR} 50%, rgb(96 165 250) 50%)`;
+const MANUAL_COLOR = "#DDD6FE";            // blocco manuale (viola chiaro)
+const IMPORTED_COLOR = "rgba(0,0,0,0.12)"; // blocco importato da una OTA (grigio)
+const OVERBOOKING_COLOR = "#B3122B";       // overbooking (rosso pieno, distinto dal corallo)
+
+const PLATFORM_NAME: Record<OtaPlatform, string> = { airbnb: "Airbnb", booking: "Booking.com", vrbo: "Vrbo" };
+
+// Colore pieno per una fonte di prenotazione/blocco.
+function sourceColor(src: DaySource | undefined): string {
+  switch (src) {
+    case "airbnb": return AIRBNB_COLOR;
+    case "booking": return BOOKING_COLOR;
+    case "vrbo": return VRBO_COLOR;
+    case "app": return APP_COLOR;
+    case "direct": return DIRECT_COLOR;
+    case "blocked": return MANUAL_COLOR;
+    case "imported":
+    case "airbnb-blocked": return IMPORTED_COLOR; // legacy → grigio importato
+    default: return MANUAL_COLOR;
+  }
+}
+// Fondo chiaro (testo scuro) per blocco manuale/importato; scuro (testo bianco) altrove.
+function isLightBg(src: DaySource | undefined, conflict: boolean): boolean {
+  if (conflict) return false;
+  return src === "blocked" || src === "imported" || src === "airbnb-blocked";
+}
+// È una fonte "prenotazione" (apre il popup con dettagli)?
+function isReservationSource(src: DaySource | undefined): boolean {
+  return src === "airbnb" || src === "booking" || src === "vrbo" || src === "app" || src === "direct";
+}
+function isImportedSource(src: DaySource | undefined): boolean {
+  return src === "imported" || src === "airbnb-blocked";
+}
 
 function toISO(d: Date) {
   const y = d.getFullYear();
@@ -54,12 +87,7 @@ function buildMonthGrid(year: number, month: number) {
 }
 
 function rectStyle(src: DaySource | undefined, conflict = false): React.CSSProperties {
-  if (conflict) return { background: CONFLICT_GRADIENT };
-  if (src === "airbnb") return { backgroundColor: AIRBNB_COLOR };
-  if (src === "airbnb-blocked") return { backgroundColor: AIRBNB_BLOCKED_COLOR };
-  if (src === "app") return { backgroundColor: "rgb(96 165 250)" };
-  if (src === "direct") return { backgroundColor: DIRECT_COLOR };
-  return { backgroundColor: "rgba(0,0,0,0.12)" };
+  return { backgroundColor: conflict ? OVERBOOKING_COLOR : sourceColor(src) };
 }
 
 function findRun(iso: string, byDate: Map<string, DayRate>): string[] {
@@ -85,7 +113,7 @@ function findRun(iso: string, byDate: Map<string, DayRate>): string[] {
   return dates;
 }
 
-interface Popup { dates: string[]; source: DaySource; note: string; conflict: boolean }
+interface Popup { dates: string[]; source: DaySource; note: string; conflict: boolean; blockedBy?: OtaPlatform[]; conflictWith?: OtaPlatform[] }
 
 interface Props {
   defaultPrice: number;
@@ -136,7 +164,7 @@ export default function AdminCalendar({ defaultPrice, overrides, onToggleDay, on
     if (!override || override.status !== "booked") return;
     const source = override.source ?? "blocked";
     const dates = findRun(iso, overridesByDate);
-    setPopup({ dates, source, note: override.note ?? "", conflict: !!override.conflict });
+    setPopup({ dates, source, note: override.note ?? "", conflict: !!override.conflict, blockedBy: override.blockedBy, conflictWith: override.conflictWith });
   }
 
   function handleSaveNote() {
@@ -187,31 +215,23 @@ export default function AdminCalendar({ defaultPrice, overrides, onToggleDay, on
           const prevOverride = overridesByDate.get(toISO(prevDay));
           const prevBooked = prevOverride?.status === "booked";
           const prevSource: DaySource | undefined = prevOverride?.source ?? (prevBooked ? "blocked" : undefined);
-          const isAirbnb        = source === "airbnb";
-          const isAirbnbBlocked = source === "airbnb-blocked";
-          const isApp           = source === "app";
-          const isDirect        = source === "direct";
-          const isConflict      = (isApp || isDirect) && !!override?.conflict;
-          const prevIsConflict  = (prevSource === "app" || prevSource === "direct") && !!prevOverride?.conflict;
+          const isConflict      = booked && !!override?.conflict;
+          const prevIsConflict  = prevBooked && !!prevOverride?.conflict;
+          const isManualBlock   = booked && source === "blocked";
+          const light           = booked && isLightBg(source, isConflict);
           const isCheckinDay  = booked && !prevBooked;
           const isMiddle      = booked && prevBooked && source === prevSource && isConflict === prevIsConflict;
           const isBothDay     = booked && prevBooked && (source !== prevSource || isConflict !== prevIsConflict);
           const isCheckoutDay = !booked && prevBooked;
-          const opensPopup = !past && booked && (isAirbnb || isAirbnbBlocked || isApp || isDirect || isConflict);
-          const clickable   = !past && !isAirbnb && !isAirbnbBlocked && !isApp && !isDirect && !isConflict;
+          // Prenotazioni e blocchi importati aprono il popup; giorni liberi e blocchi
+          // manuali si commutano al clic (aggiungi/rimuovi).
+          const opensPopup = !past && booked && !isManualBlock;
+          const clickable   = !past && (!booked || isManualBlock);
           const middleBg: React.CSSProperties = isMiddle
-            ? isConflict ? { background: CONFLICT_GRADIENT, borderColor: "transparent" }
-              : isAirbnb ? { backgroundColor: AIRBNB_COLOR, borderColor: "transparent" }
-              : isAirbnbBlocked ? { backgroundColor: AIRBNB_BLOCKED_COLOR, borderColor: "transparent" }
-              : isApp ? { backgroundColor: "rgb(96 165 250)", borderColor: "transparent" }
-              : isDirect ? { backgroundColor: DIRECT_COLOR, borderColor: "transparent" }
-              : { backgroundColor: "rgba(0,0,0,0.10)", borderColor: "transparent" }
+            ? { backgroundColor: isConflict ? OVERBOOKING_COLOR : sourceColor(source), borderColor: "transparent" }
             : {};
           const textClass = past ? "text-foreground/20"
-            : isMiddle && isConflict ? "text-white"
-            : isMiddle && isAirbnbBlocked ? "text-foreground/60"
-            : isMiddle && (isAirbnb || isApp || isDirect) ? "text-white"
-            : isMiddle ? "text-foreground/40 line-through"
+            : isMiddle ? (light ? "text-foreground/50" : "text-white")
             : isBothDay ? "text-foreground/70"
             : isCheckinDay ? "text-foreground/70"
             : isCheckoutDay ? "text-foreground/80"
@@ -252,12 +272,14 @@ export default function AdminCalendar({ defaultPrice, overrides, onToggleDay, on
       {/* Legend */}
       <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-foreground/60">
         <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-sm" style={{ backgroundColor: AIRBNB_COLOR }} />{legend.airbnb}</span>
-        <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-sm bg-blue-400" />{legend.app}</span>
+        <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-sm" style={{ backgroundColor: BOOKING_COLOR }} />{legend.booking}</span>
+        <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-sm" style={{ backgroundColor: VRBO_COLOR }} />{legend.vrbo}</span>
+        <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-sm" style={{ backgroundColor: APP_COLOR }} />{legend.app}</span>
         <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-sm" style={{ backgroundColor: DIRECT_COLOR }} />{legend.direct}</span>
-        <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-sm" style={{ backgroundColor: AIRBNB_BLOCKED_COLOR }} />{legend.airbnbBlocked}</span>
-        <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-sm bg-foreground/20" />{legend.manualBlock}</span>
+        <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-sm" style={{ backgroundColor: MANUAL_COLOR }} />{legend.manualBlock}</span>
+        <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-sm" style={{ backgroundColor: IMPORTED_COLOR }} />{legend.importedBlock}</span>
         <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-sm border border-gold bg-gold/10" />{legend.customPrice}</span>
-        <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-sm" style={{ background: CONFLICT_GRADIENT }} />{legend.overbooking}</span>
+        <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-sm" style={{ backgroundColor: OVERBOOKING_COLOR }} />{legend.overbooking}</span>
       </div>
 
       {/* Booking popup */}
@@ -266,15 +288,14 @@ export default function AdminCalendar({ defaultPrice, overrides, onToggleDay, on
           <div className="mx-4 w-full max-w-sm rounded-lg border border-gold/40 bg-background p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                {popup.source === "airbnb" && <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: AIRBNB_COLOR }} />}
-                {popup.source === "airbnb-blocked" && <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: AIRBNB_BLOCKED_COLOR }} />}
-                {popup.source === "app" && <span className="inline-block h-3 w-3 rounded-full bg-blue-400" />}
-                {popup.source === "direct" && <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: DIRECT_COLOR }} />}
+                <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: sourceColor(popup.source) }} />
                 <h3 className="font-serif-display text-lg italic text-foreground">
                   {popup.source === "airbnb" ? legend.airbnb
-                    : popup.source === "airbnb-blocked" ? legend.airbnbBlocked
+                    : popup.source === "booking" ? legend.booking
+                    : popup.source === "vrbo" ? legend.vrbo
                     : popup.source === "app" ? legend.app
                     : popup.source === "direct" ? legend.direct
+                    : isImportedSource(popup.source) ? legend.importedBlock
                     : legend.manualBlock}
                 </h3>
               </div>
@@ -282,10 +303,18 @@ export default function AdminCalendar({ defaultPrice, overrides, onToggleDay, on
             </div>
 
             {popup.conflict && (
-              <div className="mt-3 rounded-md border border-red-400/60 bg-red-50 px-3 py-2 text-xs text-red-700">
+              <div className="mt-3 rounded-md border px-3 py-2 text-xs text-white" style={{ backgroundColor: OVERBOOKING_COLOR, borderColor: OVERBOOKING_COLOR }}>
                 ⚠ <strong>{legend.overbooking}</strong>
+                {popup.conflictWith && popup.conflictWith.length > 0 && ` · ${popup.conflictWith.map((p) => PLATFORM_NAME[p]).join(", ")}`}
               </div>
             )}
+
+            {isImportedSource(popup.source) ? (
+              <div className="mt-3">
+                <p className="text-[10px] uppercase tracking-widest text-foreground/40">{legend.blockedOn}</p>
+                <p className="mt-1 text-sm text-foreground/70">{(popup.blockedBy ?? []).map((p) => PLATFORM_NAME[p]).join(", ") || "—"}</p>
+              </div>
+            ) : null}
 
             <div className="mt-3 flex gap-4 text-sm text-foreground/70">
               <div>
@@ -298,32 +327,34 @@ export default function AdminCalendar({ defaultPrice, overrides, onToggleDay, on
               </div>
             </div>
 
-            <div className="mt-4">
-              <label className="text-[10px] uppercase tracking-widest text-foreground/40">
-                {popup.source === "app" ? tc.guestName : tc.guestName}
-              </label>
-              {popup.source === "app" ? (
-                <p className="mt-1 text-sm text-foreground/70">{popup.note || "—"}</p>
-              ) : (
-                <input
-                  type="text"
-                  value={popup.note ?? ""}
-                  onChange={(e) => setPopup((p) => p ? { ...p, note: e.target.value } : p)}
-                  placeholder={tc.guestName}
-                  className="mt-1 w-full rounded border border-gold/40 bg-background px-2 py-1.5 text-sm text-foreground outline-none focus:border-gold"
-                />
-              )}
-            </div>
+            {isReservationSource(popup.source) && (
+              <div className="mt-4">
+                <label className="text-[10px] uppercase tracking-widest text-foreground/40">{tc.guestName}</label>
+                {popup.source === "direct" ? (
+                  <input
+                    type="text"
+                    value={popup.note ?? ""}
+                    onChange={(e) => setPopup((p) => p ? { ...p, note: e.target.value } : p)}
+                    placeholder={tc.guestName}
+                    className="mt-1 w-full rounded border border-gold/40 bg-background px-2 py-1.5 text-sm text-foreground outline-none focus:border-gold"
+                  />
+                ) : (
+                  <p className="mt-1 text-sm text-foreground/70">{popup.note || "—"}</p>
+                )}
+              </div>
+            )}
 
             <div className="mt-4 flex flex-wrap gap-2">
-              {(popup.source === "airbnb" || popup.source === "airbnb-blocked" || popup.source === "direct") && (
+              {popup.source === "direct" && (
                 <button onClick={handleSaveNote} className="rounded-full border border-gold bg-gold px-4 py-1.5 text-xs uppercase tracking-widest text-[#faf6ec] transition hover:bg-transparent hover:text-gold">
                   {tc.save}
                 </button>
               )}
-              <button onClick={handleDelete} className="rounded-full border border-red-400/60 px-4 py-1.5 text-xs uppercase tracking-widest text-red-600 transition hover:bg-red-50">
-                {t.bookings.archive}
-              </button>
+              {(popup.source === "app" || popup.source === "direct") && (
+                <button onClick={handleDelete} className="rounded-full border border-red-400/60 px-4 py-1.5 text-xs uppercase tracking-widest text-red-600 transition hover:bg-red-50">
+                  {t.bookings.archive}
+                </button>
+              )}
               <button onClick={() => setPopup(null)} className="rounded-full border border-gold/30 px-4 py-1.5 text-xs uppercase tracking-widest text-foreground/60 transition hover:bg-gold/10">
                 {t.common.close}
               </button>

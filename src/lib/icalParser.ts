@@ -1,8 +1,28 @@
+import type { OtaPlatform } from "@/data/availability";
+
 export interface ICalEvent {
   summary: string;
   dtstart: string; // YYYY-MM-DD (first night)
   dtend: string;   // YYYY-MM-DD (exclusive: checkout day)
   isReservation: boolean; // true = actual guest booking, false = host block
+}
+
+// Classifica un evento come prenotazione (true) o blocco (false), per piattaforma.
+// Default-safe: uno stato sconosciuto è comunque "occupato" (blocco), mai "libero";
+// qui restituiamo solo se è una *prenotazione* — l'evento resta comunque una notte occupata.
+function classifyReservation(summary: string, platform: OtaPlatform): boolean {
+  const s = summary.toLowerCase();
+  // Blocchi espliciti → mai prenotazione.
+  if (s.includes("not available") || s.includes("unavailable") || s.includes("closed") || s.includes("blocked")) {
+    return false;
+  }
+  if (platform === "booking") {
+    // L'iCal di Booking esporta quasi tutto come "CLOSED - Not available": trattiamo
+    // come prenotazione solo con un segnale esplicito (raro).
+    return s.includes("reserved") || s.includes("booked");
+  }
+  // Airbnb / Vrbo: le prenotazioni hanno SUMMARY "Reserved".
+  return s.includes("reserved");
 }
 
 function parseICalDate(raw: string): string | null {
@@ -28,7 +48,9 @@ export function icalEventNights(event: ICalEvent): string[] {
   return nights;
 }
 
-export function parseICalReservations(text: string): ICalEvent[] {
+// Analizza un feed iCal e classifica ogni evento come prenotazione/blocco secondo la
+// piattaforma. `parseICalReservations` resta come alias platform-agnostic (Airbnb).
+export function parseICalEvents(text: string, platform: OtaPlatform): ICalEvent[] {
   const events: ICalEvent[] = [];
   // Split into VEVENT blocks
   const blocks = text.split(/BEGIN:VEVENT/i).slice(1);
@@ -56,9 +78,13 @@ export function parseICalReservations(text: string): ICalEvent[] {
 
     if (!dtstart || !dtend) continue;
 
-    const isReservation = summary.toLowerCase().includes("reserved");
+    const isReservation = classifyReservation(summary, platform);
     events.push({ summary, dtstart, dtend, isReservation });
   }
 
   return events;
+}
+
+export function parseICalReservations(text: string): ICalEvent[] {
+  return parseICalEvents(text, "airbnb");
 }

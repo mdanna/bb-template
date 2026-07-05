@@ -9,7 +9,6 @@ function isValidPolicies(body: unknown): body is Policies {
   if (!body || typeof body !== "object") return false;
   const b = body as Record<string, unknown>;
   return (
-    typeof b.airbnbIcalUrl === "string" &&
     typeof b.cityTaxPerPersonPerNight === "number" &&
     typeof b.cityTaxMaxNights === "number" &&
     typeof b.defaultDepositRate === "number" &&
@@ -55,12 +54,18 @@ export async function POST(request: Request) {
   try {
     const token = requireBotToken();
     let sha: string;
+    let current: Policies = POLICIES;
     try {
-      ({ sha } = await getFile(FILE_PATH, token));
+      const { content: cur, sha: fileSha } = await getFile(FILE_PATH, token);
+      sha = fileSha;
+      current = JSON.parse(cur);
     } catch {
       sha = "";
     }
-    const content = JSON.stringify(body, null, 2) + "\n";
+    // Merge sui campi correnti: preserva `calendars` (gestito dalla pagina Impostazioni)
+    // e ogni altro campo non-policy presente nel file.
+    const updated: Policies = { ...current, ...body };
+    const content = JSON.stringify(updated, null, 2) + "\n";
     const { commitSha } = await putFile(FILE_PATH, content, sha, "Update policies", token);
     return NextResponse.json({ ok: true, commitSha });
   } catch (err) {

@@ -1,7 +1,11 @@
 import rawPolicies from "@/data/policies.json";
+import type { OtaPlatform } from "@/data/availability";
+
+export type CalendarUrls = Record<OtaPlatform, string>; // { airbnb, booking, vrbo }
 
 export interface Policies {
-  airbnbIcalUrl: string;
+  airbnbIcalUrl?: string; // legacy: singolo URL Airbnb (letto come calendars.airbnb)
+  calendars?: Partial<CalendarUrls>;
   cityTaxPerPersonPerNight: number;
   cityTaxMaxNights: number;
   defaultDepositRate: number;
@@ -22,3 +26,13 @@ export interface Policies {
 }
 
 export const POLICIES: Policies = rawPolicies as Policies;
+
+// Risolve i 3 URL iCal dalle policy, con retrocompat dal vecchio `airbnbIcalUrl`.
+export function calendarUrlsFromPolicies(p: Pick<Policies, "airbnbIcalUrl" | "calendars">): CalendarUrls {
+  const c = p.calendars ?? {};
+  return {
+    airbnb: (c.airbnb ?? p.airbnbIcalUrl ?? "").trim(),
+    booking: (c.booking ?? "").trim(),
+    vrbo: (c.vrbo ?? "").trim(),
+  };
+}

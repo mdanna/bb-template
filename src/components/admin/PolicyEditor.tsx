@@ -90,9 +90,12 @@ export default function PolicyEditor() {
     }
   }
 
-  const percentFields = new Set<keyof Policies>(["minDepositRate"]);
+  // Solo i campi policy scalari sono editabili qui (esclusi calendars/airbnbIcalUrl,
+  // gestiti dalla pagina Impostazioni).
+  type PolicyFieldKey = Exclude<keyof Policies, "calendars" | "airbnbIcalUrl">;
+  const percentFields = new Set<PolicyFieldKey>(["minDepositRate"]);
 
-  function field(label: string, key: keyof Policies, type: "number" | "text" = "number") {
+  function field(label: string, key: PolicyFieldKey, type: "number" | "text" = "number") {
     const isPercent = percentFields.has(key);
     const displayValue = isPercent && policies ? Math.round((policies[key] as number) * 100) : (policies?.[key] ?? "");
     return (
