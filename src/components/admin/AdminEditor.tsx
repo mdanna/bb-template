@@ -277,7 +277,6 @@ export default function AdminEditor({ initialDefaultPrice, initialOverrides }: P
 
         <section>
           <h2 className="font-serif-display text-xl italic text-foreground">{L.calendar}</h2>
-          <p className="mt-1 text-sm text-foreground/60">{L.calendarDesc}</p>
           <div className="mt-4 rounded-lg border border-gold/40 bg-card p-5">
             <AdminCalendar defaultPrice={defaultPrice} overrides={overrides} onToggleDay={toggleDay} onDeleteRun={deleteRun} onEditNote={editNote} />
           </div>
