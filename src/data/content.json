@@ -39,8 +39,10 @@
   ],
   "heroImage": "hero.jpg",
   "galleryImages": [
-    "camera.jpg",
+    "esterno.jpg",
     "giardino.jpg",
+    "colazione.jpg",
+    "salotto.jpg",
     "terrazza.jpg"
   ],
   "amenities": [
