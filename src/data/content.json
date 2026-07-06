@@ -1,149 +1,392 @@
 {
   "siteTitle": {
-    "it": "Il Tuo B&B",
-    "en": "Your B&B",
-    "fr": "Votre B&B",
-    "de": "Ihr B&B",
-    "es": "Tu B&B",
-    "pt": "O Seu B&B",
-    "zh": "您的民宿",
-    "ja": "あなたの民宿",
-    "ko": "당신의 B&B"
+    "it": "Villa dei Tigli",
+    "en": "",
+    "fr": "",
+    "de": "",
+    "es": "",
+    "pt": "",
+    "zh": "",
+    "ja": "",
+    "ko": ""
   },
-  "locationDisplay": "Città · Quartiere",
-  "city": "Città",
-  "address": "Via Esempio 1, Città",
-  "phone": "+39 000 0000000",
-  "email": "info@esempio.com",
-  "bookingEmail": "prenotazioni@esempio.com",
-  "vatNumber": "",
-  "cin": "",
-  "metaDescription": "Descrizione del tuo appartamento per i motori di ricerca.",
-  "hostName": "Nome Cognome",
-  "airbnbUrl": "",
-  "airbnbRating": 5.0,
-  "airbnbReviewCount": 0,
-  "mapLat": 41.9028,
-  "mapLng": 12.4964,
-  "mapBookmarks": [],
+  "locationDisplay": "Toscana · Val d'Orcia",
+  "city": "Pienza",
+  "address": "Podere dei Tigli 4, 53026 Pienza (SI)",
+  "phone": "+39 0578 748000",
+  "email": "info@villadeitigli.it",
+  "bookingEmail": "prenotazioni@villadeitigli.it",
+  "vatNumber": "IT01234567890",
+  "cin": "IT052024C1A234567890",
+  "metaDescription": "Villa dei Tigli — dimora di charme in Val d'Orcia, tra ulivi e cipressi. Prenotazione diretta, senza commissioni.",
+  "hostName": "Famiglia Ferretti",
+  "airbnbUrl": "https://www.airbnb.it/",
+  "airbnbRating": 4.92,
+  "airbnbReviewCount": 87,
+  "mapLat": 43.0761,
+  "mapLng": 11.6788,
+  "mapBookmarks": [
+    {
+      "label": "Piazza Pio II — Pienza",
+      "lat": 43.0785,
+      "lng": 11.679
+    },
+    {
+      "label": "Terme di Bagno Vignoni",
+      "lat": 43.03,
+      "lng": 11.618
+    }
+  ],
   "heroImage": "hero.jpg",
-  "galleryImages": [],
+  "galleryImages": [
+    "camera.jpg",
+    "giardino.jpg",
+    "terrazza.jpg"
+  ],
   "amenities": [
     {
       "it": "Wi-Fi ad alta velocità",
-      "en": "High-speed Wi-Fi",
-      "fr": "Wi-Fi haut débit",
-      "de": "High-Speed-WLAN",
-      "es": "Wi-Fi de alta velocidad",
-      "pt": "Wi-Fi de alta velocidade",
-      "zh": "高速Wi-Fi",
-      "ja": "高速Wi-Fi",
-      "ko": "고속 Wi-Fi"
+      "en": "",
+      "fr": "",
+      "de": "",
+      "es": "",
+      "pt": "",
+      "zh": "",
+      "ja": "",
+      "ko": ""
+    },
+    {
+      "it": "Piscina panoramica",
+      "en": "",
+      "fr": "",
+      "de": "",
+      "es": "",
+      "pt": "",
+      "zh": "",
+      "ja": "",
+      "ko": ""
+    },
+    {
+      "it": "Aria condizionata",
+      "en": "",
+      "fr": "",
+      "de": "",
+      "es": "",
+      "pt": "",
+      "zh": "",
+      "ja": "",
+      "ko": ""
+    },
+    {
+      "it": "Colazione con prodotti locali",
+      "en": "",
+      "fr": "",
+      "de": "",
+      "es": "",
+      "pt": "",
+      "zh": "",
+      "ja": "",
+      "ko": ""
+    },
+    {
+      "it": "Giardino con ulivi secolari",
+      "en": "",
+      "fr": "",
+      "de": "",
+      "es": "",
+      "pt": "",
+      "zh": "",
+      "ja": "",
+      "ko": ""
+    },
+    {
+      "it": "Parcheggio privato",
+      "en": "",
+      "fr": "",
+      "de": "",
+      "es": "",
+      "pt": "",
+      "zh": "",
+      "ja": "",
+      "ko": ""
+    },
+    {
+      "it": "Cucina attrezzata",
+      "en": "",
+      "fr": "",
+      "de": "",
+      "es": "",
+      "pt": "",
+      "zh": "",
+      "ja": "",
+      "ko": ""
+    },
+    {
+      "it": "Biancheria di lino",
+      "en": "",
+      "fr": "",
+      "de": "",
+      "es": "",
+      "pt": "",
+      "zh": "",
+      "ja": "",
+      "ko": ""
     }
   ],
-  "reviews": [],
+  "reviews": [
+    {
+      "text": {
+        "it": "Un posto incantevole, silenzioso e curato in ogni dettaglio. La colazione con i prodotti dell'orto è stata una gioia. Torneremo di sicuro.",
+        "en": "",
+        "fr": "",
+        "de": "",
+        "es": "",
+        "pt": "",
+        "zh": "",
+        "ja": "",
+        "ko": ""
+      },
+      "author": "Giulia M."
+    },
+    {
+      "text": {
+        "it": "La vista al tramonto dalla terrazza vale da sola il viaggio. Accoglienza impeccabile e piena di consigli preziosi.",
+        "en": "",
+        "fr": "",
+        "de": "",
+        "es": "",
+        "pt": "",
+        "zh": "",
+        "ja": "",
+        "ko": ""
+      },
+      "author": "Laurent D."
+    },
+    {
+      "text": {
+        "it": "Casa bellissima immersa negli ulivi, a due passi da Pienza. Perfetta per staccare davvero. Consigliatissima.",
+        "en": "",
+        "fr": "",
+        "de": "",
+        "es": "",
+        "pt": "",
+        "zh": "",
+        "ja": "",
+        "ko": ""
+      },
+      "author": "Marta e Paolo"
+    }
+  ],
   "heroSubtitle": {
-    "it": "Un appartamento accogliente nel cuore della città.",
-    "en": "A welcoming apartment in the heart of the city.",
-    "fr": "Un appartement accueillant au cœur de la ville.",
-    "de": "Eine einladende Wohnung im Herzen der Stadt.",
-    "es": "Un apartamento acogedor en el corazón de la ciudad.",
-    "pt": "Um apartamento acolhedor no coração da cidade.",
-    "zh": "城市中心的温馨公寓。",
-    "ja": "街の中心にある居心地の良いアパートメント。",
-    "ko": "도시 중심부의 아늑한 아파트."
+    "it": "Una dimora di charme tra gli ulivi della Val d'Orcia.",
+    "en": "",
+    "fr": "",
+    "de": "",
+    "es": "",
+    "pt": "",
+    "zh": "",
+    "ja": "",
+    "ko": ""
   },
   "storyTitle": {
     "it": "La nostra storia",
-    "en": "Our story",
-    "fr": "Notre histoire",
-    "de": "Unsere Geschichte",
-    "es": "Nuestra historia",
-    "pt": "A nossa história",
-    "zh": "我们的故事",
-    "ja": "私たちのストーリー",
-    "ko": "우리의 이야기"
+    "en": "",
+    "fr": "",
+    "de": "",
+    "es": "",
+    "pt": "",
+    "zh": "",
+    "ja": "",
+    "ko": ""
   },
   "storyParagraphs": [
     {
-      "it": "Descrivi qui il tuo appartamento e la tua storia come host.",
-      "en": "Describe your apartment and your story as a host here.",
-      "fr": "Décrivez ici votre appartement et votre histoire en tant qu'hôte.",
-      "de": "Beschreiben Sie hier Ihre Wohnung und Ihre Geschichte als Gastgeber.",
-      "es": "Describe aquí tu apartamento y tu historia como anfitrión.",
-      "pt": "Descreva aqui o seu apartamento e a sua história como anfitrião.",
-      "zh": "在这里描述您的公寓和作为房东的故事。",
-      "ja": "ここにあなたのアパートメントとホストとしての物語を説明してください。",
-      "ko": "여기에 귀하의 아파트와 호스트로서의 이야기를 설명하세요."
+      "it": "Villa dei Tigli è una casa colonica di fine Ottocento, ristrutturata con cura dalla nostra famiglia mantenendo le travi originali, il camino in pietra e il profumo del legno. Si affaccia su un dolce declivio di ulivi e cipressi, nel cuore della Val d'Orcia.",
+      "en": "",
+      "fr": "",
+      "de": "",
+      "es": "",
+      "pt": "",
+      "zh": "",
+      "ja": "",
+      "ko": ""
+    },
+    {
+      "it": "Ogni stanza racconta un pezzo della nostra storia: i mobili dei nonni, le ceramiche di Montepulciano, i quadri che ritraggono queste colline. Dopo il tramonto, dalla terrazza, il silenzio è rotto solo dal canto dei grilli.",
+      "en": "",
+      "fr": "",
+      "de": "",
+      "es": "",
+      "pt": "",
+      "zh": "",
+      "ja": "",
+      "ko": ""
     }
   ],
   "areaDescription": {
-    "it": "Descrivi il quartiere e i punti di interesse nelle vicinanze.",
-    "en": "Describe the neighbourhood and nearby points of interest.",
-    "fr": "Décrivez le quartier et les points d'intérêt à proximité.",
-    "de": "Beschreiben Sie die Nachbarschaft und nahe gelegene Sehenswürdigkeiten.",
-    "es": "Describe el barrio y los puntos de interés cercanos.",
-    "pt": "Descreva o bairro e os pontos de interesse próximos.",
-    "zh": "描述周边社区和附近的景点。",
-    "ja": "近隣の地域と周辺の観光スポットを説明してください。",
-    "ko": "인근 지역과 주변 관광 명소를 설명하세요."
+    "it": "A pochi minuti da Pienza e dai borghi più belli della Toscana, tra terme, cantine e strade panoramiche.",
+    "en": "",
+    "fr": "",
+    "de": "",
+    "es": "",
+    "pt": "",
+    "zh": "",
+    "ja": "",
+    "ko": ""
   },
-  "areaPlaces": [],
+  "areaPlaces": [
+    {
+      "name": {
+        "it": "Pienza — centro storico UNESCO",
+        "en": "",
+        "fr": "",
+        "de": "",
+        "es": "",
+        "pt": "",
+        "zh": "",
+        "ja": "",
+        "ko": ""
+      },
+      "comment": {
+        "it": "A 5 minuti in auto",
+        "en": "",
+        "fr": "",
+        "de": "",
+        "es": "",
+        "pt": "",
+        "zh": "",
+        "ja": "",
+        "ko": ""
+      }
+    },
+    {
+      "name": {
+        "it": "Montepulciano e le cantine di Nobile",
+        "en": "",
+        "fr": "",
+        "de": "",
+        "es": "",
+        "pt": "",
+        "zh": "",
+        "ja": "",
+        "ko": ""
+      },
+      "comment": {
+        "it": "A 20 minuti",
+        "en": "",
+        "fr": "",
+        "de": "",
+        "es": "",
+        "pt": "",
+        "zh": "",
+        "ja": "",
+        "ko": ""
+      }
+    },
+    {
+      "name": {
+        "it": "Terme di Bagno Vignoni",
+        "en": "",
+        "fr": "",
+        "de": "",
+        "es": "",
+        "pt": "",
+        "zh": "",
+        "ja": "",
+        "ko": ""
+      },
+      "comment": {
+        "it": "A 15 minuti",
+        "en": "",
+        "fr": "",
+        "de": "",
+        "es": "",
+        "pt": "",
+        "zh": "",
+        "ja": "",
+        "ko": ""
+      }
+    },
+    {
+      "name": {
+        "it": "Montalcino — Brunello",
+        "en": "",
+        "fr": "",
+        "de": "",
+        "es": "",
+        "pt": "",
+        "zh": "",
+        "ja": "",
+        "ko": ""
+      },
+      "comment": {
+        "it": "A 30 minuti",
+        "en": "",
+        "fr": "",
+        "de": "",
+        "es": "",
+        "pt": "",
+        "zh": "",
+        "ja": "",
+        "ko": ""
+      }
+    }
+  ],
   "details": {
     "entirePlace": {
-      "it": "Intero appartamento",
-      "en": "Entire apartment",
-      "fr": "Appartement entier",
-      "de": "Gesamte Wohnung",
-      "es": "Apartamento completo",
-      "pt": "Apartamento inteiro",
-      "zh": "整套公寓",
-      "ja": "アパートメント全体",
-      "ko": "아파트 전체"
+      "it": "Intera villa indipendente",
+      "en": "",
+      "fr": "",
+      "de": "",
+      "es": "",
+      "pt": "",
+      "zh": "",
+      "ja": "",
+      "ko": ""
     },
     "quietCourtyard": {
-      "it": "Vista cortile interno",
-      "en": "Quiet courtyard view",
-      "fr": "Vue sur cour intérieure",
-      "de": "Ruhiger Innenhofblick",
-      "es": "Vista al patio interior",
-      "pt": "Vista para o pátio interior",
-      "zh": "内庭院景观",
-      "ja": "静かな中庭の眺め",
-      "ko": "조용한 안뜰 전망"
+      "it": "Vista sulle colline e piscina",
+      "en": "",
+      "fr": "",
+      "de": "",
+      "es": "",
+      "pt": "",
+      "zh": "",
+      "ja": "",
+      "ko": ""
     },
     "roomInfo": {
-      "it": "2 camere da letto · 1 bagno",
-      "en": "2 bedrooms · 1 bathroom",
-      "fr": "2 chambres · 1 salle de bain",
-      "de": "2 Schlafzimmer · 1 Bad",
-      "es": "2 dormitorios · 1 baño",
-      "pt": "2 quartos · 1 casa de banho",
-      "zh": "2间卧室 · 1间浴室",
-      "ja": "寝室2室 · バスルーム1室",
-      "ko": "침실 2개 · 욕실 1개"
+      "it": "3 camere da letto · 2 bagni",
+      "en": "",
+      "fr": "",
+      "de": "",
+      "es": "",
+      "pt": "",
+      "zh": "",
+      "ja": "",
+      "ko": ""
     },
     "maxGuests": {
-      "it": "Fino a 4 ospiti",
-      "en": "Up to 4 guests",
-      "fr": "Jusqu'à 4 voyageurs",
-      "de": "Bis zu 4 Gäste",
-      "es": "Hasta 4 huéspedes",
-      "pt": "Até 4 hóspedes",
-      "zh": "最多4位客人",
-      "ja": "最大4名",
-      "ko": "최대 4명"
+      "it": "Fino a 6 ospiti",
+      "en": "",
+      "fr": "",
+      "de": "",
+      "es": "",
+      "pt": "",
+      "zh": "",
+      "ja": "",
+      "ko": ""
     },
     "neighborhood": {
-      "it": "Quartiere centrale e ben collegato",
-      "en": "Central and well-connected neighbourhood",
-      "fr": "Quartier central et bien desservi",
-      "de": "Zentrales und gut angebundenes Viertel",
-      "es": "Barrio céntrico y bien comunicado",
-      "pt": "Bairro central e bem ligado",
-      "zh": "交通便利的中心区域",
-      "ja": "交通便利な中心部のエリア",
-      "ko": "교통이 편리한 중심 지역"
+      "it": "Immersa negli ulivi, a 5 minuti da Pienza",
+      "en": "",
+      "fr": "",
+      "de": "",
+      "es": "",
+      "pt": "",
+      "zh": "",
+      "ja": "",
+      "ko": ""
     }
   }
 }

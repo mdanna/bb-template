@@ -11,4 +11,7 @@ src/data/*.json   merge=local
 # Codice su misura del singolo sito (mai propagato dal template)
 src/custom/**      merge=local
 
+# Foto della struttura, caricate dal pannello (per-sito, mai propagate)
+public/images/**   merge=local
+
 # Nota: src/data/availability.ts è CODICE condiviso (non .json) → si propaga.

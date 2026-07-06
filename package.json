@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:demo": "DEMO_MODE=true NEXT_PUBLIC_DEMO_MODE=true AUTH_SECRET=dev-only-secret-please-change-000 STRIPE_SECRET_KEY=sk_test_dummy STRIPE_WEBHOOK_SECRET=whsec_dummy RESEND_API_KEY=re_dummy next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

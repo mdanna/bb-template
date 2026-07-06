@@ -16,9 +16,5 @@
   "balanceReminderDaysFirst": 7,
   "balanceReminderDaysSecond": 2,
   "checkinTime": "14:00",
-  "checkoutTime": "10:00",
-  "bookingUrl": "https://www.booking.com/hotel/it/villa-dei-tigli.html",
-  "vrboUrl": "https://www.vrbo.com/it-it/p0000000",
-  "defaultBookingPlatform": "airbnb",
-  "airbnbUrl": "https://www.airbnb.it/rooms/12345678"
+  "checkoutTime": "10:00"
 }
