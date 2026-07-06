@@ -4,6 +4,7 @@ import "./globals.css";
 import { CONTENT } from "@/lib/siteContent";
 import { themeCss } from "@/lib/theme";
 import DemoBanner from "@/components/DemoBanner";
+import JsonLd from "@/components/JsonLd";
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -34,11 +35,13 @@ export const metadata: Metadata = {
     locale: "it_IT",
     alternateLocale: ["en_US", "fr_FR", "de_DE", "es_ES", "pt_PT", "zh_CN", "ja_JP", "ko_KR"],
     type: "website",
+    images: [{ url: `/images/${CONTENT.heroImage}`, alt: SITE_TITLE }],
   },
   twitter: {
     card: "summary_large_image",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
+    images: [`/images/${CONTENT.heroImage}`],
   },
   robots: {
     index: true,
@@ -57,6 +60,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground">
         {/* Tema del cliente: sovrascrive le variabili colore di globals.css */}
         <style dangerouslySetInnerHTML={{ __html: themeCss() }} />
+        <JsonLd />
         <DemoBanner />
         {children}
       </body>
