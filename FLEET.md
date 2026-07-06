@@ -52,9 +52,19 @@ Il merge dal template ha spigoli precisi: il comando `update` DEVE, per ogni sit
 - **usare il ramo del template rilevato**, non `main` fisso (potrebbe essere `master`).
 - fondere con **`-Xno-renames`**: un rename di un `*.json` nel template, altrimenti,
   sposterebbe i dati del sito su un path che l'app non legge → sito rotto.
-- dopo il merge, **ripristinare esplicitamente** i path per-sito alla versione locale:
-  `git checkout HEAD -- ':(glob)src/data/*.json' src/custom public/images`.
-  NB: solo `src/data/*.json` (non tutta `src/data/`), così `src/data/defaults/` e
+- dopo il merge, **ripristinare esplicitamente** i path per-sito alla versione locale.
+  Serve un **doppio passo** (né `git restore` né `git checkout HEAD --` da soli risolvono i
+  conflitti *modify/delete*: se il sito ha rinominato le proprie foto, le demo che il template
+  modifica diventano *deleted-by-us* e restano `unmerged`):
+
+  ```
+  git rm -rf --ignore-unmatch -- ':(glob)src/data/*.json' src/custom public/images
+  git checkout HEAD             -- ':(glob)src/data/*.json' src/custom public/images
+  ```
+
+  Il primo azzera il pathspec (stage di conflitto + add del template + file nuovi), il secondo
+  ripristina **solo** ciò che esiste in HEAD → le foto/`.json` d'esempio del template non restano
+  nel sito. NB: solo `src/data/*.json` (non tutta `src/data/`), così `src/data/defaults/` e
   `src/data/availability.ts` (codice) continuano a propagarsi dal template.
 - offrire **`--dry-run`** (diff/conflitti senza scrivere) e agire **per-sito**.
 
