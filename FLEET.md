@@ -52,9 +52,10 @@ Il merge dal template ha spigoli precisi: il comando `update` DEVE, per ogni sit
 - **usare il ramo del template rilevato**, non `main` fisso (potrebbe essere `master`).
 - fondere con **`-Xno-renames`**: un rename di un `*.json` nel template, altrimenti,
   sposterebbe i dati del sito su un path che l'app non legge → sito rotto.
-- dopo il merge, **ripristinare esplicitamente** i path per-sito con pathspec
-  robusti, es. `git restore --source=HEAD --worktree -- src/data src/custom public/images`
-  (tollerante se `src/custom` non ha file tracciati).
+- dopo il merge, **ripristinare esplicitamente** i path per-sito alla versione locale:
+  `git checkout HEAD -- ':(glob)src/data/*.json' src/custom public/images`.
+  NB: solo `src/data/*.json` (non tutta `src/data/`), così `src/data/defaults/` e
+  `src/data/availability.ts` (codice) continuano a propagarsi dal template.
 - offrire **`--dry-run`** (diff/conflitti senza scrivere) e agire **per-sito**.
 
 ## Regole per non rompere la propagazione
