@@ -30,9 +30,21 @@ export interface Policies {
   balanceReminderDaysSecond: number;
   checkinTime: string;
   checkoutTime: string;
+  // Lingua del pannello di amministrazione: scelta in configurazione, modificabile
+  // in Impostazioni. Default "it". (Il sito pubblico resta multilingua a parte.)
+  adminLocale?: "it" | "en" | "es" | "fr";
 }
 
 export const POLICIES: Policies = rawPolicies as Policies;
+
+export const ADMIN_LOCALES = ["it", "en", "es", "fr"] as const;
+export type AdminLocale = (typeof ADMIN_LOCALES)[number];
+
+/** Lingua del pannello admin dalle policy, con default "it". */
+export function resolveAdminLocale(): AdminLocale {
+  const l = POLICIES.adminLocale;
+  return l && (ADMIN_LOCALES as readonly string[]).includes(l) ? (l as AdminLocale) : "it";
+}
 
 // Risolve i 3 URL iCal dalle policy, con retrocompat dal vecchio `airbnbIcalUrl`.
 export function calendarUrlsFromPolicies(p: Pick<Policies, "airbnbIcalUrl" | "calendars">): CalendarUrls {

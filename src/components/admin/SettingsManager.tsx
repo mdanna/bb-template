@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAdminLanguage } from "@/i18n/AdminLanguageContext";
+import { adminLocaleOrder, adminTranslations, type AdminLocaleCode } from "@/i18n/admin";
 import type { CalendarSyncResult } from "@/app/api/admin/calendar-sync/route";
 import type { OtaPlatform } from "@/data/availability";
 
@@ -38,6 +39,9 @@ const LABELS = {
     bookingListing: "URL annuncio Booking.com",
     vrboListing: "URL annuncio Vrbo",
     defaultLabel: "Piattaforma predefinita del bottone",
+    langTitle: "Lingua del pannello",
+    langDesc: "La lingua di questo pannello di amministrazione. Il sito pubblico resta multilingua a parte.",
+    langNote: "Lingua aggiornata — avrà effetto tra qualche secondo, al riaggiornamento del sito.",
   },
   en: {
     title: "Calendar sync",
@@ -60,6 +64,9 @@ const LABELS = {
     bookingListing: "Booking.com listing URL",
     vrboListing: "Vrbo listing URL",
     defaultLabel: "Default platform for the button",
+    langTitle: "Panel language",
+    langDesc: "The language of this admin panel. The public site stays multilingual separately.",
+    langNote: "Language updated — it takes effect in a few seconds, after the site redeploys.",
   },
   es: {
     title: "Sincronización de calendarios",
@@ -82,6 +89,9 @@ const LABELS = {
     bookingListing: "URL del anuncio de Booking.com",
     vrboListing: "URL del anuncio de Vrbo",
     defaultLabel: "Plataforma predeterminada del botón",
+    langTitle: "Idioma del panel",
+    langDesc: "El idioma de este panel de administración. El sitio público sigue siendo multilingüe.",
+    langNote: "Idioma actualizado — tendrá efecto en unos segundos, tras la actualización del sitio.",
   },
   fr: {
     title: "Synchronisation des calendriers",
@@ -104,6 +114,9 @@ const LABELS = {
     bookingListing: "URL de l'annonce Booking.com",
     vrboListing: "URL de l'annonce Vrbo",
     defaultLabel: "Plateforme par défaut du bouton",
+    langTitle: "Langue du panneau",
+    langDesc: "La langue de ce panneau d'administration. Le site public reste multilingue séparément.",
+    langNote: "Langue mise à jour — effet dans quelques secondes, après le redéploiement du site.",
   },
 } as const;
 
@@ -121,13 +134,16 @@ export default function SettingsManager() {
   const [demoDone, setDemoDone] = useState(false);
   const [ext, setExt] = useState<{ airbnbUrl: string; bookingUrl: string; vrboUrl: string; defaultBookingPlatform: OtaPlatform }>({ airbnbUrl: "", bookingUrl: "", vrboUrl: "", defaultBookingPlatform: "airbnb" });
   const [extSaveState, setExtSaveState] = useState<State>("idle");
+  const [adminLoc, setAdminLoc] = useState<AdminLocaleCode>(locale as AdminLocaleCode);
+  const [locSaveState, setLocSaveState] = useState<State>("idle");
 
   useEffect(() => {
     fetch("/api/admin/settings")
       .then((r) => r.json())
-      .then((d: { calendars?: Record<OtaPlatform, string>; airbnbUrl?: string; bookingUrl?: string; vrboUrl?: string; defaultBookingPlatform?: OtaPlatform }) => {
+      .then((d: { calendars?: Record<OtaPlatform, string>; airbnbUrl?: string; bookingUrl?: string; vrboUrl?: string; defaultBookingPlatform?: OtaPlatform; adminLocale?: AdminLocaleCode }) => {
         if (d.calendars) setUrls({ airbnb: d.calendars.airbnb ?? "", booking: d.calendars.booking ?? "", vrbo: d.calendars.vrbo ?? "" });
         setExt({ airbnbUrl: d.airbnbUrl ?? "", bookingUrl: d.bookingUrl ?? "", vrboUrl: d.vrboUrl ?? "", defaultBookingPlatform: d.defaultBookingPlatform ?? "airbnb" });
+        if (d.adminLocale) setAdminLoc(d.adminLocale);
       })
       .catch(() => {});
   }, []);
@@ -143,6 +159,20 @@ export default function SettingsManager() {
       setExtSaveState("success");
       setTimeout(() => setExtSaveState("idle"), 3000);
     } catch { setExtSaveState("error"); }
+  }
+
+  async function saveLocale(next: AdminLocaleCode) {
+    setAdminLoc(next);
+    setLocSaveState("saving");
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ adminLocale: next }),
+      });
+      if (!res.ok) throw new Error();
+      setLocSaveState("success");
+      setTimeout(() => setLocSaveState("idle"), 5000);
+    } catch { setLocSaveState("error"); }
   }
 
   const anyUrl = PLATFORMS.some((p) => urls[p].trim());
@@ -180,6 +210,26 @@ export default function SettingsManager() {
 
   return (
     <div className="space-y-6">
+      {/* Lingua del pannello admin */}
+      <div className="rounded-lg border border-gold/40 bg-card p-5 space-y-3">
+        <div>
+          <h2 className="font-serif-display text-2xl italic text-foreground">{L.langTitle}</h2>
+          <p className="mt-1 text-sm text-foreground/60">{L.langDesc}</p>
+        </div>
+        <select
+          value={adminLoc}
+          onChange={(e) => saveLocale(e.target.value as AdminLocaleCode)}
+          disabled={locSaveState === "saving" || DEMO}
+          className="block rounded border border-gold/40 bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-gold disabled:opacity-50"
+        >
+          {adminLocaleOrder.map((code) => (
+            <option key={code} value={code}>{adminTranslations[code].langName}</option>
+          ))}
+        </select>
+        {locSaveState === "success" && <p className="text-xs text-green-700">{DEMO ? L.demo : L.langNote}</p>}
+        {locSaveState === "error" && <p className="text-xs text-red-600">{L.saveError}</p>}
+      </div>
+
       <div>
         <h2 className="font-serif-display text-2xl italic text-foreground">{L.title}</h2>
         <p className="mt-1 text-sm text-foreground/60">{L.desc}</p>

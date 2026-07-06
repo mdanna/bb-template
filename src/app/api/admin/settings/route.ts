@@ -22,9 +22,10 @@ export async function GET() {
       bookingUrl: p.bookingUrl ?? "",
       vrboUrl: p.vrboUrl ?? "",
       defaultBookingPlatform: p.defaultBookingPlatform ?? "airbnb",
+      adminLocale: p.adminLocale ?? "it",
     });
   } catch {
-    return NextResponse.json({ calendars: { airbnb: "", booking: "", vrbo: "" }, airbnbUrl: "", bookingUrl: "", vrboUrl: "", defaultBookingPlatform: "airbnb" });
+    return NextResponse.json({ calendars: { airbnb: "", booking: "", vrbo: "" }, airbnbUrl: "", bookingUrl: "", vrboUrl: "", defaultBookingPlatform: "airbnb", adminLocale: "it" });
   }
 }
 
@@ -56,6 +57,10 @@ function buildUpdate(body: unknown): Partial<Policies> | null {
   if ("defaultBookingPlatform" in b) {
     if (!PLATFORMS.includes(b.defaultBookingPlatform as OtaPlatform)) return null;
     update.defaultBookingPlatform = b.defaultBookingPlatform as OtaPlatform;
+  }
+  if ("adminLocale" in b) {
+    if (!(["it", "en", "es", "fr"] as string[]).includes(b.adminLocale as string)) return null;
+    update.adminLocale = b.adminLocale as Policies["adminLocale"];
   }
   return Object.keys(update).length > 0 ? update : null;
 }

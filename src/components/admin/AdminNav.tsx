@@ -5,53 +5,11 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { signOut } from "next-auth/react";
 import { useAdminLanguage } from "@/i18n/AdminLanguageContext";
-import { adminLocaleOrder, adminFlags, adminTranslations, type AdminLocaleCode } from "@/i18n/admin";
-
-export function AdminLanguagePicker({
-  locale,
-  setLocale,
-}: {
-  locale: AdminLocaleCode;
-  setLocale: (l: AdminLocaleCode) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        aria-label={adminTranslations[locale].langName}
-        className="text-xl leading-none transition hover:opacity-70"
-      >
-        {adminFlags[locale]}
-      </button>
-      {open && (
-        <div className="absolute right-0 mt-2 w-44 overflow-hidden rounded-md border border-gold/40 bg-background shadow-lg">
-          {adminLocaleOrder.map((code) => (
-            <button
-              key={code}
-              onClick={() => {
-                setLocale(code);
-                setOpen(false);
-              }}
-              className={`flex w-full items-center gap-3 px-4 py-2 text-left text-sm transition hover:bg-gold/10 ${
-                code === locale ? "text-gold" : "text-foreground/80"
-              }`}
-            >
-              <span className="text-base leading-none">{adminFlags[code]}</span>
-              {adminTranslations[code].langName}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function AdminNav({ userName: _userName }: { userName?: string | null }) {
   const pathname = usePathname();
-  const { locale, setLocale, t } = useAdminLanguage();
+  const { t } = useAdminLanguage();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const links = [
@@ -92,7 +50,7 @@ export default function AdminNav({ userName: _userName }: { userName?: string | 
         <span className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap font-serif-display text-sm italic text-foreground">
           {t.nav.title}
         </span>
-        <AdminLanguagePicker locale={locale} setLocale={setLocale} />
+        <span className="w-9" aria-hidden />
       </div>
 
       {/* Desktop toolbar */}
@@ -112,7 +70,6 @@ export default function AdminNav({ userName: _userName }: { userName?: string | 
           >
             {t.nav.signOut}
           </button>
-          <AdminLanguagePicker locale={locale} setLocale={setLocale} />
         </div>
       </div>
 

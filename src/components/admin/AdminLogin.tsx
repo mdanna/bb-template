@@ -3,11 +3,10 @@
 import Link from "next/link";
 import { signInGithub, signInDemo } from "@/app/admin/actions";
 import EmailLoginForm from "@/components/admin/EmailLoginForm";
-import { AdminLanguagePicker } from "@/components/admin/AdminNav";
 import { useAdminLanguage } from "@/i18n/AdminLanguageContext";
 
 export default function AdminLogin({ demo }: { demo: boolean }) {
-  const { t, locale, setLocale } = useAdminLanguage();
+  const { t } = useAdminLanguage();
 
   if (demo) {
     return (
@@ -40,9 +39,6 @@ export default function AdminLogin({ demo }: { demo: boolean }) {
       >
         ← {t.login.backToSite}
       </Link>
-      <div className="fixed right-6 top-6">
-        <AdminLanguagePicker locale={locale} setLocale={setLocale} />
-      </div>
 
       <h1 className="font-serif-display text-3xl italic text-foreground">{t.login.title}</h1>
       <p className="max-w-sm text-sm text-foreground/70">{t.login.subtitle}</p>

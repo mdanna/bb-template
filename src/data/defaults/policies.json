@@ -16,5 +16,6 @@
   "balanceReminderDaysFirst": 7,
   "balanceReminderDaysSecond": 2,
   "checkinTime": "14:00",
-  "checkoutTime": "10:00"
+  "checkoutTime": "10:00",
+  "adminLocale": "it"
 }
