@@ -1,4 +1,3 @@
-// [propagazione-collaudo] questa riga arriva dal template via `update`: verifica la propagazione del core.
 import raw from "./availability.json";
 
 export type DayStatus = "available" | "booked";
