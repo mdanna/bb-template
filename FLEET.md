@@ -34,13 +34,38 @@ Un sito già esistente si collega una volta con: `npm run link -- <cartella>` (i
 ## Come si propaga una fix comune
 
 1. Sviluppi la fix **nel template** (`bb-template`).
-2. `bb-wizard update` la porta su ogni sito del manifest:
-   `git fetch upstream && git merge upstream/main` → il **core** si aggiorna,
-   `config` e `override` restano intatti (driver `local`) → push → redeploy.
+2. `bb-wizard update` la porta su ogni sito del manifest (fetch del template →
+   merge del **core** → i path per-sito restano quelli locali → push → redeploy),
+   in modo robusto: vedi «Requisiti del comando update».
 3. I siti nuovi la ricevono già alla creazione.
 
 Dove hai personalizzato le stesse righe del core, il merge segnala un **conflitto**
 da risolvere invece di sovrascrivere: le modifiche locali non si perdono mai.
+
+## Requisiti del comando `update` (per non perdere dati)
+
+Il merge dal template ha spigoli precisi: il comando `update` DEVE, per ogni sito:
+
+- **abilitare il driver prima del merge**: `git config merge.local.driver true`.
+  È config **locale** (non si clona): un clone fresco senza questa riga scriverebbe
+  marker di conflitto dentro i `.json` invece di tenere la versione del sito.
+- **usare il ramo del template rilevato**, non `main` fisso (potrebbe essere `master`).
+- fondere con **`-Xno-renames`**: un rename di un `*.json` nel template, altrimenti,
+  sposterebbe i dati del sito su un path che l'app non legge → sito rotto.
+- dopo il merge, **ripristinare esplicitamente** i path per-sito con pathspec
+  robusti, es. `git restore --source=HEAD --worktree -- src/data src/custom`
+  (tollerante se `src/custom` non ha file tracciati).
+- offrire **`--dry-run`** (diff/conflitti senza scrivere) e agire **per-sito**.
+
+## Regole per non rompere la propagazione
+
+- **Non rinominare né spostare** i file `src/data/*.json` nel template.
+- **Non aggiungere** nuovi `src/data/*.json` di default nel core: verrebbero ereditati
+  da tutti i siti col valore del template. Aggiungi i nuovi campi ai `.json` esistenti
+  (protetti da `merge=local`), oppure materializza i default al `create`
+  (es. da `src/data/defaults/`).
+- Preferisci sempre **config-over-code**: se una variazione può diventare un campo in
+  `src/data/*.json` (modificabile dal pannello), mettila lì, non in `src/custom/`.
 
 ## Regola d'oro
 
