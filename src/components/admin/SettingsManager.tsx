@@ -45,6 +45,7 @@ const LABELS = {
     langNote: "Lingua aggiornata — avrà effetto tra qualche secondo, al riaggiornamento del sito.",
     policyCard: "Regole di prenotazione", policyCardDesc: "Acconto, cancellazione, tassa di soggiorno, orari di check-in/out.",
     stripeCard: "Pagamenti (Stripe)", stripeCardDesc: "Chiavi, modalità test/produzione, sicurezza.",
+    themeCard: "Colori", themeCardDesc: "Palette e colori del sito, con anteprima e controllo di contrasto.",
   },
   en: {
     title: "Calendar sync",
@@ -72,6 +73,7 @@ const LABELS = {
     langNote: "Language updated — it takes effect in a few seconds, after the site redeploys.",
     policyCard: "Booking rules", policyCardDesc: "Deposit, cancellation, city tax, check-in/out times.",
     stripeCard: "Payments (Stripe)", stripeCardDesc: "Keys, test/live mode, security.",
+    themeCard: "Colors", themeCardDesc: "Site palette and colors, with preview and contrast check.",
   },
   es: {
     title: "Sincronización de calendarios",
@@ -99,6 +101,7 @@ const LABELS = {
     langNote: "Idioma actualizado — tendrá efecto en unos segundos, tras la actualización del sitio.",
     policyCard: "Reglas de reserva", policyCardDesc: "Depósito, cancelación, tasa turística, horarios de entrada/salida.",
     stripeCard: "Pagos (Stripe)", stripeCardDesc: "Claves, modo prueba/producción, seguridad.",
+    themeCard: "Colores", themeCardDesc: "Paleta y colores del sitio, con vista previa y control de contraste.",
   },
   fr: {
     title: "Synchronisation des calendriers",
@@ -126,6 +129,7 @@ const LABELS = {
     langNote: "Langue mise à jour — effet dans quelques secondes, après le redéploiement du site.",
     policyCard: "Règles de réservation", policyCardDesc: "Acompte, annulation, taxe de séjour, horaires d'arrivée/départ.",
     stripeCard: "Paiements (Stripe)", stripeCardDesc: "Clés, mode test/production, sécurité.",
+    themeCard: "Couleurs", themeCardDesc: "Palette et couleurs du site, avec aperçu et contrôle du contraste.",
   },
 } as const;
 
@@ -225,6 +229,13 @@ export default function SettingsManager() {
           <div>
             <h3 className="font-serif-display text-lg italic text-foreground">{L.policyCard}</h3>
             <p className="mt-0.5 text-sm text-foreground/60">{L.policyCardDesc}</p>
+          </div>
+          <span className="text-gold transition group-hover:translate-x-0.5">→</span>
+        </Link>
+        <Link href="/admin/tema" className="group flex items-center justify-between rounded-lg border border-gold/40 bg-card p-5 transition hover:bg-gold/5">
+          <div>
+            <h3 className="font-serif-display text-lg italic text-foreground">{L.themeCard}</h3>
+            <p className="mt-0.5 text-sm text-foreground/60">{L.themeCardDesc}</p>
           </div>
           <span className="text-gold transition group-hover:translate-x-0.5">→</span>
         </Link>

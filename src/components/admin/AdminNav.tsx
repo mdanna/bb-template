@@ -12,15 +12,15 @@ export default function AdminNav({ userName: _userName }: { userName?: string | 
   const { t } = useAdminLanguage();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Policy e Stripe non sono più voci di menu: si raggiungono da Impostazioni
-  // (card-link), per accorciare la nav. Dashboard è la prima voce.
+  // Ordine per frequenza d'uso: operatività (Dashboard, Calendario, Prenotazioni),
+  // poi aspetto del sito (Contenuti, Immagini), poi Impostazioni.
+  // Policy, Colori e Stripe non sono più voci di menu: card-link in Impostazioni.
   const links = [
     { href: "/admin/dashboard", label: t.nav.dashboard },
     { href: "/admin", label: t.nav.calendar },
+    { href: "/admin/bookings", label: t.nav.bookings },
     { href: "/admin/contenuti", label: t.nav.contents },
     { href: "/admin/immagini", label: t.nav.images },
-    { href: "/admin/tema", label: t.nav.theme },
-    { href: "/admin/bookings", label: t.nav.bookings },
     { href: "/admin/impostazioni", label: t.nav.settings },
   ];
 
