@@ -70,6 +70,8 @@ export const adminTranslations = {
       cash: "Contanti",
       transfer: "Bonifico",
       markBalancePaid: "Segna saldo pagato",
+      loginTitle: "Richieste di prenotazione",
+      loginSubtitle: "Accedi con il tuo account GitHub autorizzato per gestire le richieste.",
       statusLabels: {
         pending: "In attesa",
         approved: "Approvata · in attesa di pagamento",
@@ -107,6 +109,7 @@ export const adminTranslations = {
     // Content editor
     contents: {
       title: "Contenuti",
+      intro: "Modifica i testi e le immagini del sito: nome, contatti, coordinate, galleria. Le modifiche vengono salvate su GitHub e pubblicate automaticamente in 1–2 minuti.",
       save: "Salva",
       saving: "Salvataggio...",
       saved: "Salvato",
@@ -124,6 +127,7 @@ export const adminTranslations = {
     // Policy editor
     policy: {
       title: "Policy",
+      intro: "Modifica le policy operative: tasse, depositi, cancellazioni, orari. Le modifiche vengono salvate su GitHub e pubblicate automaticamente in 1–2 minuti.",
       save: "Salva",
       saving: "Salvataggio...",
       saved: "Salvato",
@@ -131,6 +135,7 @@ export const adminTranslations = {
     // Images
     images: {
       title: "Immagini",
+      intro: "Carica e gestisci le immagini del sito.",
       upload: "Carica immagine",
       uploading: "Caricamento...",
       delete: "Elimina",
@@ -246,6 +251,8 @@ export const adminTranslations = {
       cash: "Cash",
       transfer: "Bank transfer",
       markBalancePaid: "Mark balance as paid",
+      loginTitle: "Booking requests",
+      loginSubtitle: "Sign in with your authorized GitHub account to manage booking requests.",
       statusLabels: {
         pending: "Pending",
         approved: "Approved · awaiting payment",
@@ -281,6 +288,7 @@ export const adminTranslations = {
     },
     contents: {
       title: "Contents",
+      intro: "Edit site texts and images: name, contacts, coordinates, gallery. Changes are saved to GitHub and published automatically within 1–2 minutes.",
       save: "Save",
       saving: "Saving...",
       saved: "Saved",
@@ -297,12 +305,14 @@ export const adminTranslations = {
     },
     policy: {
       title: "Policy",
+      intro: "Edit operational policies: taxes, deposits, cancellations, times. Changes are saved to GitHub and published automatically in 1–2 minutes.",
       save: "Save",
       saving: "Saving...",
       saved: "Saved",
     },
     images: {
       title: "Images",
+      intro: "Upload and manage your site images.",
       upload: "Upload image",
       uploading: "Uploading...",
       delete: "Delete",
@@ -416,6 +426,8 @@ export const adminTranslations = {
       cash: "Efectivo",
       transfer: "Transferencia bancaria",
       markBalancePaid: "Marcar saldo como pagado",
+      loginTitle: "Solicitudes de reserva",
+      loginSubtitle: "Inicia sesión con tu cuenta GitHub autorizada para gestionar las solicitudes de reserva.",
       statusLabels: {
         pending: "Pendiente",
         approved: "Aprobada · esperando pago",
@@ -451,6 +463,7 @@ export const adminTranslations = {
     },
     contents: {
       title: "Contenidos",
+      intro: "Edita textos e imágenes del sitio: nombre, contactos, coordenadas, galería. Los cambios se guardan en GitHub y se publican automáticamente en 1–2 minutos.",
       save: "Guardar",
       saving: "Guardando...",
       saved: "Guardado",
@@ -467,12 +480,14 @@ export const adminTranslations = {
     },
     policy: {
       title: "Política",
+      intro: "Edita las políticas operativas: impuestos, depósitos, cancelaciones, horarios. Los cambios se guardan en GitHub y se publican automáticamente en 1–2 minutos.",
       save: "Guardar",
       saving: "Guardando...",
       saved: "Guardado",
     },
     images: {
       title: "Imágenes",
+      intro: "Carga y gestiona las imágenes de tu sitio.",
       upload: "Subir imagen",
       uploading: "Subiendo...",
       delete: "Eliminar",
@@ -586,6 +601,8 @@ export const adminTranslations = {
       cash: "Espèces",
       transfer: "Virement bancaire",
       markBalancePaid: "Marquer le solde comme payé",
+      loginTitle: "Demandes de réservation",
+      loginSubtitle: "Connectez-vous avec votre compte GitHub autorisé pour gérer les demandes de réservation.",
       statusLabels: {
         pending: "En attente",
         approved: "Approuvée · en attente de paiement",
@@ -621,6 +638,7 @@ export const adminTranslations = {
     },
     contents: {
       title: "Contenus",
+      intro: "Modifiez les textes et images du site : nom, contacts, coordonnées, galerie. Les modifications sont enregistrées sur GitHub et publiées automatiquement en 1–2 minutes.",
       save: "Enregistrer",
       saving: "Enregistrement...",
       saved: "Enregistré",
@@ -637,12 +655,14 @@ export const adminTranslations = {
     },
     policy: {
       title: "Politique",
+      intro: "Modifiez les politiques opérationnelles : taxes, acomptes, annulations, horaires. Les modifications sont enregistrées sur GitHub et publiées automatiquement en 1–2 minutes.",
       save: "Enregistrer",
       saving: "Enregistrement...",
       saved: "Enregistré",
     },
     images: {
       title: "Images",
+      intro: "Téléchargez et gérez les images de votre site.",
       upload: "Télécharger une image",
       uploading: "Téléchargement...",
       delete: "Supprimer",
@@ -704,11 +724,11 @@ export const adminTranslations = {
 export type AdminTranslation = {
   langName: string;
   nav: { title: string; calendar: string; policy: string; contents: string; images: string; bookings: string; dashboard: string; stripe: string; theme: string; settings: string; signOut: string };
-  bookings: { title: string; loading: string; error: string; showArchived: string; hideArchived: string; noBookings: string; code: string; guest: string; period: string; guests: string; status: string; price: string; deposit: string; balance: string; cityTax: string; payment: string; message: string; customPrice: string; approve: string; approving: string; reject: string; rejecting: string; cancel: string; cancelling: string; archive: string; unarchive: string; archiving: string; rejectionReason: string; confirmReject: string; confirmCancel: string; cancelReason: string; receiptLink: string; paidAt: string; balancePaidAt: string; paymentMethod: string; card: string; paypal: string; cash: string; transfer: string; markBalancePaid: string; statusLabels: Record<string, string> };
+  bookings: { title: string; loading: string; error: string; showArchived: string; hideArchived: string; noBookings: string; code: string; guest: string; period: string; guests: string; status: string; price: string; deposit: string; balance: string; cityTax: string; payment: string; message: string; customPrice: string; approve: string; approving: string; reject: string; rejecting: string; cancel: string; cancelling: string; archive: string; unarchive: string; archiving: string; rejectionReason: string; confirmReject: string; confirmCancel: string; cancelReason: string; receiptLink: string; paidAt: string; balancePaidAt: string; paymentMethod: string; card: string; paypal: string; cash: string; transfer: string; markBalancePaid: string; loginTitle: string; loginSubtitle: string; statusLabels: Record<string, string> };
   calendar: { title: string; syncAirbnb: string; syncing: string; syncDone: string; blockDays: string; unblockDays: string; addBooking: string; price: string; pricePerNight: string; setPrice: string; guestName: string; save: string; saving: string; cancel: string; confirmBlock: string; confirmUnblock: string; nights: string; selectDates: string; from: string; to: string; type: string; directBooking: string; manualBlock: string };
-  contents: { title: string; save: string; saving: string; saved: string; translate: string; translating: string; translated: string; translateAll: string; field: string; preview: string; addItem: string; removeItem: string; moveUp: string; moveDown: string };
-  policy: { title: string; save: string; saving: string; saved: string };
-  images: { title: string; upload: string; uploading: string; delete: string; deleting: string; noImages: string; hero: string; gallery: string };
+  contents: { title: string; intro: string; save: string; saving: string; saved: string; translate: string; translating: string; translated: string; translateAll: string; field: string; preview: string; addItem: string; removeItem: string; moveUp: string; moveDown: string };
+  policy: { title: string; intro: string; save: string; saving: string; saved: string };
+  images: { title: string; intro: string; upload: string; uploading: string; delete: string; deleting: string; noImages: string; hero: string; gallery: string };
   dashboard: { title: string; totalBookings: string; revenue: string; occupancy: string; upcomingBookings: string; noUpcoming: string; thisMonth: string; thisYear: string };
   common: { yes: string; no: string; confirm: string; cancel: string; close: string; error: string; success: string; loading: string; noData: string; optional: string; demoSaved: string; demoImage: string };
   deploy: { building: string; ready: string; error: string };

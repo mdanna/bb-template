@@ -2,9 +2,12 @@ import Link from "next/link";
 import { auth, signIn } from "@/auth";
 import BookingsManager from "@/components/admin/BookingsManager";
 import AdminNav from "@/components/admin/AdminNav";
+import { resolveAdminLocale } from "@/lib/policies";
+import { adminTranslations } from "@/i18n/admin";
 
 export default async function AdminBookingsPage() {
   const session = await auth();
+  const t = adminTranslations[resolveAdminLocale()];
 
   if (!session) {
     return (
@@ -13,13 +16,13 @@ export default async function AdminBookingsPage() {
           href="/"
           className="fixed left-6 top-6 text-xs uppercase tracking-widest text-foreground/60 transition hover:text-gold"
         >
-          ← Torna al sito
+          ← {t.login.backToSite}
         </Link>
         <h1 className="font-serif-display text-3xl italic text-foreground">
-          Richieste di prenotazione
+          {t.bookings.loginTitle}
         </h1>
         <p className="max-w-sm text-sm text-foreground/70">
-          Accedi con il tuo account GitHub autorizzato per gestire le richieste.
+          {t.bookings.loginSubtitle}
         </p>
         <form
           action={async () => {
@@ -31,7 +34,7 @@ export default async function AdminBookingsPage() {
             type="submit"
             className="rounded-full border border-gold bg-gold px-8 py-3 text-sm font-medium uppercase tracking-widest text-[#faf6ec] transition hover:bg-transparent hover:text-gold"
           >
-            Accedi con GitHub
+            {t.login.github}
           </button>
         </form>
       </div>

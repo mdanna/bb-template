@@ -74,10 +74,10 @@ export default function ContentEditor() {
   const saveLabels = { save: tc.save, saving: tc.saving, saved: DEMO ? t.common.demoSaved : tc.saved, error: t.common.error };
 
   const CONTENT_LABELS = {
-    it: { property: "Struttura", posizione: "Posizione (visualizzata)", città: "Città", indirizzo: "Indirizzo", tel: "Telefono", email: "Email contatto", emailPren: "Email prenotazioni", piva: "Partita IVA / Codice fiscale host", cin: "CIN (Codice Identificativo Nazionale)", nomeHost: "Nome host", metaDesc: "Meta description (SEO)", privacyNote: "Visualizzato nella pagina Privacy come titolare del trattamento dati.", airbnbUrl: "URL Airbnb", rating: "Rating", numReviews: "Numero recensioni", details: "Dettagli", tipoAlloggio: "Tipo di alloggio", caratteristiche: "Caratteristiche", composizione: "Composizione", capacità: "Capacità", zona: "Zona", titoloStruttura: "Titolo struttura", sottotitoloHero: "Sottotitolo hero", titoloRacconto: "Titolo racconto", paragrafiRacconto: "Paragrafi racconto", aggiungiParag: "+ Aggiungi paragrafo", descArea: "Descrizione area", descrizione: "Descrizione", coordinate: "Coordinate appartamento", lat: "Latitudine", lng: "Longitudine", segnalibri: "Segnalibri mappa (max 5)", etichetta: "Etichetta", aggiungiSegnalibro: "Aggiungi segnalibro", puntiInteresse: "Punti di interesse", nome: "Nome", commento: "Commento", aggiungiPunto: "Aggiungi punto", servizi: "Servizi", aggiungiServizio: "Aggiungi servizio", autore: "Autore", testoRecensione: "Testo recensione", aggiungiRecensione: "Aggiungi recensione", elimina: "Elimina", rimuovi: "Rimuovi", traduceTutto: "Traduci tutto", traduceDesc: "Traduce automaticamente tutti i contenuti in 8 lingue con un solo clic, poi salva.", traduzioneCompletata: "Traduzione completata — ricordati di salvare.", traduciAuto: "Traduci automaticamente", traduciDettagli: "Traduci dettagli", traduciArea: "Traduci", traduciPunti: "Traduci punti di interesse", traduciServizi: "Traduci servizi", traduciRecensioni: "Traduci recensioni", inCorso: "Traduzione in corso…", vediEn: "Vedi traduzioni (EN)", nascondi: "Nascondi", tradotto: "Tradotto" },
-    en: { property: "Property", posizione: "Location (displayed)", città: "City", indirizzo: "Address", tel: "Phone", email: "Contact email", emailPren: "Booking email", piva: "VAT / Tax ID (host)", cin: "CIN (National ID Code)", nomeHost: "Host name", metaDesc: "Meta description (SEO)", privacyNote: "Shown on the Privacy page as data controller.", airbnbUrl: "Airbnb URL", rating: "Rating", numReviews: "Review count", details: "Details", tipoAlloggio: "Accommodation type", caratteristiche: "Features", composizione: "Composition", capacità: "Capacity", zona: "Area", titoloStruttura: "Property title", sottotitoloHero: "Hero subtitle", titoloRacconto: "Story title", paragrafiRacconto: "Story paragraphs", aggiungiParag: "+ Add paragraph", descArea: "Area description", descrizione: "Description", coordinate: "Property coordinates", lat: "Latitude", lng: "Longitude", segnalibri: "Map bookmarks (max 5)", etichetta: "Label", aggiungiSegnalibro: "Add bookmark", puntiInteresse: "Points of interest", nome: "Name", commento: "Comment", aggiungiPunto: "Add point", servizi: "Services", aggiungiServizio: "Add service", autore: "Author", testoRecensione: "Review text", aggiungiRecensione: "Add review", elimina: "Delete", rimuovi: "Remove", traduceTutto: "Translate all", traduceDesc: "Automatically translates all content into 8 languages with one click, then save.", traduzioneCompletata: "Translation complete — remember to save.", traduciAuto: "Translate automatically", traduciDettagli: "Translate details", traduciArea: "Translate", traduciPunti: "Translate points", traduciServizi: "Translate services", traduciRecensioni: "Translate reviews", inCorso: "Translating…", vediEn: "Show translations (EN)", nascondi: "Hide", tradotto: "Translated" },
-    es: { property: "Propiedad", posizione: "Ubicación (mostrada)", città: "Ciudad", indirizzo: "Dirección", tel: "Teléfono", email: "Email de contacto", emailPren: "Email de reservas", piva: "NIF / CIF (anfitrión)", cin: "CIN (Código de Identificación)", nomeHost: "Nombre anfitrión", metaDesc: "Meta descripción (SEO)", privacyNote: "Mostrado en la página de Privacidad como responsable del tratamiento.", airbnbUrl: "URL Airbnb", rating: "Valoración", numReviews: "Nº de reseñas", details: "Detalles", tipoAlloggio: "Tipo de alojamiento", caratteristiche: "Características", composizione: "Composición", capacità: "Capacidad", zona: "Zona", titoloStruttura: "Título del alojamiento", sottotitoloHero: "Subtítulo hero", titoloRacconto: "Título de la historia", paragrafiRacconto: "Párrafos de la historia", aggiungiParag: "+ Añadir párrafo", descArea: "Descripción del área", descrizione: "Descripción", coordinate: "Coordenadas del alojamiento", lat: "Latitud", lng: "Longitud", segnalibri: "Marcadores del mapa (máx 5)", etichetta: "Etiqueta", aggiungiSegnalibro: "Añadir marcador", puntiInteresse: "Puntos de interés", nome: "Nombre", commento: "Comentario", aggiungiPunto: "Añadir punto", servizi: "Servicios", aggiungiServizio: "Añadir servicio", autore: "Autor", testoRecensione: "Texto de la reseña", aggiungiRecensione: "Añadir reseña", elimina: "Eliminar", rimuovi: "Quitar", traduceTutto: "Traducir todo", traduceDesc: "Traduce automáticamente todos los contenidos a 8 idiomas con un clic, luego guarda.", traduzioneCompletata: "Traducción completa — recuerda guardar.", traduciAuto: "Traducir automáticamente", traduciDettagli: "Traducir detalles", traduciArea: "Traducir", traduciPunti: "Traducir puntos", traduciServizi: "Traducir servicios", traduciRecensioni: "Traducir reseñas", inCorso: "Traduciendo…", vediEn: "Ver traducciones (EN)", nascondi: "Ocultar", tradotto: "Traducido" },
-    fr: { property: "Propriété", posizione: "Localisation (affichée)", città: "Ville", indirizzo: "Adresse", tel: "Téléphone", email: "Email de contact", emailPren: "Email de réservation", piva: "N° TVA / SIRET (hôte)", cin: "CIN (Code d'Identification National)", nomeHost: "Nom de l'hôte", metaDesc: "Méta description (SEO)", privacyNote: "Affiché sur la page Politique de confidentialité comme responsable du traitement.", airbnbUrl: "URL Airbnb", rating: "Note", numReviews: "Nombre d'avis", details: "Détails", tipoAlloggio: "Type de logement", caratteristiche: "Caractéristiques", composizione: "Composition", capacità: "Capacité", zona: "Zone", titoloStruttura: "Titre du logement", sottotitoloHero: "Sous-titre hero", titoloRacconto: "Titre de l'histoire", paragrafiRacconto: "Paragraphes de l'histoire", aggiungiParag: "+ Ajouter un paragraphe", descArea: "Description de la zone", descrizione: "Description", coordinate: "Coordonnées du logement", lat: "Latitude", lng: "Longitude", segnalibri: "Signets de la carte (max 5)", etichetta: "Étiquette", aggiungiSegnalibro: "Ajouter un signet", puntiInteresse: "Points d'intérêt", nome: "Nom", commento: "Commentaire", aggiungiPunto: "Ajouter un point", servizi: "Services", aggiungiServizio: "Ajouter un service", autore: "Auteur", testoRecensione: "Texte de l'avis", aggiungiRecensione: "Ajouter un avis", elimina: "Supprimer", rimuovi: "Retirer", traduceTutto: "Tout traduire", traduceDesc: "Traduit automatiquement tous les contenus en 8 langues en un clic, puis enregistrez.", traduzioneCompletata: "Traduction terminée — pensez à enregistrer.", traduciAuto: "Traduire automatiquement", traduciDettagli: "Traduire les détails", traduciArea: "Traduire", traduciPunti: "Traduire les points", traduciServizi: "Traduire les services", traduciRecensioni: "Traduire les avis", inCorso: "Traduction en cours…", vediEn: "Voir les traductions (EN)", nascondi: "Masquer", tradotto: "Traduit" },
+    it: { property: "Struttura", posizione: "Posizione (visualizzata)", città: "Città", indirizzo: "Indirizzo", tel: "Telefono", email: "Email contatto", emailPren: "Email prenotazioni", piva: "Partita IVA / Codice fiscale host", cin: "CIN (Codice Identificativo Nazionale)", nomeHost: "Nome host", metaDesc: "Meta description (SEO)", privacyNote: "Visualizzato nella pagina Privacy come titolare del trattamento dati.", airbnbUrl: "URL Airbnb", rating: "Rating", numReviews: "Numero recensioni", details: "Dettagli", tipoAlloggio: "Tipo di alloggio", caratteristiche: "Caratteristiche", composizione: "Composizione", capacità: "Capacità", zona: "Zona", titoloStruttura: "Titolo struttura", sottotitoloHero: "Sottotitolo hero", titoloRacconto: "Titolo racconto", paragrafiRacconto: "Paragrafi racconto", aggiungiParag: "+ Aggiungi paragrafo", descArea: "Descrizione area", descrizione: "Descrizione", coordinate: "Coordinate appartamento", lat: "Latitudine", lng: "Longitudine", segnalibri: "Segnalibri mappa (max 5)", etichetta: "Etichetta", aggiungiSegnalibro: "Aggiungi segnalibro", puntiInteresse: "Punti di interesse", nome: "Nome", commento: "Commento", aggiungiPunto: "Aggiungi punto", servizi: "Servizi", aggiungiServizio: "Aggiungi servizio", autore: "Autore", testoRecensione: "Testo recensione", aggiungiRecensione: "Aggiungi recensione", elimina: "Elimina", rimuovi: "Rimuovi", traduceTutto: "Traduci tutto", traduceDesc: "Traduce automaticamente tutti i contenuti in 8 lingue con un solo clic, poi salva.", traduzioneCompletata: "Traduzione completata — ricordati di salvare.", traduciAuto: "Traduci automaticamente", traduciDettagli: "Traduci dettagli", traduciArea: "Traduci", traduciPunti: "Traduci punti di interesse", traduciServizi: "Traduci servizi", traduciRecensioni: "Traduci recensioni", inCorso: "Traduzione in corso…", vediEn: "Vedi traduzioni (EN)", nascondi: "Nascondi", tradotto: "Tradotto", airbnbSection: "Airbnb", paragrafoPh: "Paragrafo {n}…" },
+    en: { property: "Property", posizione: "Location (displayed)", città: "City", indirizzo: "Address", tel: "Phone", email: "Contact email", emailPren: "Booking email", piva: "VAT / Tax ID (host)", cin: "CIN (National ID Code)", nomeHost: "Host name", metaDesc: "Meta description (SEO)", privacyNote: "Shown on the Privacy page as data controller.", airbnbUrl: "Airbnb URL", rating: "Rating", numReviews: "Review count", details: "Details", tipoAlloggio: "Accommodation type", caratteristiche: "Features", composizione: "Composition", capacità: "Capacity", zona: "Area", titoloStruttura: "Property title", sottotitoloHero: "Hero subtitle", titoloRacconto: "Story title", paragrafiRacconto: "Story paragraphs", aggiungiParag: "+ Add paragraph", descArea: "Area description", descrizione: "Description", coordinate: "Property coordinates", lat: "Latitude", lng: "Longitude", segnalibri: "Map bookmarks (max 5)", etichetta: "Label", aggiungiSegnalibro: "Add bookmark", puntiInteresse: "Points of interest", nome: "Name", commento: "Comment", aggiungiPunto: "Add point", servizi: "Services", aggiungiServizio: "Add service", autore: "Author", testoRecensione: "Review text", aggiungiRecensione: "Add review", elimina: "Delete", rimuovi: "Remove", traduceTutto: "Translate all", traduceDesc: "Automatically translates all content into 8 languages with one click, then save.", traduzioneCompletata: "Translation complete — remember to save.", traduciAuto: "Translate automatically", traduciDettagli: "Translate details", traduciArea: "Translate", traduciPunti: "Translate points", traduciServizi: "Translate services", traduciRecensioni: "Translate reviews", inCorso: "Translating…", vediEn: "Show translations (EN)", nascondi: "Hide", tradotto: "Translated", airbnbSection: "Airbnb", paragrafoPh: "Paragraph {n}…" },
+    es: { property: "Propiedad", posizione: "Ubicación (mostrada)", città: "Ciudad", indirizzo: "Dirección", tel: "Teléfono", email: "Email de contacto", emailPren: "Email de reservas", piva: "NIF / CIF (anfitrión)", cin: "CIN (Código de Identificación)", nomeHost: "Nombre anfitrión", metaDesc: "Meta descripción (SEO)", privacyNote: "Mostrado en la página de Privacidad como responsable del tratamiento.", airbnbUrl: "URL Airbnb", rating: "Valoración", numReviews: "Nº de reseñas", details: "Detalles", tipoAlloggio: "Tipo de alojamiento", caratteristiche: "Características", composizione: "Composición", capacità: "Capacidad", zona: "Zona", titoloStruttura: "Título del alojamiento", sottotitoloHero: "Subtítulo hero", titoloRacconto: "Título de la historia", paragrafiRacconto: "Párrafos de la historia", aggiungiParag: "+ Añadir párrafo", descArea: "Descripción del área", descrizione: "Descripción", coordinate: "Coordenadas del alojamiento", lat: "Latitud", lng: "Longitud", segnalibri: "Marcadores del mapa (máx 5)", etichetta: "Etiqueta", aggiungiSegnalibro: "Añadir marcador", puntiInteresse: "Puntos de interés", nome: "Nombre", commento: "Comentario", aggiungiPunto: "Añadir punto", servizi: "Servicios", aggiungiServizio: "Añadir servicio", autore: "Autor", testoRecensione: "Texto de la reseña", aggiungiRecensione: "Añadir reseña", elimina: "Eliminar", rimuovi: "Quitar", traduceTutto: "Traducir todo", traduceDesc: "Traduce automáticamente todos los contenidos a 8 idiomas con un clic, luego guarda.", traduzioneCompletata: "Traducción completa — recuerda guardar.", traduciAuto: "Traducir automáticamente", traduciDettagli: "Traducir detalles", traduciArea: "Traducir", traduciPunti: "Traducir puntos", traduciServizi: "Traducir servicios", traduciRecensioni: "Traducir reseñas", inCorso: "Traduciendo…", vediEn: "Ver traducciones (EN)", nascondi: "Ocultar", tradotto: "Traducido", airbnbSection: "Airbnb", paragrafoPh: "Párrafo {n}…" },
+    fr: { property: "Propriété", posizione: "Localisation (affichée)", città: "Ville", indirizzo: "Adresse", tel: "Téléphone", email: "Email de contact", emailPren: "Email de réservation", piva: "N° TVA / SIRET (hôte)", cin: "CIN (Code d'Identification National)", nomeHost: "Nom de l'hôte", metaDesc: "Méta description (SEO)", privacyNote: "Affiché sur la page Politique de confidentialité comme responsable du traitement.", airbnbUrl: "URL Airbnb", rating: "Note", numReviews: "Nombre d'avis", details: "Détails", tipoAlloggio: "Type de logement", caratteristiche: "Caractéristiques", composizione: "Composition", capacità: "Capacité", zona: "Zone", titoloStruttura: "Titre du logement", sottotitoloHero: "Sous-titre hero", titoloRacconto: "Titre de l'histoire", paragrafiRacconto: "Paragraphes de l'histoire", aggiungiParag: "+ Ajouter un paragraphe", descArea: "Description de la zone", descrizione: "Description", coordinate: "Coordonnées du logement", lat: "Latitude", lng: "Longitude", segnalibri: "Signets de la carte (max 5)", etichetta: "Étiquette", aggiungiSegnalibro: "Ajouter un signet", puntiInteresse: "Points d'intérêt", nome: "Nom", commento: "Commentaire", aggiungiPunto: "Ajouter un point", servizi: "Services", aggiungiServizio: "Ajouter un service", autore: "Auteur", testoRecensione: "Texte de l'avis", aggiungiRecensione: "Ajouter un avis", elimina: "Supprimer", rimuovi: "Retirer", traduceTutto: "Tout traduire", traduceDesc: "Traduit automatiquement tous les contenus en 8 langues en un clic, puis enregistrez.", traduzioneCompletata: "Traduction terminée — pensez à enregistrer.", traduciAuto: "Traduire automatiquement", traduciDettagli: "Traduire les détails", traduciArea: "Traduire", traduciPunti: "Traduire les points", traduciServizi: "Traduire les services", traduciRecensioni: "Traduire les avis", inCorso: "Traduction en cours…", vediEn: "Voir les traductions (EN)", nascondi: "Masquer", tradotto: "Traduit", airbnbSection: "Airbnb", paragrafoPh: "Paragraphe {n}…" },
   } as const;
 
   const L = CONTENT_LABELS[locale as keyof typeof CONTENT_LABELS] ?? CONTENT_LABELS.en;
@@ -496,7 +496,7 @@ export default function ContentEditor() {
 
         {/* Airbnb card */}
         <div className="rounded-lg border border-gold/30 bg-background p-6">
-          <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-foreground/50">Airbnb</h3>
+          <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-foreground/50">{L.airbnbSection}</h3>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <label className={labelCls}>
               <FieldLabel>{L.rating}</FieldLabel>
@@ -625,7 +625,7 @@ export default function ContentEditor() {
                 rows={4}
                 value={p[srcLang] ?? ""}
                 onChange={(e) => setParagraphIt(idx, e.target.value)}
-                placeholder={`Paragrafo ${idx + 1}…`}
+                placeholder={L.paragrafoPh.replace('{n}', String(idx + 1))}
                 className={`${inputCls} flex-1`}
               />
               {content.storyParagraphs.length > 1 && (
@@ -651,7 +651,7 @@ export default function ContentEditor() {
             {textsTranslateState === "translating" ? L.inCorso : L.traduciAuto}
           </button>
           {textsTranslateState === "done" && (
-            <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-700">Tradotto</span>
+            <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-700">{L.tradotto}</span>
           )}
           {textsTranslateState === "error" && (
             <span className="text-xs text-red-600">{textsTranslateError}</span>
@@ -688,7 +688,7 @@ export default function ContentEditor() {
       <div className="space-y-6">
         {/* Descrizione */}
         <div className="rounded-lg border border-gold/30 bg-background p-6 space-y-4">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-foreground/50">Descrizione area</h3>
+          <h3 className="text-xs font-bold uppercase tracking-widest text-foreground/50">{L.descArea}</h3>
           <label className={labelCls}>
             <span className={labelTextCls}>
               {L.descrizione} <LangBadge lang={locale} />
@@ -709,7 +709,7 @@ export default function ContentEditor() {
               {areaDescTranslateState === "translating" ? L.inCorso : L.traduciArea}
             </button>
             {areaDescTranslateState === "done" && (
-              <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-700">Tradotto</span>
+              <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-700">{L.tradotto}</span>
             )}
             {areaDescTranslateState === "error" && (
               <span className="text-xs text-red-600">{areaDescTranslateError}</span>
@@ -720,11 +720,11 @@ export default function ContentEditor() {
         {/* Coordinate */}
         <div className="rounded-lg border border-gold/30 bg-background p-6">
           <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-foreground/50">
-            Coordinate appartamento
+            {L.coordinate}
           </h3>
           <div className="grid grid-cols-2 gap-4">
             <label className={labelCls}>
-              <FieldLabel>Latitudine</FieldLabel>
+              <FieldLabel>{L.lat}</FieldLabel>
               <input
                 type="number"
                 step="any"
@@ -734,7 +734,7 @@ export default function ContentEditor() {
               />
             </label>
             <label className={labelCls}>
-              <FieldLabel>Longitudine</FieldLabel>
+              <FieldLabel>{L.lng}</FieldLabel>
               <input
                 type="number"
                 step="any"
@@ -748,7 +748,7 @@ export default function ContentEditor() {
 
         {/* Segnalibri mappa */}
         <div className="rounded-lg border border-gold/30 bg-background p-6 space-y-3">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-foreground/50">Segnalibri mappa (max 5)</h3>
+          <h3 className="text-xs font-bold uppercase tracking-widest text-foreground/50">{L.segnalibri}</h3>
           {content.mapBookmarks.map((bm, i) => (
             <div key={i} className="flex flex-wrap items-end gap-3">
               <label className="flex flex-col gap-1 text-sm flex-1 min-w-24">
@@ -782,7 +782,7 @@ export default function ContentEditor() {
                 />
               </label>
               <label className="flex flex-col gap-1 text-sm flex-1 min-w-40">
-                <FieldLabel>Etichetta</FieldLabel>
+                <FieldLabel>{L.etichetta}</FieldLabel>
                 <input
                   type="text"
                   value={bm.label}
@@ -799,7 +799,7 @@ export default function ContentEditor() {
                 onClick={() => set("mapBookmarks", content.mapBookmarks.filter((_, j) => j !== i))}
                 className="text-xs text-red-500 hover:text-red-700 pb-2"
               >
-                Rimuovi
+                {L.rimuovi}
               </button>
             </div>
           ))}
@@ -810,14 +810,14 @@ export default function ContentEditor() {
               }
               className="rounded-full border border-gold/40 px-4 py-1.5 text-xs text-foreground/60 hover:bg-gold/5"
             >
-              Aggiungi segnalibro
+              {L.aggiungiSegnalibro}
             </button>
           )}
         </div>
 
         {/* Punti di interesse */}
         <div className="rounded-lg border border-gold/30 bg-background p-6 space-y-4">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-foreground/50">Punti di interesse</h3>
+          <h3 className="text-xs font-bold uppercase tracking-widest text-foreground/50">{L.puntiInteresse}</h3>
           {content.areaPlaces.map((place, i) => (
             <div key={i} className="rounded-lg border border-gold/20 bg-card p-4 space-y-3">
               <div className="flex items-start justify-between">
@@ -859,7 +859,7 @@ export default function ContentEditor() {
                   onClick={() => set("areaPlaces", content.areaPlaces.filter((_, j) => j !== i))}
                   className="ml-3 text-xs text-red-500 hover:text-red-700 mt-6"
                 >
-                  Elimina
+                  {L.elimina}
                 </button>
               </div>
             </div>
@@ -876,7 +876,7 @@ export default function ContentEditor() {
             }
             className="rounded-full border border-gold/40 px-4 py-1.5 text-xs text-foreground/60 hover:bg-gold/5"
           >
-            Aggiungi punto
+            {L.aggiungiPunto}
           </button>
 
           <div className="flex flex-wrap items-center gap-4 pt-2">
@@ -888,7 +888,7 @@ export default function ContentEditor() {
               {placesTranslateState === "translating" ? L.inCorso : L.traduciPunti}
             </button>
             {placesTranslateState === "done" && (
-              <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-700">Tradotto</span>
+              <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-700">{L.tradotto}</span>
             )}
             {placesTranslateState === "error" && (
               <span className="text-xs text-red-600">{placesTranslateError}</span>
@@ -907,7 +907,7 @@ export default function ContentEditor() {
       <div className="space-y-6">
         <div className="rounded-lg border border-gold/30 bg-background p-6 space-y-2">
           <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-foreground/50">
-            Servizi
+            {L.servizi}
           </h3>
           {content.amenities.map((item, i) => (
             <div key={i} className="flex items-center gap-2">
@@ -940,7 +940,7 @@ export default function ContentEditor() {
               }
               className="rounded-full border border-gold/40 px-4 py-1.5 text-xs text-foreground/60 hover:bg-gold/5"
             >
-              Aggiungi servizio
+              {L.aggiungiServizio}
             </button>
             <button
               onClick={handleTranslateAmenities}
@@ -950,7 +950,7 @@ export default function ContentEditor() {
               {amenitiesTranslateState === "translating" ? L.inCorso : L.traduciServizi}
             </button>
             {amenitiesTranslateState === "done" && (
-              <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-700">Tradotto</span>
+              <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-700">{L.tradotto}</span>
             )}
             {amenitiesTranslateState === "error" && (
               <span className="text-xs text-red-600">{amenitiesTranslateError}</span>
@@ -971,7 +971,7 @@ export default function ContentEditor() {
             <div key={i} className="rounded-lg border border-gold/30 bg-background p-4 space-y-3">
               <div className="flex items-center justify-between gap-3">
                 <label className="flex flex-1 flex-col gap-1 text-sm">
-                  <FieldLabel>Autore</FieldLabel>
+                  <FieldLabel>{L.autore}</FieldLabel>
                   <input
                     type="text"
                     value={review.author}
@@ -988,7 +988,7 @@ export default function ContentEditor() {
                   onClick={() => set("reviews", content.reviews.filter((_, j) => j !== i))}
                   className="mt-5 text-xs text-red-500 hover:text-red-700"
                 >
-                  Elimina
+                  {L.elimina}
                 </button>
               </div>
               <label className={labelCls}>
@@ -1019,7 +1019,7 @@ export default function ContentEditor() {
               }
               className="rounded-full border border-gold/40 px-4 py-1.5 text-xs text-foreground/60 hover:bg-gold/5"
             >
-              Aggiungi recensione
+              {L.aggiungiRecensione}
             </button>
             <button
               onClick={handleTranslateReviews}
@@ -1029,7 +1029,7 @@ export default function ContentEditor() {
               {reviewsTranslateState === "translating" ? L.inCorso : L.traduciRecensioni}
             </button>
             {reviewsTranslateState === "done" && (
-              <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-700">Tradotto</span>
+              <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-700">{L.tradotto}</span>
             )}
             {reviewsTranslateState === "error" && (
               <span className="text-xs text-red-600">{reviewsTranslateError}</span>
@@ -1112,11 +1112,11 @@ export default function ContentEditor() {
           {allTranslateState === "translating" ? L.inCorso : L.traduceTutto}
         </button>
         <p className="text-xs text-foreground/50">
-          Traduce automaticamente tutti i contenuti in 8 lingue con un solo clic, poi salva.
+          {L.traduceDesc}
         </p>
         {allTranslateState === "done" && (
           <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-700">
-            Traduzione completata — ricordati di salvare.
+            {L.traduzioneCompletata}
           </span>
         )}
         {allTranslateState === "error" && (
