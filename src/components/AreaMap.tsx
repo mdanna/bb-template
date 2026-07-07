@@ -58,8 +58,12 @@ export default function AreaMap({ markers, bookmarks, centerLat, centerLng }: Pr
           iconSize: [18, 18],
           iconAnchor: [9, 9],
         });
+        // Tooltip permanente: l'etichetta assegnata al segnalibro (es. "Metro
+        // Ottaviano (Linea A)") resta sempre visibile sulla mappa, anche su mobile
+        // dove non esiste l'hover. Prima era permanent:false → si vedeva solo la
+        // legenda generica, non l'etichetta del singolo segnalibro.
         L.marker([m.lat, m.lon], { icon }).addTo(map).bindTooltip(m.label, {
-          permanent: false,
+          permanent: true,
           direction: "top",
         });
       });

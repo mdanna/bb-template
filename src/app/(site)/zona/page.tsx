@@ -30,16 +30,6 @@ export default function ZonaPage() {
             ]}
           />
         </div>
-        <div className="mx-auto mt-3 flex max-w-xs items-center justify-center gap-6 text-xs text-foreground/60">
-          <span className="flex items-center gap-2">
-            <span className="inline-block h-3 w-3 rounded-full border border-white" style={{ backgroundColor: "#2563eb" }} />
-            {t.area.mapApartmentLabel}
-          </span>
-          <span className="flex items-center gap-2">
-            <span className="inline-block h-3 w-3 rounded-full border border-white" style={{ backgroundColor: "#dc2626" }} />
-            {t.area.mapMetroLabel}
-          </span>
-        </div>
 
         <div className="mt-10 grid gap-6 sm:grid-cols-2">
           {CONTENT.areaPlaces.map((place) => {
