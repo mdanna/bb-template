@@ -19,10 +19,11 @@ const inter = Inter({
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://your-domain.com";
 const SITE_TITLE = CONTENT.siteTitle.it;
 const SITE_DESCRIPTION = CONTENT.metaDescription;
+const TITLE_SUFFIX = CONTENT.seoTitleSuffix ? ` · ${CONTENT.seoTitleSuffix}` : "";
 
 export const metadata: Metadata = {
   title: {
-    default: `${SITE_TITLE} | ${CONTENT.locationDisplay}`,
+    default: `${SITE_TITLE} — ${CONTENT.locationDisplay}${TITLE_SUFFIX}`,
     template: `%s | ${SITE_TITLE}`,
   },
   description: SITE_DESCRIPTION,

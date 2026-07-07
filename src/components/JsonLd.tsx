@@ -55,6 +55,10 @@ export default function JsonLd() {
     .map((name) => ({ "@type": "LocationFeatureSpecification", name, value: true }));
   if (amenityFeature.length) jsonLd.amenityFeature = amenityFeature;
 
+  if (CONTENT.alternateNames && CONTENT.alternateNames.length > 0) {
+    jsonLd.alternateName = CONTENT.alternateNames;
+  }
+
   return (
     <script
       type="application/ld+json"

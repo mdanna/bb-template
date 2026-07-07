@@ -55,6 +55,11 @@ export interface SiteContent {
   areaDescription: L10n;
   areaPlaces: AreaPlace[];
   details: Details;
+  // SEO (opzionali): nomi alternativi con cui la struttura viene cercata — nome
+  // accorciato, titolo dell'annuncio Airbnb, ecc. → schema.org `alternateName`.
+  alternateNames?: string[];
+  // Suffisso del <title> per zona/landmark (es. "a due passi dal Vaticano").
+  seoTitleSuffix?: string;
 }
 
 export const CONTENT: SiteContent = rawContent as SiteContent;
