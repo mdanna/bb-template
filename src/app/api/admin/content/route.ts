@@ -30,7 +30,10 @@ function isValidContent(body: unknown): body is SiteContent {
     (!("areaDescription" in b) || typeof b.areaDescription === "object") &&
     (!("areaPlaces" in b) || Array.isArray(b.areaPlaces)) &&
     (!("siteTitle" in b) || typeof b.siteTitle === "object") &&
-    (!("details" in b) || typeof b.details === "object")
+    (!("details" in b) || typeof b.details === "object") &&
+    (!("metaDescription" in b) || typeof b.metaDescription === "string") &&
+    (!("alternateNames" in b) || (Array.isArray(b.alternateNames) && b.alternateNames.every((n) => typeof n === "string"))) &&
+    (!("seoTitleSuffix" in b) || typeof b.seoTitleSuffix === "string")
   );
 }
 

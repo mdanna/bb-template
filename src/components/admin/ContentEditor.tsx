@@ -7,16 +7,23 @@ import DeployToast from "@/components/admin/DeployToast";
 
 type SaveState = "idle" | "saving" | "success" | "error";
 type TranslateState = "idle" | "translating" | "done" | "error";
-type SubTab = "struttura" | "testi" | "area" | "servizi" | "recensioni";
+type SubTab = "struttura" | "testi" | "area" | "servizi" | "recensioni" | "seo";
 
 const SUB_TAB_LABELS: Record<string, Record<SubTab, string>> = {
-  it: { struttura: "Struttura", testi: "Testi", area: "Area", servizi: "Servizi", recensioni: "Recensioni" },
-  en: { struttura: "Property", testi: "Texts", area: "Area", servizi: "Services", recensioni: "Reviews" },
-  es: { struttura: "Propiedad", testi: "Textos", area: "Área", servizi: "Servicios", recensioni: "Reseñas" },
-  fr: { struttura: "Propriété", testi: "Textes", area: "Zone", servizi: "Services", recensioni: "Avis" },
+  it: { struttura: "Struttura", testi: "Testi", area: "Area", servizi: "Servizi", recensioni: "Recensioni", seo: "SEO" },
+  en: { struttura: "Property", testi: "Texts", area: "Area", servizi: "Services", recensioni: "Reviews", seo: "SEO" },
+  es: { struttura: "Propiedad", testi: "Textos", area: "Área", servizi: "Servicios", recensioni: "Reseñas", seo: "SEO" },
+  fr: { struttura: "Propriété", testi: "Textes", area: "Zone", servizi: "Services", recensioni: "Avis", seo: "SEO" },
 };
 
-const SUB_TABS: SubTab[] = ["struttura", "testi", "area", "servizi", "recensioni"];
+const SUB_TABS: SubTab[] = ["struttura", "testi", "area", "servizi", "recensioni", "seo"];
+
+const SEO_LABELS = {
+  it: { intro: "Come appari su Google e a chi cerca la tua struttura. Aiuta chi ti ha trovato su Airbnb a ritrovarti qui, sul sito diretto.", preview: "Anteprima Google", metaDesc: "Descrizione per Google", metaDescHelp: "La frase sotto il titolo nei risultati. ~155 caratteri.", altNames: "Nomi alternativi", altNamesHelp: "Altri nomi con cui ti cercano (nome corto, titolo dell'annuncio Airbnb…), separati da virgola.", titleSuffix: "Aggiunta al titolo", titleSuffixHelp: "Un riferimento di zona per la SEO, es. «a due passi dal Vaticano».", titleSuffixPh: "a due passi da…" },
+  en: { intro: "How you appear on Google and to people searching for your place. Helps guests who found you on Airbnb find you here, on the direct site.", preview: "Google preview", metaDesc: "Description for Google", metaDescHelp: "The line under the title in results. ~155 characters.", altNames: "Alternative names", altNamesHelp: "Other names people search for (short name, your Airbnb listing title…), comma-separated.", titleSuffix: "Title add-on", titleSuffixHelp: "A landmark for SEO, e.g. “steps from the Vatican”.", titleSuffixPh: "steps from…" },
+  es: { intro: "Cómo apareces en Google y ante quien busca tu alojamiento. Ayuda a quien te encontró en Airbnb a hallarte aquí, en el sitio directo.", preview: "Vista previa de Google", metaDesc: "Descripción para Google", metaDescHelp: "La frase bajo el título en los resultados. ~155 caracteres.", altNames: "Nombres alternativos", altNamesHelp: "Otros nombres con los que te buscan (nombre corto, título del anuncio de Airbnb…), separados por comas.", titleSuffix: "Añadido al título", titleSuffixHelp: "Una referencia de zona para el SEO, p. ej. «a un paso del Vaticano».", titleSuffixPh: "a un paso de…" },
+  fr: { intro: "Comment vous apparaissez sur Google et pour ceux qui cherchent votre logement. Aide ceux qui vous ont trouvé sur Airbnb à vous retrouver ici, sur le site direct.", preview: "Aperçu Google", metaDesc: "Description pour Google", metaDescHelp: "La phrase sous le titre dans les résultats. ~155 caractères.", altNames: "Noms alternatifs", altNamesHelp: "Autres noms recherchés (nom court, titre de l'annonce Airbnb…), séparés par des virgules.", titleSuffix: "Ajout au titre", titleSuffixHelp: "Un point de repère pour le SEO, ex. « à deux pas du Vatican ».", titleSuffixPh: "à deux pas de…" },
+} as const;
 
 const inputCls =
   "rounded border border-gold/40 bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-gold";
@@ -74,6 +81,7 @@ export default function ContentEditor() {
   } as const;
 
   const L = CONTENT_LABELS[locale as keyof typeof CONTENT_LABELS] ?? CONTENT_LABELS.en;
+  const S = SEO_LABELS[locale as keyof typeof SEO_LABELS] ?? SEO_LABELS.en;
   const srcLang = locale as keyof L10n;
   // Best available source text: prefer current admin locale, fallback to Italian
   const src = (field: L10n): string => field[srcLang] || field.it || Object.values(field).find(Boolean) || "";
@@ -483,15 +491,6 @@ export default function ContentEditor() {
               </label>
             ))}
             <p className="col-span-full text-xs text-foreground/40 -mt-2">{L.privacyNote}</p>
-            <label className={`${labelCls} col-span-full`}>
-              <FieldLabel>{L.metaDesc}</FieldLabel>
-              <textarea
-                rows={2}
-                value={content.metaDescription ?? ""}
-                onChange={(e) => set("metaDescription", e.target.value)}
-                className={inputCls}
-              />
-            </label>
           </div>
         </div>
 
@@ -1042,6 +1041,65 @@ export default function ContentEditor() {
     );
   }
 
+  function renderSeo() {
+    if (!content) return null;
+    const suffix = content.seoTitleSuffix ? ` · ${content.seoTitleSuffix}` : "";
+    const previewTitle = `${content.siteTitle.it} — ${content.locationDisplay}${suffix}`;
+    const desc = content.metaDescription ?? "";
+    const names = content.alternateNames ?? [];
+    const host = (process.env.NEXT_PUBLIC_SITE_URL ?? "").replace(/^https?:\/\//, "").replace(/\/+$/, "");
+    return (
+      <div className="max-w-2xl space-y-6">
+        <p className="text-sm text-foreground/60">{S.intro}</p>
+
+        {/* Anteprima Google */}
+        <div>
+          <span className="text-[11px] font-bold uppercase tracking-widest text-foreground/40">{S.preview}</span>
+          <div className="mt-1 rounded-lg border border-gold/40 bg-background px-4 py-3">
+            {host && <p className="text-xs text-green-700">{host}</p>}
+            <p className="text-lg leading-snug text-[#1a0dab]">
+              {previewTitle.length > 62 ? previewTitle.slice(0, 62) + "…" : previewTitle}
+            </p>
+            <p className="text-sm text-foreground/70">
+              {desc ? (desc.length > 158 ? desc.slice(0, 158) + "…" : desc) : "…"}
+            </p>
+          </div>
+        </div>
+
+        {/* Descrizione per Google */}
+        <label className={labelCls}>
+          <FieldLabel>
+            {S.metaDesc} <span className="text-foreground/40">({desc.length}/155)</span>
+          </FieldLabel>
+          <textarea rows={3} value={desc} onChange={(e) => set("metaDescription", e.target.value)} className={inputCls} />
+          <span className="text-xs text-foreground/40">{S.metaDescHelp}</span>
+        </label>
+
+        {/* Aggiunta al titolo (landmark/zona) */}
+        <label className={labelCls}>
+          <FieldLabel>{S.titleSuffix}</FieldLabel>
+          <input type="text" value={content.seoTitleSuffix ?? ""} onChange={(e) => set("seoTitleSuffix", e.target.value)} placeholder={S.titleSuffixPh} className={inputCls} />
+          <span className="text-xs text-foreground/40">{S.titleSuffixHelp}</span>
+        </label>
+
+        {/* Nomi alternativi */}
+        <label className={labelCls}>
+          <FieldLabel>{S.altNames}</FieldLabel>
+          <input
+            type="text"
+            value={names.join(", ")}
+            onChange={(e) => set("alternateNames", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))}
+            placeholder="Casa Misteriosa, The Mysterious Home…"
+            className={inputCls}
+          />
+          <span className="text-xs text-foreground/40">{S.altNamesHelp}</span>
+        </label>
+
+        <SaveButton saveState={saveState} onClick={handleSave} labels={saveLabels} />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Traduci tutto */}
@@ -1090,6 +1148,7 @@ export default function ContentEditor() {
         {activeTab === "area" && renderArea()}
         {activeTab === "servizi" && renderServizi()}
         {activeTab === "recensioni" && renderRecensioni()}
+        {activeTab === "seo" && renderSeo()}
       </div>
 
       <DeployToast sha={deploySha} onDone={() => setDeploySha(null)} />
