@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useAdminLanguage } from "@/i18n/AdminLanguageContext";
 import { adminLocaleOrder, adminTranslations, type AdminLocaleCode } from "@/i18n/admin";
 import type { CalendarSyncResult } from "@/app/api/admin/calendar-sync/route";
@@ -42,6 +43,8 @@ const LABELS = {
     langTitle: "Lingua del pannello",
     langDesc: "La lingua di questo pannello di amministrazione. Il sito pubblico resta multilingua a parte.",
     langNote: "Lingua aggiornata — avrà effetto tra qualche secondo, al riaggiornamento del sito.",
+    policyCard: "Regole di prenotazione", policyCardDesc: "Acconto, cancellazione, tassa di soggiorno, orari di check-in/out.",
+    stripeCard: "Pagamenti (Stripe)", stripeCardDesc: "Chiavi, modalità test/produzione, sicurezza.",
   },
   en: {
     title: "Calendar sync",
@@ -67,6 +70,8 @@ const LABELS = {
     langTitle: "Panel language",
     langDesc: "The language of this admin panel. The public site stays multilingual separately.",
     langNote: "Language updated — it takes effect in a few seconds, after the site redeploys.",
+    policyCard: "Booking rules", policyCardDesc: "Deposit, cancellation, city tax, check-in/out times.",
+    stripeCard: "Payments (Stripe)", stripeCardDesc: "Keys, test/live mode, security.",
   },
   es: {
     title: "Sincronización de calendarios",
@@ -92,6 +97,8 @@ const LABELS = {
     langTitle: "Idioma del panel",
     langDesc: "El idioma de este panel de administración. El sitio público sigue siendo multilingüe.",
     langNote: "Idioma actualizado — tendrá efecto en unos segundos, tras la actualización del sitio.",
+    policyCard: "Reglas de reserva", policyCardDesc: "Depósito, cancelación, tasa turística, horarios de entrada/salida.",
+    stripeCard: "Pagos (Stripe)", stripeCardDesc: "Claves, modo prueba/producción, seguridad.",
   },
   fr: {
     title: "Synchronisation des calendriers",
@@ -117,6 +124,8 @@ const LABELS = {
     langTitle: "Langue du panneau",
     langDesc: "La langue de ce panneau d'administration. Le site public reste multilingue séparément.",
     langNote: "Langue mise à jour — effet dans quelques secondes, après le redéploiement du site.",
+    policyCard: "Règles de réservation", policyCardDesc: "Acompte, annulation, taxe de séjour, horaires d'arrivée/départ.",
+    stripeCard: "Paiements (Stripe)", stripeCardDesc: "Clés, mode test/production, sécurité.",
   },
 } as const;
 
@@ -210,6 +219,26 @@ export default function SettingsManager() {
 
   return (
     <div className="space-y-6">
+      {/* Collegamenti alle altre aree di configurazione (spostate qui dalla nav) */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <Link href="/admin/policy" className="group flex items-center justify-between rounded-lg border border-gold/40 bg-card p-5 transition hover:bg-gold/5">
+          <div>
+            <h3 className="font-serif-display text-lg italic text-foreground">{L.policyCard}</h3>
+            <p className="mt-0.5 text-sm text-foreground/60">{L.policyCardDesc}</p>
+          </div>
+          <span className="text-gold transition group-hover:translate-x-0.5">→</span>
+        </Link>
+        {!DEMO && (
+          <Link href="/admin/stripe" className="group flex items-center justify-between rounded-lg border border-gold/40 bg-card p-5 transition hover:bg-gold/5">
+            <div>
+              <h3 className="font-serif-display text-lg italic text-foreground">{L.stripeCard}</h3>
+              <p className="mt-0.5 text-sm text-foreground/60">{L.stripeCardDesc}</p>
+            </div>
+            <span className="text-gold transition group-hover:translate-x-0.5">→</span>
+          </Link>
+        )}
+      </div>
+
       {/* Lingua del pannello admin */}
       <div className="rounded-lg border border-gold/40 bg-card p-5 space-y-3">
         <div>
