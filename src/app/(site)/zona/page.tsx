@@ -6,6 +6,10 @@ import { CONTENT } from "@/lib/siteContent";
 
 const AreaMap = dynamic(() => import("@/components/AreaMap"), { ssr: false });
 
+// Un colore distinto per ogni segnalibro, così si riconoscono sulla mappa
+// (l'appartamento resta blu). Oltre il quinto la palette si ricicla.
+const BOOKMARK_COLORS = ["#dc2626", "#7c3aed", "#16a34a", "#8b4513", "#ca8a04"];
+
 function Diamond() {
   return <div className="divider-diamond text-gold">◆</div>;
 }
@@ -26,7 +30,7 @@ export default function ZonaPage() {
           <AreaMap
             markers={[
               { lat: CONTENT.mapLat, lon: CONTENT.mapLng, label: t.area.mapApartmentLabel, color: "#2563eb" },
-              ...CONTENT.mapBookmarks.map((b) => ({ lat: b.lat, lon: b.lng, label: b.label, color: "#dc2626" })),
+              ...CONTENT.mapBookmarks.map((b, i) => ({ lat: b.lat, lon: b.lng, label: b.label, color: BOOKMARK_COLORS[i % BOOKMARK_COLORS.length] })),
             ]}
           />
         </div>
@@ -35,9 +39,9 @@ export default function ZonaPage() {
             <span className="inline-block h-3 w-3 rounded-full border border-white" style={{ backgroundColor: "#2563eb" }} />
             {t.area.mapApartmentLabel}
           </span>
-          {CONTENT.mapBookmarks.map((b) => (
+          {CONTENT.mapBookmarks.map((b, i) => (
             <span key={b.label} className="flex items-center gap-2">
-              <span className="inline-block h-3 w-3 rounded-full border border-white" style={{ backgroundColor: "#dc2626" }} />
+              <span className="inline-block h-3 w-3 rounded-full border border-white" style={{ backgroundColor: BOOKMARK_COLORS[i % BOOKMARK_COLORS.length] }} />
               {b.label}
             </span>
           ))}

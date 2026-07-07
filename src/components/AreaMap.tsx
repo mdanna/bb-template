@@ -76,5 +76,5 @@ export default function AreaMap({ markers, bookmarks, centerLat, centerLng }: Pr
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return <div ref={containerRef} className="relative isolate z-0 h-80 w-full" />;
+  return <div ref={containerRef} className="relative isolate z-0 h-[40rem] w-full" />;
 }
