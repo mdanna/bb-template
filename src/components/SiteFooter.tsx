@@ -2,14 +2,15 @@
 
 import { useLanguage } from "@/i18n/LanguageContext";
 import { CONTENT } from "@/lib/siteContent";
+import { PORTAL_LINK } from "@/lib/portalLink";
 import type { LocaleCode } from "@/i18n/index";
 
 // Se questa struttura fa parte di un portale multi-struttura, mostriamo un link che
-// rimanda alla home del portale ("scopri tutte le nostre dimore"). Riusa lo stesso
-// NEXT_PUBLIC_PORTAL_URL dello switcher admin; NEXT_PUBLIC_PORTAL_NAME (opzionale) è
-// il nome del brand. Assenti = struttura singola → nessun link (retro-compatibile).
-const PORTAL_URL = process.env.NEXT_PUBLIC_PORTAL_URL;
-const PORTAL_NAME = process.env.NEXT_PUBLIC_PORTAL_NAME;
+// rimanda alla home del portale ("scopri tutte le nostre dimore"). L'appartenenza è
+// in src/data/portal-link.json (scritto dall'handshake, di proprietà del sito), con
+// fallback all'env. Assente = struttura singola → nessun link (retro-compatibile).
+const PORTAL_URL = PORTAL_LINK.url;
+const PORTAL_NAME = PORTAL_LINK.name;
 
 const PORTAL_LABEL: Record<LocaleCode, string> = {
   it: "Scopri tutte le nostre dimore",
