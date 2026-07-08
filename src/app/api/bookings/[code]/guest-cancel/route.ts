@@ -50,9 +50,14 @@ export async function POST(
   const depositAmount = Number(booking.deposit_amount ?? 0);
   const balancePaid = booking.balance_paid_at != null ? Number(booking.balance_due ?? 0) : 0;
   const totalPaid = depositAmount + balancePaid;
+  // Opzione A: la tassa di soggiorno online è stata incassata con l'anticipo →
+  // va rimborsata. Prenotazioni vecchie (flag null/false): tassa mai incassata →
+  // cityTax=0, nessun rimborso tassa, comportamento invariato.
+  const cityTaxCollected =
+    booking.city_tax_online === true ? Number(booking.city_tax ?? 0) : 0;
   const refund = wasPaid
-    ? computeRefund(totalPaid, daysUntilCheckin)
-    : { eligible: false, amount: 0, reason: "none" as const };
+    ? computeRefund(totalPaid, daysUntilCheckin, cityTaxCollected)
+    : { eligible: false, amount: 0, reason: "none" as const, cityTaxRefund: 0 };
 
   try {
     await sendGuestCancellationEmail({

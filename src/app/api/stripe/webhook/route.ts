@@ -70,6 +70,7 @@ export async function POST(request: Request) {
               totalPrice: booking.total_price,
               balanceDue: booking.balance_due,
               cityTax: booking.city_tax,
+              cityTaxOnline: booking.city_tax_online,
               guests: booking.guests,
               locale: (booking.locale as import("@/i18n/index").LocaleCode) ?? "it",
             });
@@ -89,6 +90,7 @@ export async function POST(request: Request) {
               depositAmount: booking.deposit_amount,
               balanceDue: booking.balance_due,
               cityTax: booking.city_tax,
+              cityTaxOnline: booking.city_tax_online,
               paymentMethod: "Carta di credito (saldo online)",
             });
           } catch (err) {

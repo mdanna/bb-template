@@ -93,6 +93,8 @@ export interface Translation {
     depositDueNow: string;
     balanceDueAtCheckin: string; // template, use {amount}
     cityTaxNote: string; // template, use {amount}
+    cityTaxLineItem: string; // nome voce tassa di soggiorno (line item Stripe / ricevuta PDF)
+    cityTaxOnlineNote: string; // template {amount} — variante online: tassa inclusa nel pagamento come voce separata
     refundPolicy: string;
     depositOnlyButton: string;
     fullAmountButton: string;
@@ -156,6 +158,7 @@ export interface Translation {
     balanceSectionTitle: string;
     balanceDueText: string; // template {amount}
     balanceCityTax: string; // template {amount}
+    balanceCityTaxOnline: string; // template {amount} — variante online: tassa già inclusa nell'anticipo online
     payBalanceButton: string;
     cancelSectionTitle: string;
     cancelPolicyTitle: string;
@@ -168,6 +171,7 @@ export interface Translation {
     cancelNoneContactBefore: string;
     cancelNoneContactAfter: string;
     cancelRefundCredit: string;
+    cancelCityTaxRefund: string; // template {amount} — riga separata: tassa online rimborsata per intero (tutte le finestre)
     cancelConfirmPrompt: string;
     cancelConfirmYes: string;
     cancelConfirmNo: string;
@@ -197,6 +201,7 @@ export interface Translation {
     depositPaid: string;
     balanceDueAtCheckin: string; // template, use {amount}
     cityTaxNote: string; // template, use {amount}
+    cityTaxOnlineNote: string; // template {amount} — variante online: tassa inclusa nel pagamento online come voce separata
     refundPolicy: string;
   };
 }

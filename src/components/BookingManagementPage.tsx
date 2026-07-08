@@ -42,6 +42,7 @@ interface BookingData {
   deposit_amount: number | null;
   balance_due: number | null;
   city_tax: number | null;
+  city_tax_online: boolean | null;
   paid_at: string | null;
   balance_paid_at: string | null;
   stripe_payment_intent_id: string | null;
@@ -158,21 +159,33 @@ export default function BookingManagementPage({ code, token }: { code: string; t
   const days = daysUntil(booking.checkin);
   const depositNum = Number(booking.deposit_amount ?? 0);
   const balancePaid = !!booking.balance_paid_at && Number(booking.balance_due ?? 0) > 0;
-  const totalPaid = balancePaid
+  // Importo alloggio effettivamente incassato (anticipo [+ saldo]) — SENZA tassa di soggiorno.
+  const accommodationPaid = balancePaid
     ? depositNum + Number(booking.balance_due ?? 0)
     : depositNum;
+  // Opzione A: se city_tax_online la tassa è stata incassata online con l'anticipo → concorre al
+  // totale pagato ed è interamente rimborsabile (non dovuta per notti non godute). Vecchie
+  // prenotazioni (null/false): tassa mai incassata online → nessun impatto (comportamento invariato).
+  const cityTaxOnline = booking.city_tax_online === true;
+  const cityTaxNum = Number(booking.city_tax ?? 0);
+  const totalPaid = accommodationPaid + (cityTaxOnline ? cityTaxNum : 0);
 
   const refundReason: "full" | "half" | "none" =
     !wasPaid ? "none"
     : days > CANCEL_FULL_REFUND_DAYS ? "full"
     : days >= CANCEL_HALF_REFUND_DAYS ? "half"
     : "none";
-  const fee = refundReason !== "none" ? Math.round(totalPaid * CANCEL_FEE_PERCENT) / 100 : 0;
-  const grossHalf = Math.round(totalPaid * CANCEL_PARTIAL_REFUND_PCT) / 100; // rimborso lordo (prima della trattenuta)
-  const refundAmount =
-    refundReason === "full" ? totalPaid - fee
+  // La policy di cancellazione (trattenuta / quota parziale) si applica SOLO all'alloggio.
+  const fee = refundReason !== "none" ? Math.round(accommodationPaid * CANCEL_FEE_PERCENT) / 100 : 0;
+  const grossHalf = Math.round(accommodationPaid * CANCEL_PARTIAL_REFUND_PCT) / 100; // rimborso lordo alloggio (prima della trattenuta)
+  const accommodationRefund =
+    refundReason === "full" ? accommodationPaid - fee
     : refundReason === "half" ? grossHalf - fee
     : 0;
+  // La tassa di soggiorno incassata online viene rimborsata per intero (mai ridotta dalla policy),
+  // in TUTTE le finestre — anche "none" — coerentemente col backend (computeRefund/guest-cancel).
+  const cityTaxRefund = wasPaid && cityTaxOnline ? cityTaxNum : 0;
+  const refundAmount = accommodationRefund + cityTaxRefund;
 
   const statusLabel: Record<string, string> = {
     pending: m.statusPending,
@@ -287,7 +300,10 @@ export default function BookingManagementPage({ code, token }: { code: string; t
           </p>
           {booking.city_tax != null && Number(booking.city_tax) > 0 && (
             <p className="text-xs text-foreground/50">
-              {format(m.balanceCityTax, { amount: Number(booking.city_tax).toFixed(2) })}
+              {format(
+                cityTaxOnline ? m.balanceCityTaxOnline : m.balanceCityTax,
+                { amount: Number(booking.city_tax).toFixed(2) },
+              )}
             </p>
           )}
           <Link
@@ -320,12 +336,15 @@ export default function BookingManagementPage({ code, token }: { code: string; t
                   </p>
                   <p>
                     {format(m.cancelFullRefundDetail, {
-                      paid: totalPaid.toFixed(2),
+                      paid: accommodationPaid.toFixed(2),
                       fee_pct: String(CANCEL_FEE_PERCENT),
                       fee: fee.toFixed(2),
-                      refund: refundAmount.toFixed(2),
+                      refund: accommodationRefund.toFixed(2),
                     })}
                   </p>
+                  {cityTaxRefund > 0 && (
+                    <p>{format(m.cancelCityTaxRefund, { amount: cityTaxRefund.toFixed(2) })}</p>
+                  )}
                   <p className="text-foreground/50 text-xs">{m.cancelRefundCredit}</p>
                 </>
               ) : refundReason === "half" ? (
@@ -340,14 +359,17 @@ export default function BookingManagementPage({ code, token }: { code: string; t
                   </p>
                   <p>
                     {format(m.cancelHalfRefundDetail, {
-                      paid: totalPaid.toFixed(2),
+                      paid: accommodationPaid.toFixed(2),
                       pct: String(CANCEL_PARTIAL_REFUND_PCT),
                       gross: grossHalf.toFixed(2),
                       fee_pct: String(CANCEL_FEE_PERCENT),
                       fee: fee.toFixed(2),
-                      refund: refundAmount.toFixed(2),
+                      refund: accommodationRefund.toFixed(2),
                     })}
                   </p>
+                  {cityTaxRefund > 0 && (
+                    <p>{format(m.cancelCityTaxRefund, { amount: cityTaxRefund.toFixed(2) })}</p>
+                  )}
                   <p className="text-foreground/50 text-xs">{m.cancelRefundCredit}</p>
                 </>
               ) : (
@@ -358,6 +380,9 @@ export default function BookingManagementPage({ code, token }: { code: string; t
                       threshold: String(CANCEL_HALF_REFUND_DAYS),
                     })}
                   </p>
+                  {cityTaxRefund > 0 && (
+                    <p>{format(m.cancelCityTaxRefund, { amount: cityTaxRefund.toFixed(2) })}</p>
+                  )}
                   <p className="text-foreground/50 text-xs">
                     {m.cancelNoneContactBefore}{" "}
                     <a href={`mailto:${CONTENT.email}`} className="text-gold underline">

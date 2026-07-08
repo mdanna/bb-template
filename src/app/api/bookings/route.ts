@@ -130,8 +130,8 @@ export async function POST(request: Request) {
 
   await pool.query(
     `INSERT INTO bookings
-      (code, first_name, last_name, email, phone, guests, checkin, checkout, total_price, message, status, locale, deposit_amount, city_tax, balance_due, deposit_rate)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'pending',$11,$12,$13,$14,$15)`,
+      (code, first_name, last_name, email, phone, guests, checkin, checkout, total_price, message, status, locale, deposit_amount, city_tax, balance_due, deposit_rate, city_tax_online)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'pending',$11,$12,$13,$14,$15,true)`,
     [
       code,
       body.firstName,

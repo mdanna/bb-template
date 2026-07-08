@@ -17,6 +17,7 @@ interface BookingSummary {
   deposit_amount: string | null;
   balance_due: string | null;
   city_tax: string | null;
+  city_tax_online: boolean | null;
   status: "pending" | "approved" | "rejected" | "completed";
   locale: LocaleCode;
 }
@@ -74,9 +75,13 @@ export default function PaymentPage({ code }: { code: string }) {
 
   const totalPrice = booking?.total_price ? Number(booking.total_price) : 0;
   const cityTax = booking?.city_tax ? Number(booking.city_tax) : 0;
+  // Opzione A: se city_tax_online la tassa è incassata ORA insieme all'anticipo (voce separata Stripe).
+  // Se null/false = vecchio comportamento (tassa riscossa al check-in, mai online).
+  const cityTaxOnline = booking?.city_tax_online === true && cityTax > 0;
   const effectivePct = payFull ? 100 : depositPct;
   const depositAmount = totalPrice > 0 ? Math.round(totalPrice * effectivePct / 100) : 0;
-  const balanceRemaining = totalPrice - depositAmount; // city tax excluded — collected at check-in
+  const balanceRemaining = totalPrice - depositAmount; // city tax excluded — pagata ora (online) o al check-in (vecchio)
+  const dueNowTotal = depositAmount + (cityTaxOnline ? cityTax : 0);
 
   async function goToCheckout() {
     setRedirecting(true);
@@ -202,10 +207,26 @@ export default function PaymentPage({ code }: { code: string }) {
             <div className="rounded-md bg-foreground/5 p-4 space-y-1.5 text-sm">
               <div className="flex justify-between">
                 <span className="text-foreground/70">
-                  {payFull ? t.payment.totalDueNow : t.payment.depositDueNow}
+                  {cityTaxOnline
+                    ? (payFull ? t.payment.totalStayPrice : t.payment.depositDueNow)
+                    : (payFull ? t.payment.totalDueNow : t.payment.depositDueNow)}
                 </span>
-                <span className="font-semibold text-gold">€{depositAmount.toFixed(2)}</span>
+                <span className={cityTaxOnline ? "text-foreground/70" : "font-semibold text-gold"}>
+                  €{depositAmount.toFixed(2)}
+                </span>
               </div>
+              {cityTaxOnline && (
+                <>
+                  <div className="flex justify-between text-foreground/70">
+                    <span>{t.payment.cityTaxLineItem}</span>
+                    <span>€{cityTax.toFixed(2)}</span>
+                  </div>
+                  <div className="border-t border-foreground/10 pt-1.5 flex justify-between">
+                    <span className="text-foreground/70">{t.payment.totalDueNow}</span>
+                    <span className="font-semibold text-gold">€{dueNowTotal.toFixed(2)}</span>
+                  </div>
+                </>
+              )}
               {!payFull && balanceRemaining > 0 && (
                 <div className="border-t border-foreground/10 pt-1.5 flex justify-between text-foreground/70">
                   <span>{t.payment.balanceLabel}</span>
@@ -216,7 +237,10 @@ export default function PaymentPage({ code }: { code: string }) {
 
             {cityTax > 0 && (
               <p className="text-xs text-foreground/50">
-                {format(t.payment.cityTaxNote, { amount: cityTax.toFixed(2) })}
+                {format(
+                  cityTaxOnline ? t.payment.cityTaxOnlineNote : t.payment.cityTaxNote,
+                  { amount: cityTax.toFixed(2) },
+                )}
               </p>
             )}
             <p className="text-xs text-foreground/50">{t.payment.refundPolicy}</p>

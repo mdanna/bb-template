@@ -125,4 +125,44 @@ describe("computeRefund", () => {
     const { eligible } = computeRefund(deposit, -5);
     expect(eligible).toBe(false);
   });
+
+  it("senza cityTax il comportamento è invariato (backward compatible)", () => {
+    const { cityTaxRefund } = computeRefund(deposit, CANCEL_FULL_REFUND_DAYS + 1);
+    expect(cityTaxRefund).toBe(0);
+  });
+
+  it("con cityTax online: rimborso completo = anticipo meno trattenuta PIÙ tassa intera", () => {
+    const cityTax = 12;
+    const fee = Math.round(deposit * CANCEL_FEE_PERCENT) / 100;
+    const { eligible, amount, cityTaxRefund } = computeRefund(
+      deposit,
+      CANCEL_FULL_REFUND_DAYS + 1,
+      cityTax
+    );
+    expect(eligible).toBe(true);
+    expect(cityTaxRefund).toBe(cityTax);
+    expect(amount).toBe(deposit - fee + cityTax);
+  });
+
+  it("con cityTax online: rimborso parziale include comunque la tassa intera", () => {
+    const cityTax = 12;
+    const fee = Math.round(deposit * CANCEL_FEE_PERCENT) / 100;
+    const partial = Math.round(deposit * CANCEL_PARTIAL_REFUND_PCT) / 100;
+    const { amount, cityTaxRefund } = computeRefund(deposit, CANCEL_HALF_REFUND_DAYS, cityTax);
+    expect(cityTaxRefund).toBe(cityTax);
+    expect(amount).toBe(partial - fee + cityTax);
+  });
+
+  it("con cityTax online: anche fuori finestra rimborso anticipo, la tassa è rimborsata", () => {
+    const cityTax = 12;
+    const { eligible, amount, reason, cityTaxRefund } = computeRefund(
+      deposit,
+      CANCEL_HALF_REFUND_DAYS - 1,
+      cityTax
+    );
+    expect(reason).toBe("none"); // nessun rimborso anticipo
+    expect(eligible).toBe(true); // ma c'è comunque la tassa da rimborsare
+    expect(cityTaxRefund).toBe(cityTax);
+    expect(amount).toBe(cityTax);
+  });
 });

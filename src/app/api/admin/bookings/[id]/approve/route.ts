@@ -100,6 +100,7 @@ export async function POST(
       depositAmount: booking.deposit_amount,
       balanceDue: booking.balance_due,
       cityTax: booking.city_tax,
+      cityTaxOnline: booking.city_tax_online,
       guests: booking.guests,
     });
   } catch (err) {

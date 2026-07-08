@@ -90,6 +90,7 @@ export async function sendHostPaymentNotification(params: {
   depositAmount: number | null;
   balanceDue: number | null;
   cityTax: number | null;
+  cityTaxOnline?: boolean | null;
   paymentMethod: string;
 }) {
   const {
@@ -104,8 +105,14 @@ export async function sendHostPaymentNotification(params: {
     depositAmount,
     balanceDue,
     cityTax,
+    cityTaxOnline,
     paymentMethod,
   } = params;
+  // Opzione A: se la tassa è stata incassata online (voce separata dell'anticipo) la mostriamo
+  // come già pagata; altrimenti resta da riscuotere al check-in (comportamento storico).
+  const cityTaxLabel = cityTaxOnline
+    ? "Tassa di soggiorno (inclusa nel pagamento)"
+    : "Tassa di soggiorno (al check-in)";
   const balanceRow: [string, string, "amber"?][] = balanceDue != null && balanceDue > 0
     ? [["Saldo da incassare (entro 2 gg dal check-in)", `€${balanceDue}`, "amber"]]
     : balanceDue === 0 ? [["Pagamento", "Completo ✓"]] : [];
@@ -118,7 +125,7 @@ export async function sendHostPaymentNotification(params: {
     ...(totalPrice ? [["Totale soggiorno", `€${totalPrice}`] as [string,string]] : []),
     ...(depositAmount ? [["Anticipo incassato", `€${depositAmount}`] as [string,string]] : []),
     ...balanceRow,
-    ...(cityTax != null ? [["Tassa di soggiorno (al check-in)", `€${cityTax}`] as [string,string]] : []),
+    ...(cityTax != null ? [[cityTaxLabel, `€${cityTax}`] as [string,string]] : []),
     ["Metodo di pagamento", paymentMethod],
   ];
   await send({
@@ -132,7 +139,7 @@ export async function sendHostPaymentNotification(params: {
       totalPrice ? `Totale soggiorno: €${totalPrice}` : null,
       depositAmount ? `Anticipo incassato ora: €${depositAmount}` : null,
       balanceDue != null && balanceDue > 0 ? `Saldo da incassare entro ${POLICIES.balanceDueDays} giorni dal check-in: €${balanceDue}` : balanceDue === 0 ? `Pagamento completo — nessun saldo residuo` : null,
-      cityTax != null ? `Tassa di soggiorno da riscuotere al check-in: €${cityTax}` : null,
+      cityTax != null ? (cityTaxOnline ? `Tassa di soggiorno inclusa nel pagamento online: €${cityTax}` : `Tassa di soggiorno da riscuotere al check-in: €${cityTax}`) : null,
       `Metodo di pagamento: ${paymentMethod}`,
       "", `Dettagli su: ${siteUrl()}/admin/bookings`,
     ].filter(Boolean).join("\n"),
@@ -178,6 +185,7 @@ export async function sendApprovalEmail(params: {
   depositAmount: number | null;
   balanceDue: number | null;
   cityTax: number | null;
+  cityTaxOnline?: boolean | null;
   guests?: number;
 }) {
   const payUrl = `${siteUrl()}/pay/${params.code}?t=${encodeURIComponent(generateAccessToken(params.code))}`;
@@ -185,11 +193,16 @@ export async function sendApprovalEmail(params: {
   const { subject, text } = getEmailTemplates(params.locale).approval({
     code: params.code, payUrl, manageUrl,
     totalPrice: params.totalPrice, depositAmount: params.depositAmount,
-    balanceDue: params.balanceDue, cityTax: params.cityTax, guests: params.guests,
+    balanceDue: params.balanceDue, cityTax: params.cityTax,
+    cityTaxOnline: params.cityTaxOnline, guests: params.guests,
   });
+  // Opzione A: online = tassa già inclusa nel pagamento (voce separata); altrimenti al check-in.
+  const cityTaxLabel = params.cityTaxOnline
+    ? "Tassa di soggiorno (inclusa nel pagamento)"
+    : "Tassa di soggiorno (al check-in)";
   const priceRows: [string, string][] = [
     ...(params.totalPrice != null ? [["Totale soggiorno", `€${params.totalPrice}`] as [string,string]] : []),
-    ...(params.cityTax != null ? [["Tassa di soggiorno (al check-in)", `€${params.cityTax}`] as [string,string]] : []),
+    ...(params.cityTax != null ? [[cityTaxLabel, `€${params.cityTax}`] as [string,string]] : []),
   ];
   const html = buildHtml(
     title("Prenotazione confermata") +
@@ -213,6 +226,7 @@ export async function sendPaymentConfirmationEmail(params: {
   depositAmount: number | null;
   balanceDue: number | null;
   cityTax: number | null;
+  cityTaxOnline?: boolean | null;
   guests: number;
   paymentMethod: string;
   locale: LocaleCode;
@@ -225,10 +239,15 @@ export async function sendPaymentConfirmationEmail(params: {
     checkin: fmtDate(params.checkin), checkout: fmtDate(params.checkout),
     totalPrice: params.totalPrice, depositAmount: params.depositAmount,
     balanceDue: params.balanceDue, cityTax: params.cityTax,
+    cityTaxOnline: params.cityTaxOnline,
     guests: params.guests, paymentMethod: params.paymentMethod,
     confirmationUrl, manageUrl,
   });
   const isFullPayment = !params.balanceDue || Number(params.balanceDue) === 0;
+  // Opzione A: online = tassa già inclusa nel pagamento (voce separata); altrimenti al check-in.
+  const cityTaxLabel = params.cityTaxOnline
+    ? "Tassa di soggiorno (inclusa nel pagamento)"
+    : "Tassa di soggiorno (al check-in)";
   const rows: [string, string][] = [
     ["Check-in", fmtDate(params.checkin)],
     ["Check-out", fmtDate(params.checkout)],
@@ -236,7 +255,7 @@ export async function sendPaymentConfirmationEmail(params: {
     ...(params.totalPrice != null ? [["Totale soggiorno", `€${params.totalPrice}`] as [string,string]] : []),
     [isFullPayment ? "Totale pagato" : "Anticipo pagato", `€${params.depositAmount}`],
     ...(params.balanceDue && Number(params.balanceDue) > 0 ? [["Saldo (entro 2 gg dal check-in)", `€${params.balanceDue}`] as [string,string]] : []),
-    ...(params.cityTax != null ? [["Tassa di soggiorno (al check-in)", `€${params.cityTax}`] as [string,string]] : []),
+    ...(params.cityTax != null ? [[cityTaxLabel, `€${params.cityTax}`] as [string,string]] : []),
     ["Metodo di pagamento", params.paymentMethod],
   ];
   const html = buildHtml(
@@ -404,20 +423,24 @@ export async function sendBalanceReminderEmail(params: {
   checkout: string | Date;
   balanceDue: number | null;
   cityTax: number | null;
+  cityTaxOnline?: boolean | null;
   payBalanceUrl: string;
   locale: LocaleCode;
 }) {
-  const { to, code, firstName, checkin, checkout, balanceDue, cityTax, payBalanceUrl, locale } = params;
+  const { to, code, firstName, checkin, checkout, balanceDue, cityTax, cityTaxOnline, payBalanceUrl, locale } = params;
   const s = getExtraEmailStrings(locale);
   const ci = fmtDate(checkin);
   const co = fmtDate(checkout);
   const balanceStr = balanceDue != null && balanceDue > 0 ? `€${balanceDue}` : null;
+  // Opzione A: se la tassa è già stata incassata online (con l'acconto) NON va ricordata nel
+  // promemoria del saldo — comparirebbe come "da riscuotere al check-in", cosa ormai errata.
+  const showCityTax = cityTax != null && cityTax > 0 && !cityTaxOnline;
   const html = buildHtml(
     title(s.balanceReminderSubject(code)) +
     para(s.balanceReminderBody(firstName, code, ci)) +
     infoBox(
       para(balanceStr ? s.balanceReminderAmount(balanceStr) : s.balanceReminderNoDue) +
-      (cityTax ? smallPara(s.balanceReminderCityTax(String(cityTax))) : "")
+      (showCityTax ? smallPara(s.balanceReminderCityTax(String(cityTax))) : "")
     ) +
     button(s.balanceReminderButton, payBalanceUrl) +
     divider() +
@@ -429,7 +452,7 @@ export async function sendBalanceReminderEmail(params: {
     balanceStr ? s.balanceReminderAmount(balanceStr) : s.balanceReminderNoDue, "",
     payBalanceUrl, "",
     s.balanceReminderAlternative,
-    cityTax ? s.balanceReminderCityTax(String(cityTax)) : null,
+    showCityTax ? s.balanceReminderCityTax(String(cityTax)) : null,
     "", `${HOST_EMAIL} · +39 335 7573294`, "",
     s.houseName,
     `Check-in: ${ci} · Check-out: ${co}`,
@@ -452,20 +475,24 @@ export async function sendBalanceReceiptEmail(params: {
   totalPrice: number | null;
   balanceDue: number | null;
   cityTax: number | null;
+  cityTaxOnline?: boolean | null;
   guests: number;
   locale: LocaleCode;
 }) {
-  const { to, code, firstName, lastName, checkin, checkout, totalPrice, balanceDue, cityTax, guests, locale } = params;
+  const { to, code, firstName, lastName, checkin, checkout, totalPrice, balanceDue, cityTax, cityTaxOnline, guests, locale } = params;
   const s = getExtraEmailStrings(locale);
   const token = generateAccessToken(code);
   const receiptUrl = `${siteUrl()}/api/bookings/${code}/receipt?t=${encodeURIComponent(token)}`;
   const manageUrl = `${siteUrl()}/gestione-prenotazione/${code}?t=${encodeURIComponent(token)}`;
+  // Opzione A: la tassa di soggiorno online è stata incassata con l'acconto, NON con il saldo,
+  // quindi non va ripetuta nella ricevuta del saldo. Per le prenotazioni vecchie resta invariata.
+  const showCityTax = cityTax != null && !cityTaxOnline;
   const rows: [string, string][] = [
     [s.balanceReceiptCheckin, fmtDate(checkin)],
     [s.balanceReceiptCheckout, fmtDate(checkout)],
     ...(totalPrice != null ? [[s.balanceReceiptTotalStay, `€${totalPrice}`] as [string,string]] : []),
     ...(balanceDue != null ? [[s.balanceReceiptBalancePaid, `€${balanceDue}`] as [string,string]] : []),
-    ...(cityTax != null ? [[s.balanceReceiptCityTax(guests), `€${cityTax}`] as [string,string]] : []),
+    ...(showCityTax ? [[s.balanceReceiptCityTax(guests), `€${cityTax}`] as [string,string]] : []),
   ];
   const html = buildHtml(
     title(s.balanceReceiptSubject(code)) +
@@ -478,7 +505,7 @@ export async function sendBalanceReceiptEmail(params: {
     s.balanceReceiptGreeting(firstName, lastName, code), "",
     totalPrice ? `  ${s.balanceReceiptTotalStay}: €${totalPrice}` : null,
     balanceDue != null ? `  ${s.balanceReceiptBalancePaid}: €${balanceDue}` : null,
-    cityTax != null ? `  ${s.balanceReceiptCityTax(guests)}: €${cityTax}` : null,
+    showCityTax ? `  ${s.balanceReceiptCityTax(guests)}: €${cityTax}` : null,
     "", `${s.balanceReceiptCheckin}: ${fmtDate(checkin)}`,
     `${s.balanceReceiptCheckout}: ${fmtDate(checkout)}`,
     "", `${s.balanceReceiptButton}: ${receiptUrl}`,

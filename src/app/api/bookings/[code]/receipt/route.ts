@@ -17,6 +17,7 @@ type PdfLabels = {
   locatore: string; immobile: string; cfLocatore: string;
   code: string; guest: string; guests: string;
   checkin: string; checkout: string; total: string;
+  cityTax: string;
   method: string; paidOn: string; thanks: string; na: string;
 };
 
@@ -33,6 +34,7 @@ const PDF_LABELS: Record<string, PdfLabels> = {
     checkin: "Check-in",
     checkout: "Check-out",
     total: "Importo totale",
+    cityTax: "Tassa di soggiorno",
     method: "Metodo di pagamento",
     paidOn: "Data pagamento",
     thanks: `Grazie per aver scelto ${CONTENT.siteTitle.it}.`,
@@ -50,6 +52,7 @@ const PDF_LABELS: Record<string, PdfLabels> = {
     checkin: "Check-in",
     checkout: "Check-out",
     total: "Total amount",
+    cityTax: "City tax",
     method: "Payment method",
     paidOn: "Payment date",
     thanks: `Thank you for choosing ${CONTENT.siteTitle.en}.`,
@@ -67,6 +70,7 @@ const PDF_LABELS: Record<string, PdfLabels> = {
     checkin: "Arrivée",
     checkout: "Départ",
     total: "Montant total",
+    cityTax: "Taxe de séjour",
     method: "Méthode de paiement",
     paidOn: "Date de paiement",
     thanks: `Merci d'avoir choisi ${CONTENT.siteTitle.fr}.`,
@@ -84,6 +88,7 @@ const PDF_LABELS: Record<string, PdfLabels> = {
     checkin: "Anreise",
     checkout: "Abreise",
     total: "Gesamtbetrag",
+    cityTax: "Kurtaxe",
     method: "Zahlungsmethode",
     paidOn: "Zahlungsdatum",
     thanks: `Vielen Dank, dass Sie sich für ${CONTENT.siteTitle.de} entschieden haben.`,
@@ -101,6 +106,7 @@ const PDF_LABELS: Record<string, PdfLabels> = {
     checkin: "Llegada",
     checkout: "Salida",
     total: "Importe total",
+    cityTax: "Tasa turística",
     method: "Método de pago",
     paidOn: "Fecha de pago",
     thanks: `Gracias por elegir ${CONTENT.siteTitle.es}.`,
@@ -118,6 +124,7 @@ const PDF_LABELS: Record<string, PdfLabels> = {
     checkin: "Check-in",
     checkout: "Check-out",
     total: "Valor total",
+    cityTax: "Taxa turística",
     method: "Método de pagamento",
     paidOn: "Data do pagamento",
     thanks: `Obrigado por escolher ${CONTENT.siteTitle.pt}.`,
@@ -271,6 +278,11 @@ export async function GET(
       ? getMethodLabel(bookingLocale, booking.payment_method)
       : (booking.payment_method ?? L.na);
 
+  // Opzione A: quando la tassa di soggiorno è stata incassata online (voce separata dell'anticipo)
+  // la ricevuta deve elencarla esplicitamente. Per le prenotazioni con flag false/null la tassa è
+  // riscossa al check-in con ricevuta dedicata, quindi qui non compare (comportamento storico).
+  const showCityTax = booking.city_tax_online === true && Number(booking.city_tax) > 0;
+
   const rows: [string, string][] = [
     [L.code, booking.code],
     [L.guest, `${booking.first_name} ${booking.last_name}`],
@@ -278,6 +290,7 @@ export async function GET(
     [L.checkin, formatFriendlyDateOnly(booking.checkin, dateLocale)],
     [L.checkout, formatFriendlyDateOnly(booking.checkout, dateLocale)],
     [L.total, booking.total_price ? `€ ${booking.total_price}` : L.na],
+    ...(showCityTax ? [[L.cityTax, `€ ${booking.city_tax}`] as [string, string]] : []),
     [L.method, method],
     [L.paidOn, booking.paid_at ? formatFriendlyDate(booking.paid_at, dateLocale) : L.na],
   ];

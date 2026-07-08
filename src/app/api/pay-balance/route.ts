@@ -49,7 +49,10 @@ export async function POST(request: Request) {
             unit_amount: Math.round(balanceDue * 100),
             product_data: {
               name: `Saldo soggiorno · ${CONTENT.siteTitle.it} · ${booking.code}`,
-              description: `Check-in ${booking.checkin} → Check-out ${booking.checkout} · Include tassa di soggiorno €${booking.city_tax}`,
+              // La tassa di soggiorno NON è mai sul saldo (opzione A: online è
+              // sull'anticipo, altrimenti riscossa al check-in). Descrizione
+              // corretta senza riferimento alla tassa.
+              description: `Check-in ${booking.checkin} → Check-out ${booking.checkout} · Saldo del soggiorno`,
             },
           },
           quantity: 1,

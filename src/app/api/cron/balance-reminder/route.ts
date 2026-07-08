@@ -19,6 +19,7 @@ async function sendReminder(booking: Booking): Promise<void> {
     checkout: booking.checkout,
     balanceDue: booking.balance_due,
     cityTax: booking.city_tax,
+    cityTaxOnline: booking.city_tax_online,
     payBalanceUrl,
     locale: (booking.locale as import("@/i18n/index").LocaleCode) ?? "it",
   });

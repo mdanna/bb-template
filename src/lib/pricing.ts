@@ -38,15 +38,24 @@ export function computePricingBreakdown(
 
 export function computeRefund(
   depositAmount: number,
-  daysUntilCheckin: number
-): { eligible: boolean; amount: number; reason: "full" | "half" | "none" } {
+  daysUntilCheckin: number,
+  cityTax: number = 0
+): { eligible: boolean; amount: number; reason: "full" | "half" | "none"; cityTaxRefund: number } {
+  // Opzione A: quando la tassa di soggiorno è stata incassata online (con
+  // l'anticipo), va rimborsata INTERA in caso di cancellazione — la tassa per
+  // notti non godute non è dovuta, indipendentemente dalla finestra di penale
+  // che si applica solo all'anticipo. Le prenotazioni vecchie passano cityTax=0
+  // (tassa mai incassata) e il comportamento resta identico a prima.
+  const cityTaxRefund = cityTax > 0 ? cityTax : 0;
   const fee = Math.round(depositAmount * CANCEL_FEE_PERCENT) / 100;
   if (daysUntilCheckin > CANCEL_FULL_REFUND_DAYS) {
-    return { eligible: true, amount: depositAmount - fee, reason: "full" };
+    return { eligible: true, amount: depositAmount - fee + cityTaxRefund, reason: "full", cityTaxRefund };
   }
   if (daysUntilCheckin >= CANCEL_HALF_REFUND_DAYS) {
     const partial = Math.round(depositAmount * CANCEL_PARTIAL_REFUND_PCT) / 100;
-    return { eligible: true, amount: partial - fee, reason: "half" };
+    return { eligible: true, amount: partial - fee + cityTaxRefund, reason: "half", cityTaxRefund };
   }
-  return { eligible: false, amount: 0, reason: "none" };
+  // Nessun rimborso dell'anticipo, ma la tassa online resta comunque dovuta al
+  // rimborso: se presente, la cancellazione è "eligible" per il solo importo tassa.
+  return { eligible: cityTaxRefund > 0, amount: cityTaxRefund, reason: "none", cityTaxRefund };
 }

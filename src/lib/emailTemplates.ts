@@ -35,6 +35,7 @@ interface ApprovalParams {
   depositAmount: number | null;
   balanceDue: number | null;
   cityTax: number | null;
+  cityTaxOnline?: boolean | null;
   guests?: number;
 }
 
@@ -48,6 +49,7 @@ interface PaymentConfirmationParams {
   depositAmount: number | null;
   balanceDue: number | null;
   cityTax: number | null;
+  cityTaxOnline?: boolean | null;
   guests: number;
   paymentMethod: string;
   confirmationUrl: string;
@@ -63,6 +65,9 @@ interface DepositStrings {
   refundPolicy: string;
   balanceBeforeCheckin: (balanceDue: number) => string;
   cityTaxNote: (cityTax: number, guests: number) => string;
+  // Variante Opzione A (tassa online): tassa inclusa nel pagamento online come voce separata,
+  // NON riscossa al check-in. Popolata in tutte le 9 lingue.
+  cityTaxOnlineNote: (cityTax: number, guests: number) => string;
   depositPaidConfirmation: (depositAmount: number) => string;
 }
 
@@ -80,6 +85,7 @@ function buildDepositStrings(): Record<LocaleCode, DepositStrings> {
       refundPolicy: `Policy di cancellazione: rimborso completo (meno ${fee}% di spese) fino a ${full} giorni prima del check-in; rimborso del ${partial}% (meno ${fee}% di spese) da ${half} a ${full} giorni prima; nessun rimborso nelle ultime 48 ore.`,
       balanceBeforeCheckin: (b) => b > 0 ? `Il saldo rimanente di €${b} dovrà essere versato entro ${bal} giorni prima del check-in.` : "",
       cityTaxNote: (t, g) => `La tassa di soggiorno (€${t} per ${g} ospiti) verrà riscossa separatamente al check-in e avrà una ricevuta dedicata.`,
+      cityTaxOnlineNote: (t, g) => `La tassa di soggiorno (€${t} per ${g} ospiti) è inclusa nel pagamento online come voce separata; non è dovuto alcun importo aggiuntivo al check-in.`,
       depositPaidConfirmation: (d) => `Anticipo pagato: €${d}.`,
     },
     en: {
@@ -87,6 +93,7 @@ function buildDepositStrings(): Record<LocaleCode, DepositStrings> {
       refundPolicy: `Cancellation policy: full refund (minus ${fee}% fee) up to ${full} days before check-in; ${partial}% refund (minus ${fee}% fee) from ${half} to ${full} days before; no refund within 48 hours.`,
       balanceBeforeCheckin: (b) => b > 0 ? `The remaining balance of €${b} must be paid no later than ${bal} days before check-in, in cash or by card.` : "",
       cityTaxNote: (t, g) => `The city tax (€${t} for ${g} guests) will be collected separately at check-in and will have its own receipt.`,
+      cityTaxOnlineNote: (t, g) => `The city tax (€${t} for ${g} guests) is included in your online payment as a separate item; no additional amount is due at check-in.`,
       depositPaidConfirmation: (d) => `Deposit paid: €${d}.`,
     },
     fr: {
@@ -94,6 +101,7 @@ function buildDepositStrings(): Record<LocaleCode, DepositStrings> {
       refundPolicy: `Politique d'annulation : remboursement complet (moins ${fee} % de frais) jusqu'à ${full} jours avant l'arrivée ; remboursement à ${partial} % (moins ${fee} % de frais) entre ${half} et ${full} jours avant ; aucun remboursement dans les 48 heures.`,
       balanceBeforeCheckin: (b) => b > 0 ? `Le solde restant de €${b} devra être réglé au plus tard ${bal} jours avant l'arrivée, en espèces ou par carte.` : "",
       cityTaxNote: (t, g) => `La taxe de séjour (€${t} pour ${g} personnes) sera encaissée séparément à l'arrivée et fera l'objet d'un reçu distinct.`,
+      cityTaxOnlineNote: (t, g) => `La taxe de séjour (€${t} pour ${g} personnes) est incluse dans le paiement en ligne en tant qu'article distinct ; aucun montant supplémentaire n'est dû à l'arrivée.`,
       depositPaidConfirmation: (d) => `Acompte payé : €${d}.`,
     },
     de: {
@@ -101,6 +109,7 @@ function buildDepositStrings(): Record<LocaleCode, DepositStrings> {
       refundPolicy: `Stornierungsbedingungen: volle Rückerstattung (abzüglich ${fee} % Bearbeitungsgebühr) bis ${full} Tage vor Anreise; ${partial} % Rückerstattung (abzüglich ${fee} % Gebühr) zwischen ${half} und ${full} Tagen vor Anreise; keine Rückerstattung in den letzten 48 Stunden.`,
       balanceBeforeCheckin: (b) => b > 0 ? `Der Restbetrag von €${b} ist spätestens ${bal} Tage vor der Anreise bar oder mit Karte zu zahlen.` : "",
       cityTaxNote: (t, g) => `Die Kurtaxe (€${t} für ${g} Gäste) wird bei der Anreise separat erhoben und erhält eine eigene Quittung.`,
+      cityTaxOnlineNote: (t, g) => `Die Kurtaxe (€${t} für ${g} Gäste) ist als separate Position in der Online-Zahlung enthalten; bei der Anreise ist kein zusätzlicher Betrag fällig.`,
       depositPaidConfirmation: (d) => `Anzahlung bezahlt: €${d}.`,
     },
     es: {
@@ -108,6 +117,7 @@ function buildDepositStrings(): Record<LocaleCode, DepositStrings> {
       refundPolicy: `Política de cancelación: reembolso completo (menos el ${fee} % de gastos de gestión) hasta ${full} días antes del check-in; reembolso del ${partial} % (menos ${fee} % de gastos) entre ${half} y ${full} días antes; sin reembolso en las últimas 48 horas.`,
       balanceBeforeCheckin: (b) => b > 0 ? `El saldo restante de €${b} deberá pagarse en efectivo o con tarjeta como máximo ${bal} días antes del check-in.` : "",
       cityTaxNote: (t, g) => `La tasa turística (€${t} para ${g} huéspedes) se cobrará por separado al hacer el check-in y tendrá su propio recibo.`,
+      cityTaxOnlineNote: (t, g) => `La tasa turística (€${t} para ${g} huéspedes) está incluida en el pago online como concepto separado; no se debe pagar ningún importe adicional al hacer el check-in.`,
       depositPaidConfirmation: (d) => `Depósito pagado: €${d}.`,
     },
     pt: {
@@ -115,6 +125,7 @@ function buildDepositStrings(): Record<LocaleCode, DepositStrings> {
       refundPolicy: `Política de cancelamento: reembolso total (menos ${fee} % de taxa) até ${full} dias antes do check-in; reembolso de ${partial} % (menos ${fee} % de taxa) entre ${half} e ${full} dias antes; sem reembolso nas últimas 48 horas.`,
       balanceBeforeCheckin: (b) => b > 0 ? `O saldo restante de €${b} deverá ser pago em dinheiro ou cartão até ${bal} dias antes do check-in.` : "",
       cityTaxNote: (t, g) => `A taxa turística (€${t} para ${g} hóspedes) será cobrada separadamente no check-in e terá um recibo próprio.`,
+      cityTaxOnlineNote: (t, g) => `A taxa turística (€${t} para ${g} hóspedes) está incluída no pagamento online como item separado; não é devido qualquer valor adicional no check-in.`,
       depositPaidConfirmation: (d) => `Depósito pago: €${d}.`,
     },
     zh: {
@@ -122,6 +133,7 @@ function buildDepositStrings(): Record<LocaleCode, DepositStrings> {
       refundPolicy: `取消政策:入住前${full}天以上可全额退款(扣除${fee}%手续费);入住前${half}至${full}天退款${partial}%(扣除${fee}%手续费);48小时内取消不予退款。`,
       balanceBeforeCheckin: (b) => b > 0 ? `剩余余额 €${b} 须在入住前${bal}天内以现金或银行卡结清。` : "",
       cityTaxNote: (t, g) => `城市税(${g}位客人共 €${t})将在入住时单独收取,并提供单独的收据。`,
+      cityTaxOnlineNote: (t, g) => `城市税(${g}位客人共 €${t})已作为单独项目包含在您的在线付款中;入住时无需支付额外费用。`,
       depositPaidConfirmation: (d) => `已付定金:€${d}。`,
     },
     ja: {
@@ -129,6 +141,7 @@ function buildDepositStrings(): Record<LocaleCode, DepositStrings> {
       refundPolicy: `キャンセルポリシー:チェックイン${full}日以上前のキャンセルは全額返金(手数料${fee}%差引);${half}〜${full}日前は${partial}%返金(手数料${fee}%差引);48時間以内はご返金不可。`,
       balanceBeforeCheckin: (b) => b > 0 ? `残額 €${b} は、チェックインの${bal}日前までに現金またはカードでお支払いください。` : "",
       cityTaxNote: (t, g) => `宿泊税(${g}名様分 €${t})はチェックイン時に別途徴収され、別途領収書が発行されます。`,
+      cityTaxOnlineNote: (t, g) => `宿泊税(${g}名様分 €${t})はオンライン決済に別項目として含まれています。チェックイン時の追加のお支払いは不要です。`,
       depositPaidConfirmation: (d) => `お支払い済みの保証金:€${d}。`,
     },
     ko: {
@@ -136,12 +149,26 @@ function buildDepositStrings(): Record<LocaleCode, DepositStrings> {
       refundPolicy: `취소 정책: 체크인 ${full}일 이전 취소 시 전액 환불(${fee}% 수수료 제외); ${half}~${full}일 전 취소 시 ${partial}% 환불(${fee}% 수수료 제외); 48시간 이내 취소 시 환불 불가.`,
       balanceBeforeCheckin: (b) => b > 0 ? `잔액 €${b}는 체크인 ${bal}일 전까지 현금 또는 카드로 납부해 주세요.` : "",
       cityTaxNote: (t, g) => `도시세(${g}명 €${t})는 체크인 시 별도로 징수되며 별도 영수증이 발급됩니다.`,
+      cityTaxOnlineNote: (t, g) => `도시세(${g}명 €${t})는 온라인 결제에 별도 항목으로 포함되어 있습니다. 체크인 시 추가로 지불하실 금액은 없습니다.`,
       depositPaidConfirmation: (d) => `결제된 보증금: €${d}.`,
     },
   };
 }
 
 const DEPOSIT_STRINGS = buildDepositStrings();
+
+// Sceglie la frase sulla tassa di soggiorno in base al flag Opzione A: se la tassa è stata
+// incassata online (voce separata dell'anticipo) usa la nota "inclusa nel pagamento online",
+// altrimenti la nota classica "riscossa al check-in" (prenotazioni con flag false/null).
+function cityTaxNoteFor(
+  locale: LocaleCode,
+  cityTax: number,
+  guests: number,
+  online: boolean | null | undefined,
+): string {
+  const s = DEPOSIT_STRINGS[locale] ?? DEPOSIT_STRINGS.it;
+  return online ? s.cityTaxOnlineNote(cityTax, guests) : s.cityTaxNote(cityTax, guests);
+}
 
 interface EmailContent {
   subject: string;
@@ -170,7 +197,7 @@ const templates: Record<LocaleCode, Templates> = {
         CONTENT.siteTitle.it,
       ].join("\n"),
     }),
-    approval: ({ code, payUrl, manageUrl, totalPrice, balanceDue, cityTax, guests }) => ({
+    approval: ({ code, payUrl, manageUrl, totalPrice, balanceDue, cityTax, cityTaxOnline, guests }) => ({
       subject: `Prenotazione ${code} approvata · completa il pagamento`,
       text: [
         "Gentile ospite,",
@@ -180,7 +207,7 @@ const templates: Record<LocaleCode, Templates> = {
         totalPrice ? DEPOSIT_STRINGS.it.depositDue(totalPrice) : null,
         DEPOSIT_STRINGS.it.refundPolicy,
         balanceDue != null && balanceDue > 0 ? DEPOSIT_STRINGS.it.balanceBeforeCheckin(balanceDue) : null,
-        cityTax != null && guests ? DEPOSIT_STRINGS.it.cityTaxNote(cityTax, guests) : null,
+        cityTax != null && guests ? cityTaxNoteFor("it", cityTax, guests, cityTaxOnline) : null,
         "",
         `Per confermare la prenotazione, completa il pagamento qui: ${payUrl}`,
         `Potrai gestire o cancellare la prenotazione qui: ${manageUrl}`,
@@ -201,7 +228,7 @@ const templates: Record<LocaleCode, Templates> = {
         p.totalPrice ? `Totale soggiorno: €${p.totalPrice}` : null,
         p.depositAmount ? DEPOSIT_STRINGS.it.depositPaidConfirmation(p.depositAmount) : null,
         p.balanceDue != null ? DEPOSIT_STRINGS.it.balanceBeforeCheckin(p.balanceDue) : null,
-        p.cityTax != null ? DEPOSIT_STRINGS.it.cityTaxNote(p.cityTax, p.guests) : null,
+        p.cityTax != null ? cityTaxNoteFor("it", p.cityTax, p.guests, p.cityTaxOnline) : null,
         DEPOSIT_STRINGS.it.refundPolicy,
         `Metodo di pagamento: ${p.paymentMethod}`,
         "",
@@ -233,7 +260,7 @@ const templates: Record<LocaleCode, Templates> = {
         CONTENT.siteTitle.en,
       ].join("\n"),
     }),
-    approval: ({ code, payUrl, manageUrl, totalPrice, balanceDue, cityTax, guests }) => ({
+    approval: ({ code, payUrl, manageUrl, totalPrice, balanceDue, cityTax, cityTaxOnline, guests }) => ({
       subject: `Booking ${code} approved · complete your payment`,
       text: [
         "Dear guest,",
@@ -243,7 +270,7 @@ const templates: Record<LocaleCode, Templates> = {
         totalPrice ? DEPOSIT_STRINGS.en.depositDue(totalPrice) : null,
         DEPOSIT_STRINGS.en.refundPolicy,
         balanceDue != null && balanceDue > 0 ? DEPOSIT_STRINGS.en.balanceBeforeCheckin(balanceDue) : null,
-        cityTax != null && guests ? DEPOSIT_STRINGS.en.cityTaxNote(cityTax, guests) : null,
+        cityTax != null && guests ? cityTaxNoteFor("en", cityTax, guests, cityTaxOnline) : null,
         "",
         `To confirm your booking, complete the payment here: ${payUrl}`,
         `You can manage or cancel your booking here: ${manageUrl}`,
@@ -264,7 +291,7 @@ const templates: Record<LocaleCode, Templates> = {
         p.totalPrice ? `Total stay price: €${p.totalPrice}` : null,
         p.depositAmount ? DEPOSIT_STRINGS.en.depositPaidConfirmation(p.depositAmount) : null,
         p.balanceDue != null ? DEPOSIT_STRINGS.en.balanceBeforeCheckin(p.balanceDue) : null,
-        p.cityTax != null ? DEPOSIT_STRINGS.en.cityTaxNote(p.cityTax, p.guests) : null,
+        p.cityTax != null ? cityTaxNoteFor("en", p.cityTax, p.guests, p.cityTaxOnline) : null,
         DEPOSIT_STRINGS.en.refundPolicy,
         `Payment method: ${p.paymentMethod}`,
         "",
@@ -296,7 +323,7 @@ const templates: Record<LocaleCode, Templates> = {
         CONTENT.siteTitle.fr,
       ].join("\n"),
     }),
-    approval: ({ code, payUrl, manageUrl, totalPrice, balanceDue, cityTax, guests }) => ({
+    approval: ({ code, payUrl, manageUrl, totalPrice, balanceDue, cityTax, cityTaxOnline, guests }) => ({
       subject: `Réservation ${code} approuvée · finalisez le paiement`,
       text: [
         "Cher hôte,",
@@ -306,7 +333,7 @@ const templates: Record<LocaleCode, Templates> = {
         totalPrice ? DEPOSIT_STRINGS.fr.depositDue(totalPrice) : null,
         DEPOSIT_STRINGS.fr.refundPolicy,
         balanceDue != null && balanceDue > 0 ? DEPOSIT_STRINGS.fr.balanceBeforeCheckin(balanceDue) : null,
-        cityTax != null && guests ? DEPOSIT_STRINGS.fr.cityTaxNote(cityTax, guests) : null,
+        cityTax != null && guests ? cityTaxNoteFor("fr", cityTax, guests, cityTaxOnline) : null,
         "",
         `Pour confirmer votre réservation, finalisez le paiement ici : ${payUrl}`,
         `Vous pouvez gérer ou annuler votre réservation ici : ${manageUrl}`,
@@ -327,7 +354,7 @@ const templates: Record<LocaleCode, Templates> = {
         p.totalPrice ? `Prix total du séjour : €${p.totalPrice}` : null,
         p.depositAmount ? DEPOSIT_STRINGS.fr.depositPaidConfirmation(p.depositAmount) : null,
         p.balanceDue != null ? DEPOSIT_STRINGS.fr.balanceBeforeCheckin(p.balanceDue) : null,
-        p.cityTax != null ? DEPOSIT_STRINGS.fr.cityTaxNote(p.cityTax, p.guests) : null,
+        p.cityTax != null ? cityTaxNoteFor("fr", p.cityTax, p.guests, p.cityTaxOnline) : null,
         DEPOSIT_STRINGS.fr.refundPolicy,
         `Méthode de paiement : ${p.paymentMethod}`,
         "",
@@ -359,7 +386,7 @@ const templates: Record<LocaleCode, Templates> = {
         CONTENT.siteTitle.de,
       ].join("\n"),
     }),
-    approval: ({ code, payUrl, manageUrl, totalPrice, balanceDue, cityTax, guests }) => ({
+    approval: ({ code, payUrl, manageUrl, totalPrice, balanceDue, cityTax, cityTaxOnline, guests }) => ({
       subject: `Buchung ${code} genehmigt · Zahlung abschließen`,
       text: [
         "Liebe Gäste,",
@@ -369,7 +396,7 @@ const templates: Record<LocaleCode, Templates> = {
         totalPrice ? DEPOSIT_STRINGS.de.depositDue(totalPrice) : null,
         DEPOSIT_STRINGS.de.refundPolicy,
         balanceDue != null && balanceDue > 0 ? DEPOSIT_STRINGS.de.balanceBeforeCheckin(balanceDue) : null,
-        cityTax != null && guests ? DEPOSIT_STRINGS.de.cityTaxNote(cityTax, guests) : null,
+        cityTax != null && guests ? cityTaxNoteFor("de", cityTax, guests, cityTaxOnline) : null,
         "",
         `Um Ihre Buchung zu bestätigen, schließen Sie die Zahlung hier ab: ${payUrl}`,
         `Sie können Ihre Buchung hier verwalten oder stornieren: ${manageUrl}`,
@@ -390,7 +417,7 @@ const templates: Record<LocaleCode, Templates> = {
         p.totalPrice ? `Gesamtpreis des Aufenthalts: €${p.totalPrice}` : null,
         p.depositAmount ? DEPOSIT_STRINGS.de.depositPaidConfirmation(p.depositAmount) : null,
         p.balanceDue != null ? DEPOSIT_STRINGS.de.balanceBeforeCheckin(p.balanceDue) : null,
-        p.cityTax != null ? DEPOSIT_STRINGS.de.cityTaxNote(p.cityTax, p.guests) : null,
+        p.cityTax != null ? cityTaxNoteFor("de", p.cityTax, p.guests, p.cityTaxOnline) : null,
         DEPOSIT_STRINGS.de.refundPolicy,
         `Zahlungsmethode: ${p.paymentMethod}`,
         "",
@@ -422,7 +449,7 @@ const templates: Record<LocaleCode, Templates> = {
         CONTENT.siteTitle.es,
       ].join("\n"),
     }),
-    approval: ({ code, payUrl, manageUrl, totalPrice, balanceDue, cityTax, guests }) => ({
+    approval: ({ code, payUrl, manageUrl, totalPrice, balanceDue, cityTax, cityTaxOnline, guests }) => ({
       subject: `Reserva ${code} aprobada · completa el pago`,
       text: [
         "Estimado huésped,",
@@ -432,7 +459,7 @@ const templates: Record<LocaleCode, Templates> = {
         totalPrice ? DEPOSIT_STRINGS.es.depositDue(totalPrice) : null,
         DEPOSIT_STRINGS.es.refundPolicy,
         balanceDue != null && balanceDue > 0 ? DEPOSIT_STRINGS.es.balanceBeforeCheckin(balanceDue) : null,
-        cityTax != null && guests ? DEPOSIT_STRINGS.es.cityTaxNote(cityTax, guests) : null,
+        cityTax != null && guests ? cityTaxNoteFor("es", cityTax, guests, cityTaxOnline) : null,
         "",
         `Para confirmar tu reserva, completa el pago aquí: ${payUrl}`,
         `Puedes gestionar o cancelar tu reserva aquí: ${manageUrl}`,
@@ -453,7 +480,7 @@ const templates: Record<LocaleCode, Templates> = {
         p.totalPrice ? `Precio total de la estancia: €${p.totalPrice}` : null,
         p.depositAmount ? DEPOSIT_STRINGS.es.depositPaidConfirmation(p.depositAmount) : null,
         p.balanceDue != null ? DEPOSIT_STRINGS.es.balanceBeforeCheckin(p.balanceDue) : null,
-        p.cityTax != null ? DEPOSIT_STRINGS.es.cityTaxNote(p.cityTax, p.guests) : null,
+        p.cityTax != null ? cityTaxNoteFor("es", p.cityTax, p.guests, p.cityTaxOnline) : null,
         DEPOSIT_STRINGS.es.refundPolicy,
         `Método de pago: ${p.paymentMethod}`,
         "",
@@ -485,7 +512,7 @@ const templates: Record<LocaleCode, Templates> = {
         CONTENT.siteTitle.pt,
       ].join("\n"),
     }),
-    approval: ({ code, payUrl, manageUrl, totalPrice, balanceDue, cityTax, guests }) => ({
+    approval: ({ code, payUrl, manageUrl, totalPrice, balanceDue, cityTax, cityTaxOnline, guests }) => ({
       subject: `Reserva ${code} aprovada · conclua o pagamento`,
       text: [
         "Prezado hóspede,",
@@ -495,7 +522,7 @@ const templates: Record<LocaleCode, Templates> = {
         totalPrice ? DEPOSIT_STRINGS.pt.depositDue(totalPrice) : null,
         DEPOSIT_STRINGS.pt.refundPolicy,
         balanceDue != null && balanceDue > 0 ? DEPOSIT_STRINGS.pt.balanceBeforeCheckin(balanceDue) : null,
-        cityTax != null && guests ? DEPOSIT_STRINGS.pt.cityTaxNote(cityTax, guests) : null,
+        cityTax != null && guests ? cityTaxNoteFor("pt", cityTax, guests, cityTaxOnline) : null,
         "",
         `Para confirmar sua reserva, conclua o pagamento aqui: ${payUrl}`,
         `Você pode gerenciar ou cancelar sua reserva aqui: ${manageUrl}`,
@@ -516,7 +543,7 @@ const templates: Record<LocaleCode, Templates> = {
         p.totalPrice ? `Preço total da estadia: €${p.totalPrice}` : null,
         p.depositAmount ? DEPOSIT_STRINGS.pt.depositPaidConfirmation(p.depositAmount) : null,
         p.balanceDue != null ? DEPOSIT_STRINGS.pt.balanceBeforeCheckin(p.balanceDue) : null,
-        p.cityTax != null ? DEPOSIT_STRINGS.pt.cityTaxNote(p.cityTax, p.guests) : null,
+        p.cityTax != null ? cityTaxNoteFor("pt", p.cityTax, p.guests, p.cityTaxOnline) : null,
         DEPOSIT_STRINGS.pt.refundPolicy,
         `Método de pagamento: ${p.paymentMethod}`,
         "",
@@ -548,7 +575,7 @@ const templates: Record<LocaleCode, Templates> = {
         CONTENT.siteTitle.zh,
       ].join("\n"),
     }),
-    approval: ({ code, payUrl, manageUrl, totalPrice, balanceDue, cityTax, guests }) => ({
+    approval: ({ code, payUrl, manageUrl, totalPrice, balanceDue, cityTax, cityTaxOnline, guests }) => ({
       subject: `预订 ${code} 已批准 · 请完成付款`,
       text: [
         "尊敬的客人,",
@@ -558,7 +585,7 @@ const templates: Record<LocaleCode, Templates> = {
         totalPrice ? DEPOSIT_STRINGS.zh.depositDue(totalPrice) : null,
         DEPOSIT_STRINGS.zh.refundPolicy,
         balanceDue != null && balanceDue > 0 ? DEPOSIT_STRINGS.zh.balanceBeforeCheckin(balanceDue) : null,
-        cityTax != null && guests ? DEPOSIT_STRINGS.zh.cityTaxNote(cityTax, guests) : null,
+        cityTax != null && guests ? cityTaxNoteFor("zh", cityTax, guests, cityTaxOnline) : null,
         "",
         `请在此完成付款以确认预订:${payUrl}`,
         `您可以在此管理或取消预订:${manageUrl}`,
@@ -579,7 +606,7 @@ const templates: Record<LocaleCode, Templates> = {
         p.totalPrice ? `住宿总价:€${p.totalPrice}` : null,
         p.depositAmount ? DEPOSIT_STRINGS.zh.depositPaidConfirmation(p.depositAmount) : null,
         p.balanceDue != null ? DEPOSIT_STRINGS.zh.balanceBeforeCheckin(p.balanceDue) : null,
-        p.cityTax != null ? DEPOSIT_STRINGS.zh.cityTaxNote(p.cityTax, p.guests) : null,
+        p.cityTax != null ? cityTaxNoteFor("zh", p.cityTax, p.guests, p.cityTaxOnline) : null,
         DEPOSIT_STRINGS.zh.refundPolicy,
         `支付方式:${p.paymentMethod}`,
         "",
@@ -611,7 +638,7 @@ const templates: Record<LocaleCode, Templates> = {
         CONTENT.siteTitle.ja,
       ].join("\n"),
     }),
-    approval: ({ code, payUrl, manageUrl, totalPrice, balanceDue, cityTax, guests }) => ({
+    approval: ({ code, payUrl, manageUrl, totalPrice, balanceDue, cityTax, cityTaxOnline, guests }) => ({
       subject: `予約 ${code} が承認されました · お支払いを完了してください`,
       text: [
         "ゲスト様",
@@ -621,7 +648,7 @@ const templates: Record<LocaleCode, Templates> = {
         totalPrice ? DEPOSIT_STRINGS.ja.depositDue(totalPrice) : null,
         DEPOSIT_STRINGS.ja.refundPolicy,
         balanceDue != null && balanceDue > 0 ? DEPOSIT_STRINGS.ja.balanceBeforeCheckin(balanceDue) : null,
-        cityTax != null && guests ? DEPOSIT_STRINGS.ja.cityTaxNote(cityTax, guests) : null,
+        cityTax != null && guests ? cityTaxNoteFor("ja", cityTax, guests, cityTaxOnline) : null,
         "",
         `ご予約を確定するには、こちらからお支払いを完了してください:${payUrl}`,
         `こちらからご予約の管理またはキャンセルができます:${manageUrl}`,
@@ -642,7 +669,7 @@ const templates: Record<LocaleCode, Templates> = {
         p.totalPrice ? `宿泊合計金額:€${p.totalPrice}` : null,
         p.depositAmount ? DEPOSIT_STRINGS.ja.depositPaidConfirmation(p.depositAmount) : null,
         p.balanceDue != null ? DEPOSIT_STRINGS.ja.balanceBeforeCheckin(p.balanceDue) : null,
-        p.cityTax != null ? DEPOSIT_STRINGS.ja.cityTaxNote(p.cityTax, p.guests) : null,
+        p.cityTax != null ? cityTaxNoteFor("ja", p.cityTax, p.guests, p.cityTaxOnline) : null,
         DEPOSIT_STRINGS.ja.refundPolicy,
         `お支払い方法:${p.paymentMethod}`,
         "",
@@ -674,7 +701,7 @@ const templates: Record<LocaleCode, Templates> = {
         CONTENT.siteTitle.ko,
       ].join("\n"),
     }),
-    approval: ({ code, payUrl, manageUrl, totalPrice, balanceDue, cityTax, guests }) => ({
+    approval: ({ code, payUrl, manageUrl, totalPrice, balanceDue, cityTax, cityTaxOnline, guests }) => ({
       subject: `예약 ${code} 승인됨 · 결제를 완료해 주세요`,
       text: [
         "친애하는 고객님,",
@@ -684,7 +711,7 @@ const templates: Record<LocaleCode, Templates> = {
         totalPrice ? DEPOSIT_STRINGS.ko.depositDue(totalPrice) : null,
         DEPOSIT_STRINGS.ko.refundPolicy,
         balanceDue != null && balanceDue > 0 ? DEPOSIT_STRINGS.ko.balanceBeforeCheckin(balanceDue) : null,
-        cityTax != null && guests ? DEPOSIT_STRINGS.ko.cityTaxNote(cityTax, guests) : null,
+        cityTax != null && guests ? cityTaxNoteFor("ko", cityTax, guests, cityTaxOnline) : null,
         "",
         `예약을 확정하려면 여기에서 결제를 완료해 주세요: ${payUrl}`,
         `여기에서 예약을 관리하거나 취소할 수 있습니다: ${manageUrl}`,
@@ -705,7 +732,7 @@ const templates: Record<LocaleCode, Templates> = {
         p.totalPrice ? `숙박 총액: €${p.totalPrice}` : null,
         p.depositAmount ? DEPOSIT_STRINGS.ko.depositPaidConfirmation(p.depositAmount) : null,
         p.balanceDue != null ? DEPOSIT_STRINGS.ko.balanceBeforeCheckin(p.balanceDue) : null,
-        p.cityTax != null ? DEPOSIT_STRINGS.ko.cityTaxNote(p.cityTax, p.guests) : null,
+        p.cityTax != null ? cityTaxNoteFor("ko", p.cityTax, p.guests, p.cityTaxOnline) : null,
         DEPOSIT_STRINGS.ko.refundPolicy,
         `결제 방법: ${p.paymentMethod}`,
         "",

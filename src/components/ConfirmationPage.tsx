@@ -17,6 +17,7 @@ interface BookingSummary {
   deposit_amount: string | null;
   balance_due: string | null;
   city_tax: string | null;
+  city_tax_online: boolean | null;
   status: "pending" | "approved" | "rejected" | "completed";
   payment_method: string | null;
   paid_at: string | null;
@@ -152,9 +153,16 @@ export default function ConfirmationPage({ code }: { code: string }) {
           </p>
         )}
         {booking.city_tax && Number(booking.city_tax) > 0 && (
-          <p className="mt-1 text-sm text-foreground/60">
-            {format(t.confirmation.cityTaxNote, { amount: booking.city_tax })}
-          </p>
+          booking.city_tax_online ? (
+            // Opzione A: tassa incassata online con l'anticipo → voce pagata, non "al check-in".
+            <p className="mt-1 text-sm text-foreground/80">
+              {format(t.confirmation.cityTaxOnlineNote, { amount: booking.city_tax })}
+            </p>
+          ) : (
+            <p className="mt-1 text-sm text-foreground/60">
+              {format(t.confirmation.cityTaxNote, { amount: booking.city_tax })}
+            </p>
+          )
         )}
         <p className="mt-1 text-sm text-foreground/80">
           {t.confirmation.method}: {methodLabel(booking.payment_method)}

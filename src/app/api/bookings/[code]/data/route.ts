@@ -39,6 +39,7 @@ export async function GET(
       deposit_amount: booking.deposit_amount,
       balance_due: booking.balance_due,
       city_tax: booking.city_tax,
+      city_tax_online: booking.city_tax_online,
       paid_at: booking.paid_at,
       stripe_payment_intent_id: booking.stripe_payment_intent_id,
       balance_paid_at: booking.balance_paid_at,

@@ -36,6 +36,7 @@ export async function completeBookingPayment(
       depositAmount: booking.deposit_amount,
       balanceDue: booking.balance_due,
       cityTax: booking.city_tax,
+      cityTaxOnline: booking.city_tax_online,
       guests: booking.guests,
       paymentMethod: methodLabel,
       locale,
@@ -57,6 +58,7 @@ export async function completeBookingPayment(
       depositAmount: booking.deposit_amount,
       balanceDue: booking.balance_due,
       cityTax: booking.city_tax,
+      cityTaxOnline: booking.city_tax_online,
       paymentMethod: methodLabel,
     });
   } catch (err) {

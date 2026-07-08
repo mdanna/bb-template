@@ -33,6 +33,7 @@ export async function GET(
       deposit_amount: booking.deposit_amount,
       balance_due: booking.balance_due,
       city_tax: booking.city_tax,
+      city_tax_online: booking.city_tax_online,
       status: booking.status,
       payment_method: booking.payment_method,
       paid_at: booking.paid_at,

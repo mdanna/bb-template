@@ -36,7 +36,14 @@ export async function POST(
   const daysUntilCheckin = Math.round(
     (parseDateOnly(previous.checkin).getTime() - today.getTime()) / 86_400_000
   );
-  const refundDue = wasPaid && daysUntilCheckin >= REFUND_WINDOW_DAYS;
+  const depositRefundDue = wasPaid && daysUntilCheckin >= REFUND_WINDOW_DAYS;
+  // Opzione A: la tassa di soggiorno online è stata incassata con l'anticipo →
+  // va sempre rimborsata (non dovuta per notti non godute), a prescindere dalla
+  // finestra di penale sull'anticipo. Prenotazioni vecchie (flag null/false):
+  // tassa mai incassata → nessun rimborso tassa, comportamento invariato.
+  const cityTaxRefund =
+    wasPaid && previous.city_tax_online === true ? Number(previous.city_tax ?? 0) : 0;
+  const refundDue = depositRefundDue || cityTaxRefund > 0;
 
   const result = await pool.query<Booking>(
     `UPDATE bookings SET status = 'cancelled' WHERE id = $1 RETURNING *`,
@@ -56,11 +63,14 @@ export async function POST(
   // Il rimborso della anticipo non è automatico: lo gestisce l'host manualmente da Stripe.
   // Qui calcoliamo solo se spetta (cancellazione di una prenotazione pagata con almeno 10
   // giorni di anticipo sul check-in) e lo segnaliamo chiaramente in risposta.
-  const refundNotice = wasPaid
-    ? refundDue
-      ? `Rimborso dovuto: l'anticipo di €${booking.deposit_amount ?? "?"} va restituito manualmente all'ospite (cancellazione con ${daysUntilCheckin} giorni di anticipo, oltre la soglia di ${REFUND_WINDOW_DAYS}).`
-      : `Nessun rimborso dovuto: cancellazione a ${daysUntilCheckin} giorni dal check-in, sotto la soglia di ${REFUND_WINDOW_DAYS} giorni.`
-    : null;
+  const depositNotice = depositRefundDue
+    ? `Rimborso dovuto: l'anticipo di €${booking.deposit_amount ?? "?"} va restituito manualmente all'ospite (cancellazione con ${daysUntilCheckin} giorni di anticipo, oltre la soglia di ${REFUND_WINDOW_DAYS}).`
+    : `Nessun rimborso dell'anticipo dovuto: cancellazione a ${daysUntilCheckin} giorni dal check-in, sotto la soglia di ${REFUND_WINDOW_DAYS} giorni.`;
+  const cityTaxNotice =
+    cityTaxRefund > 0
+      ? ` Inoltre la tassa di soggiorno di €${cityTaxRefund} (incassata online con l'anticipo) va rimborsata all'ospite: non è dovuta per le notti non godute.`
+      : "";
+  const refundNotice = wasPaid ? `${depositNotice}${cityTaxNotice}` : null;
 
   return NextResponse.json({ ok: true, booking, calendarError, refundDue, refundNotice });
 }

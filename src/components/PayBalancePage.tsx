@@ -21,6 +21,7 @@ interface BookingData {
   total_price: string | null;
   balance_due: string | null;
   city_tax: string | null;
+  city_tax_online: boolean | null;
   balance_paid_at: string | null;
   status: string;
   locale: LocaleCode | null;
@@ -100,6 +101,8 @@ export default function PayBalancePage({ code, token }: { code: string; token: s
 
   const balanceDue = booking.balance_due ? Number(booking.balance_due) : null;
   const cityTax = booking.city_tax ? Number(booking.city_tax) : null;
+  // Opzione A: se la tassa è stata incassata online con l'anticipo, NON va mostrata/ripetuta sul saldo.
+  const cityTaxOnline = booking.city_tax_online === true;
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-16">
@@ -126,7 +129,7 @@ export default function PayBalancePage({ code, token }: { code: string; token: s
               <span className="font-medium">€{booking.total_price}</span>
             </div>
           )}
-          {cityTax != null && (
+          {cityTax != null && !cityTaxOnline && (
             <div className="flex justify-between text-foreground/60">
               <span>{format(pb.cityTaxLabel, { guests: booking.guests })}</span>
               <span>€{cityTax}</span>

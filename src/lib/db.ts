@@ -63,6 +63,11 @@ export async function ensureSchema() {
   await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS balance_payment_intent_id TEXT;`);
   await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS custom_price NUMERIC;`);
   await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS deposit_rate NUMERIC;`);
+  // Opzione A tassa di soggiorno online: flag per prenotazione che governa OVUNQUE la scelta
+  // tra il comportamento nuovo (tassa inclusa nel pagamento online come voce separata) e quello
+  // vecchio (tassa riscossa al check-in). true = online. Le prenotazioni create prima di questa
+  // colonna restano NULL = vecchio comportamento (tassa al check-in), invariato.
+  await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS city_tax_online BOOLEAN;`);
   initialized = true;
 }
 
@@ -163,4 +168,7 @@ export interface Booking {
   balance_payment_intent_id: string | null;
   custom_price: number | null;
   deposit_rate: number | null;
+  // true = tassa di soggiorno inclusa nel pagamento online (voce separata); false/null = vecchio
+  // comportamento, tassa riscossa al check-in. NULL = prenotazioni antecedenti al flag.
+  city_tax_online: boolean | null;
 }

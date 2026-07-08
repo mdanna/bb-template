@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
+import type Stripe from "stripe";
 import { pool, ensureSchema, type Booking } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
 import { checkRateLimit } from "@/lib/rateLimit";
-import { computePricingBreakdown, MIN_DEPOSIT_RATE, MAX_DEPOSIT_RATE, DEFAULT_DEPOSIT_RATE } from "@/lib/pricing";
+import { computePricingBreakdown, MIN_DEPOSIT_RATE, MAX_DEPOSIT_RATE, DEFAULT_DEPOSIT_RATE, CITY_TAX_MAX_NIGHTS } from "@/lib/pricing";
 import { POLICIES } from "@/lib/policies";
 import { CONTENT } from "@/lib/siteContent";
 import { verifyAccessToken } from "@/lib/accessToken";
+import { nightsBetween } from "@/lib/dateOnly";
+import { translations, type LocaleCode } from "@/i18n";
 
 function siteUrl() {
   return process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.com";
@@ -76,26 +79,61 @@ export async function POST(
   const depositPct = Math.round((pricing.depositRate ?? DEFAULT_DEPOSIT_RATE) * 100);
   const isFullPayment = depositPct >= 100;
 
+  // Opzione A: la tassa di soggiorno viaggia con l'anticipo online come voce
+  // separata. Le prenotazioni vecchie (flag null) mantengono il vecchio testo
+  // "riscossa al check-in" e NON hanno la seconda riga.
+  const cityTaxOnline = booking.city_tax_online === true && pricing.cityTax > 0;
+  const locale = (booking.locale as LocaleCode) ?? "it";
+  const t = translations[locale] ?? translations.it;
+
+  const nights = nightsBetween(booking.checkin, booking.checkout);
+  const cityTaxNights = Math.min(nights, CITY_TAX_MAX_NIGHTS);
+
+  const depositBaseDesc = isFullPayment
+    ? `Check-in ${booking.checkin} → Check-out ${booking.checkout}`
+    : `Check-in ${booking.checkin} → Check-out ${booking.checkout} · Saldo di €${pricing.balanceDue} da versare entro ${POLICIES.balanceDueDays} giorni prima del check-in`;
+
+  // Vecchio comportamento (flag null/false): la tassa resta annotata come
+  // riscossa al check-in nella riga dell'anticipo. Online: nessuna menzione qui,
+  // perché è una line item separata pagata ora.
+  const depositDescription = cityTaxOnline
+    ? depositBaseDesc
+    : `${depositBaseDesc} · Tassa di soggiorno €${pricing.cityTax} riscossa separatamente al check-in`;
+
+  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
+    {
+      price_data: {
+        currency: "eur",
+        unit_amount: Math.round(pricing.depositAmount * 100),
+        product_data: {
+          name: isFullPayment
+            ? `Pagamento completo · ${CONTENT.siteTitle.it} · ${booking.code}`
+            : `Anticipo ${depositPct}% · ${CONTENT.siteTitle.it} · ${booking.code}`,
+          description: depositDescription,
+        },
+      },
+      quantity: 1,
+    },
+  ];
+
+  if (cityTaxOnline) {
+    lineItems.push({
+      price_data: {
+        currency: "eur",
+        unit_amount: Math.round(pricing.cityTax * 100),
+        product_data: {
+          name: t.payment.cityTaxLineItem,
+          description: `${booking.guests} ospiti × ${cityTaxNights} notti`,
+        },
+      },
+      quantity: 1,
+    });
+  }
+
   try {
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      line_items: [
-        {
-          price_data: {
-            currency: "eur",
-            unit_amount: Math.round(pricing.depositAmount * 100),
-            product_data: {
-              name: isFullPayment
-                ? `Pagamento completo · ${CONTENT.siteTitle.it} · ${booking.code}`
-                : `Anticipo ${depositPct}% · ${CONTENT.siteTitle.it} · ${booking.code}`,
-              description: isFullPayment
-                ? `Check-in ${booking.checkin} → Check-out ${booking.checkout} · Tassa di soggiorno €${pricing.cityTax} riscossa separatamente al check-in`
-                : `Check-in ${booking.checkin} → Check-out ${booking.checkout} · Saldo di €${pricing.balanceDue} da versare entro ${POLICIES.balanceDueDays} giorni prima del check-in · Tassa di soggiorno €${pricing.cityTax} riscossa separatamente al check-in`,
-            },
-          },
-          quantity: 1,
-        },
-      ],
+      line_items: lineItems,
       customer_email: booking.email,
       client_reference_id: booking.code,
       metadata: { bookingCode: booking.code },
