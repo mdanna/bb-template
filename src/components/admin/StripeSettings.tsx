@@ -19,7 +19,11 @@ const LABELS = {
     title: "Configurazione Stripe",
     intro: "Passa tra ambiente di test e produzione. Sezione protetta da Authenticator (TOTP).",
     enrollTitle: "Configura l'Authenticator",
-    enrollIntro: "Questa pagina è protetta da un codice a 6 cifre. Registra un authenticator (es. Microsoft Authenticator) una volta sola.",
+    enrollIntro: "Questa pagina è protetta da un codice a 6 cifre. Registra un'app authenticator una volta sola, seguendo questi passi:",
+    enrollStep1: "Se non ce l'hai già, installa sul telefono un'app authenticator: Microsoft Authenticator o Google Authenticator (gratuite, su App Store o Google Play).",
+    enrollStep2: "Premi «Genera QR» qui sotto.",
+    enrollStep3: "Nell'app scegli «Aggiungi account» → «Altro account» (o «Account personale») e inquadra il QR con la fotocamera. In alternativa inserisci a mano la chiave mostrata.",
+    enrollStep4: "Digita nel campo il codice a 6 cifre che appare nell'app e conferma.",
     generate: "Genera QR",
     scan: "Scansiona con l'app authenticator (Aggiungi account → Altro account). In alternativa inserisci la chiave manualmente:",
     confirmCode: "Inserisci il codice a 6 cifre per confermare",
@@ -54,7 +58,11 @@ const LABELS = {
     title: "Stripe configuration",
     intro: "Switch between test and production. Section protected by an Authenticator (TOTP).",
     enrollTitle: "Set up the Authenticator",
-    enrollIntro: "This page is protected by a 6-digit code. Enrol an authenticator (e.g. Microsoft Authenticator) once.",
+    enrollIntro: "This page is protected by a 6-digit code. Enrol an authenticator app once, following these steps:",
+    enrollStep1: "If you don't have one yet, install an authenticator app on your phone: Microsoft Authenticator or Google Authenticator (free, on the App Store or Google Play).",
+    enrollStep2: "Press “Generate QR” below.",
+    enrollStep3: "In the app choose “Add account” → “Other account” (or “Personal account”) and scan the QR with the camera. Or enter the shown key manually.",
+    enrollStep4: "Type the 6-digit code shown by the app into the field and confirm.",
     generate: "Generate QR",
     scan: "Scan with your authenticator app (Add account → Other account). Or enter the key manually:",
     confirmCode: "Enter the 6-digit code to confirm",
@@ -89,7 +97,11 @@ const LABELS = {
     title: "Configuración de Stripe",
     intro: "Cambia entre entorno de prueba y producción. Sección protegida con Authenticator (TOTP).",
     enrollTitle: "Configura el Authenticator",
-    enrollIntro: "Esta página está protegida con un código de 6 dígitos. Registra un authenticator (p. ej. Microsoft Authenticator) una sola vez.",
+    enrollIntro: "Esta página está protegida con un código de 6 dígitos. Registra una app authenticator una sola vez, siguiendo estos pasos:",
+    enrollStep1: "Si aún no la tienes, instala en el teléfono una app authenticator: Microsoft Authenticator o Google Authenticator (gratis, en App Store o Google Play).",
+    enrollStep2: "Pulsa «Generar QR» abajo.",
+    enrollStep3: "En la app elige «Agregar cuenta» → «Otra cuenta» (o «Cuenta personal») y escanea el QR con la cámara. O introduce la clave mostrada manualmente.",
+    enrollStep4: "Escribe en el campo el código de 6 dígitos que muestra la app y confirma.",
     generate: "Generar QR",
     scan: "Escanea con la app authenticator (Agregar cuenta → Otra cuenta). O introduce la clave manualmente:",
     confirmCode: "Introduce el código de 6 dígitos para confirmar",
@@ -124,7 +136,11 @@ const LABELS = {
     title: "Configuration Stripe",
     intro: "Basculez entre l'environnement de test et de production. Section protégée par un Authenticator (TOTP).",
     enrollTitle: "Configurer l'Authenticator",
-    enrollIntro: "Cette page est protégée par un code à 6 chiffres. Enregistrez un authenticator (ex. Microsoft Authenticator) une seule fois.",
+    enrollIntro: "Cette page est protégée par un code à 6 chiffres. Enregistrez une app authenticator une seule fois, en suivant ces étapes :",
+    enrollStep1: "Si vous n'en avez pas encore, installez une app authenticator sur votre téléphone : Microsoft Authenticator ou Google Authenticator (gratuites, sur l'App Store ou Google Play).",
+    enrollStep2: "Appuyez sur « Générer le QR » ci-dessous.",
+    enrollStep3: "Dans l'app, choisissez « Ajouter un compte » → « Autre compte » (ou « Compte personnel ») et scannez le QR avec la caméra. Ou saisissez la clé affichée manuellement.",
+    enrollStep4: "Saisissez dans le champ le code à 6 chiffres affiché par l'app et confirmez.",
     generate: "Générer le QR",
     scan: "Scannez avec votre app authenticator (Ajouter un compte → Autre compte). Ou saisissez la clé manuellement :",
     confirmCode: "Saisissez le code à 6 chiffres pour confirmer",
@@ -279,6 +295,12 @@ export default function StripeSettings() {
         <div className="space-y-4">
           <h2 className="text-sm font-bold uppercase tracking-widest text-foreground/50">{L.enrollTitle}</h2>
           <p className="text-sm text-foreground/70">{L.enrollIntro}</p>
+          <ol className="list-decimal space-y-1.5 pl-5 text-sm text-foreground/70 marker:font-bold marker:text-gold">
+            <li>{L.enrollStep1}</li>
+            <li>{L.enrollStep2}</li>
+            <li>{L.enrollStep3}</li>
+            <li>{L.enrollStep4}</li>
+          </ol>
           {!enrollData ? (
             <button onClick={generate} disabled={busy} className={btnCls}>{L.generate}</button>
           ) : (
