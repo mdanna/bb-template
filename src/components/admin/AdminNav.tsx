@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { signOut } from "next-auth/react";
 import { useAdminLanguage } from "@/i18n/AdminLanguageContext";
+import StructureSwitcher from "@/components/admin/StructureSwitcher";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function AdminNav({ userName: _userName }: { userName?: string | null }) {
@@ -70,6 +71,8 @@ export default function AdminNav({ userName: _userName }: { userName?: string | 
               {link.label}
             </Link>
           ))}
+          {/* Switcher tra le strutture del portale (non mostrato se la struttura è singola) */}
+          <StructureSwitcher />
           <a
             href={manualUrl}
             target="_blank"
@@ -101,6 +104,7 @@ export default function AdminNav({ userName: _userName }: { userName?: string | 
                 {link.label}
               </Link>
             ))}
+            <StructureSwitcher />
             <a
               href={manualUrl}
               target="_blank"
