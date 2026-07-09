@@ -13,15 +13,27 @@ import { MIN_DEPOSIT_RATE } from "./pricing";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const FROM = `${CONTENT.siteTitle.it} <${CONTENT.bookingEmail}>`;
+// Modello D — mittente UNICO dell'operatore (un dominio verificato in Resend,
+// uguale per tutta la flotta), così non serve verificare il dominio di ogni
+// cliente né un account Resend per cliente. Se MAIL_FROM_ADDRESS è impostata, le
+// email partono da quell'indirizzo col NOME della struttura come display name e il
+// contatto della struttura come Reply-To (stile Airbnb), e il nome della struttura
+// è aggiunto anche all'OGGETTO (l'indirizzo non è del cliente → serve per capire a
+// quale struttura si riferisce). Se NON è impostata: comportamento storico
+// (mittente = bookingEmail della struttura), così le istanze esistenti non cambiano.
+const MAIL_FROM_ADDRESS = process.env.MAIL_FROM_ADDRESS?.trim();
+const MODEL_D = !!MAIL_FROM_ADDRESS;
+const FROM = `${CONTENT.siteTitle.it} <${MAIL_FROM_ADDRESS || CONTENT.bookingEmail}>`;
 const HOST_EMAIL = CONTENT.email;
 const HOST_PHONE = CONTENT.phone;
 
 async function send(payload: { to: string; subject: string; text: string; html?: string; replyTo?: string }) {
-  const { replyTo, ...rest } = payload;
+  const { replyTo, subject, ...rest } = payload;
+  const finalSubject = MODEL_D ? `${CONTENT.siteTitle.it} · ${subject}` : subject;
   const result = await resend.emails.send({
     from: FROM,
     ...(replyTo ? { replyTo } : {}),
+    subject: finalSubject,
     ...rest,
   });
   if (result.error) {
