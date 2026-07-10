@@ -37,7 +37,7 @@ export default function BookingForm({ checkin, checkout, totalPrice }: Props) {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [guests, setGuests] = useState(2);
+  const [guests, setGuests] = useState(Math.min(2, POLICIES.maxGuests));
   const [message, setMessage] = useState("");
   const [checkinDate, setCheckinDate] = useState(checkin);
   const [checkoutDate, setCheckoutDate] = useState(checkout);
@@ -223,15 +223,17 @@ export default function BookingForm({ checkin, checkout, totalPrice }: Props) {
         </div>
         <div>
           <label className="text-xs uppercase tracking-widest text-foreground/60">
-            {t.form.guests}
+            {t.form.guests} <span className="normal-case text-foreground/40">(max {POLICIES.maxGuests})</span>
           </label>
           <input
             required
             type="number"
             min={1}
-            max={6}
+            max={POLICIES.maxGuests}
             value={guests}
-            onChange={(e) => setGuests(Number(e.target.value))}
+            onChange={(e) =>
+              setGuests(Math.min(Math.max(1, Number(e.target.value) || 1), POLICIES.maxGuests))
+            }
             className="mt-1 w-full rounded border border-gold/40 bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-gold"
           />
         </div>
