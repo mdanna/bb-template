@@ -5,7 +5,7 @@ import { signInGithub, signInDemo } from "@/app/admin/actions";
 import EmailLoginForm from "@/components/admin/EmailLoginForm";
 import { useAdminLanguage } from "@/i18n/AdminLanguageContext";
 
-export default function AdminLogin({ demo }: { demo: boolean }) {
+export default function AdminLogin({ demo, callbackUrl }: { demo: boolean; callbackUrl?: string }) {
   const { t } = useAdminLanguage();
 
   if (demo) {
@@ -45,6 +45,7 @@ export default function AdminLogin({ demo }: { demo: boolean }) {
 
       {/* Login con GitHub */}
       <form action={signInGithub}>
+        {callbackUrl && <input type="hidden" name="callbackUrl" value={callbackUrl} />}
         <button
           type="submit"
           className="rounded-full border border-gold bg-gold px-8 py-3 text-sm font-medium uppercase tracking-widest text-[#faf6ec] transition hover:bg-transparent hover:text-gold"
@@ -58,7 +59,7 @@ export default function AdminLogin({ demo }: { demo: boolean }) {
       </div>
 
       {/* Login con magic-link via email (client component con esito inline) */}
-      <EmailLoginForm />
+      <EmailLoginForm callbackUrl={callbackUrl} />
     </div>
   );
 }

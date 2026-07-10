@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { requestMagicLink, type LoginState } from "@/app/admin/actions";
 import { useAdminLanguage } from "@/i18n/AdminLanguageContext";
 
-export default function EmailLoginForm() {
+export default function EmailLoginForm({ callbackUrl }: { callbackUrl?: string }) {
   const { t } = useAdminLanguage();
   const [state, formAction, pending] = useActionState<LoginState, FormData>(
     requestMagicLink,
@@ -21,6 +21,7 @@ export default function EmailLoginForm() {
 
   return (
     <form action={formAction} className="flex w-full max-w-sm flex-col gap-3">
+      {callbackUrl && <input type="hidden" name="callbackUrl" value={callbackUrl} />}
       <input
         type="email"
         name="email"

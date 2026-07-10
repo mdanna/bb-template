@@ -7,8 +7,13 @@ import { AuthError } from "next-auth";
 // localizzata lato client in base alla lingua admin scelta.
 export type LoginState = { ok: boolean; status: "sent" | "empty" | "error" } | null;
 
-export async function signInGithub(): Promise<void> {
-  await signIn("github", { redirectTo: "/admin" });
+// callbackUrl (relativo, same-origin — Auth.js rifiuta URL esterni) = pagina a cui
+// tornare dopo il login. Default /admin; la pagina "collega-portale" lo valorizza a
+// sé stessa (col token nella query) così dopo il login si torna alla conferma, non al
+// pannello.
+export async function signInGithub(formData: FormData): Promise<void> {
+  const callbackUrl = String(formData.get("callbackUrl") ?? "").trim() || "/admin";
+  await signIn("github", { redirectTo: callbackUrl });
 }
 
 export async function signInDemo(): Promise<void> {
@@ -25,9 +30,12 @@ export async function requestMagicLink(
 ): Promise<LoginState> {
   const email = String(formData.get("email") ?? "").trim();
   if (!email) return { ok: false, status: "empty" };
+  const callbackUrl = String(formData.get("callbackUrl") ?? "").trim() || "/admin";
 
   try {
-    await signIn("resend", { email, redirect: false });
+    // redirectTo = dove atterra il magic-link dopo la verifica (torna alla pagina
+    // di partenza, es. la conferma di collegamento al portale).
+    await signIn("resend", { email, redirectTo: callbackUrl, redirect: false });
   } catch (err) {
     // Se Auth.js tentasse comunque un redirect (caso di successo), lascialo passare.
     if (

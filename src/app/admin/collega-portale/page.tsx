@@ -11,11 +11,21 @@ export default async function CollegaPortalePage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const session = await auth();
-  if (!session) return <AdminLogin demo={DEMO_MODE} />;
-
   const sp = await searchParams;
   const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? "";
+
+  // Ricostruisci l'URL di QUESTA pagina (col token) come callbackUrl del login: così
+  // dopo l'accesso Auth.js riporta qui, alla conferma di collegamento, e non al
+  // pannello /admin (da cui l'host doveva tornare indietro a mano).
+  const params = new URLSearchParams();
+  for (const k of ["portal", "name", "action", "t"]) {
+    const v = one(sp[k]);
+    if (v) params.set(k, v);
+  }
+  const callbackUrl = `/admin/collega-portale?${params.toString()}`;
+
+  const session = await auth();
+  if (!session) return <AdminLogin demo={DEMO_MODE} callbackUrl={callbackUrl} />;
 
   return (
     <PortalLinkConfirm
