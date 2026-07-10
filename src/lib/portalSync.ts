@@ -8,7 +8,7 @@
 // si aggiorna SUBITO — senza che il portale rilegga il sito (che sarebbe ancora al
 // deployment precedente). Best-effort: non blocca né fa fallire il salvataggio.
 
-import type { SiteContent } from "@/lib/siteContent";
+import { resolveDescription, type SiteContent } from "@/lib/siteContent";
 import { PORTAL_LINK } from "@/lib/portalLink";
 import tokenData from "@/data/portal-link-token.json";
 
@@ -32,7 +32,7 @@ export function cardMeta(content: SiteContent): {
 } {
   const name = pickL10n(content.siteTitle) || SITE_URL;
   const city = typeof content.city === "string" ? content.city.trim() : "";
-  const description = (content.metaDescription || pickL10n(content.heroSubtitle) || "").trim();
+  const description = resolveDescription(content);
   const image = content.heroImage && SITE_URL ? `${SITE_URL}/images/${content.heroImage}` : "";
   return { name, city, description, image };
 }

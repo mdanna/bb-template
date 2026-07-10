@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
-import { CONTENT } from "@/lib/siteContent";
+import { CONTENT, resolveDescription } from "@/lib/siteContent";
 import { themeCss } from "@/lib/theme";
 import DemoBanner from "@/components/DemoBanner";
 import JsonLd from "@/components/JsonLd";
@@ -18,7 +18,7 @@ const inter = Inter({
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://your-domain.com";
 const SITE_TITLE = CONTENT.siteTitle.it;
-const SITE_DESCRIPTION = CONTENT.metaDescription;
+const SITE_DESCRIPTION = resolveDescription(CONTENT);
 const TITLE_SUFFIX = CONTENT.seoTitleSuffix ? ` · ${CONTENT.seoTitleSuffix}` : "";
 
 export const metadata: Metadata = {

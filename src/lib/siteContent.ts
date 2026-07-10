@@ -1,4 +1,5 @@
 import rawContent from "@/data/content.json";
+import defaultsRaw from "@/data/defaults/content.json";
 import type { LocaleCode } from "@/i18n/index";
 
 export type L10n = Record<LocaleCode, string>;
@@ -63,3 +64,26 @@ export interface SiteContent {
 }
 
 export const CONTENT: SiteContent = rawContent as SiteContent;
+
+// Placeholder di default della metaDescription (dal seed dei contenuti): se la
+// struttura non l'ha personalizzata, resta questo testo generico.
+const DEFAULT_META_DESCRIPTION = ((defaultsRaw as { metaDescription?: string }).metaDescription ?? "").trim();
+
+function firstL10n(m: L10n | undefined): string {
+  if (!m) return "";
+  return (m.it || Object.values(m).find(Boolean) || "").trim();
+}
+
+/**
+ * Descrizione breve del sito: la metaDescription se l'host l'ha davvero scritta,
+ * altrimenti (vuota o ancora il placeholder di default) il SOTTOTITOLO dell'hero.
+ * Usata sia per og:description/SEO sia per il teaser nel portale, così coincidono
+ * con ciò che si vede sul sito.
+ */
+export function resolveDescription(
+  content: Pick<SiteContent, "metaDescription" | "heroSubtitle">,
+): string {
+  const md = (content.metaDescription ?? "").trim();
+  if (md && md !== DEFAULT_META_DESCRIPTION) return md;
+  return firstL10n(content.heroSubtitle) || md;
+}
