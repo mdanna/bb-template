@@ -88,7 +88,7 @@ const en: Translation = {
     error: "Something went wrong. Please try again or contact us directly.",
     datesUnavailable: "The selected dates are no longer available. Please choose a different period.",
   },
-  footer: { copyright: "" },
+  footer: { copyright: "", admin: "Manage" },
   payment: {
     eyebrow: "Secure payment",
     title: "Complete your booking",

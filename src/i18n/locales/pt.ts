@@ -89,7 +89,7 @@ const pt: Translation = {
     error: "Algo deu errado. Tente novamente ou entre em contato diretamente.",
     datesUnavailable: "As datas selecionadas não estão mais disponíveis. Escolha outro período.",
   },
-  footer: { copyright: "" },
+  footer: { copyright: "", admin: "Gestão" },
   payment: {
     eyebrow: "Pagamento seguro",
     title: "Conclua sua reserva",

@@ -87,7 +87,7 @@ const ja: Translation = {
     error: "エラーが発生しました。もう一度お試しいただくか、直接お問い合わせください。",
     datesUnavailable: "選択した日付はご利用いただけません。別の期間を選択してください。",
   },
-  footer: { copyright: "" },
+  footer: { copyright: "", admin: "管理" },
   payment: {
     eyebrow: "安全なお支払い",
     title: "予約を完了する",

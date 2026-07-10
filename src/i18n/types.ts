@@ -71,7 +71,7 @@ export interface Translation {
     error: string;
     datesUnavailable: string;
   };
-  footer: { copyright: string };
+  footer: { copyright: string; admin: string };
   payment: {
     eyebrow: string;
     title: string;

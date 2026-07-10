@@ -87,7 +87,7 @@ const zh: Translation = {
     error: "出现错误,请重试或直接联系我们。",
     datesUnavailable: "所选日期已不可用,请选择其他时间段。",
   },
-  footer: { copyright: "" },
+  footer: { copyright: "", admin: "管理" },
   payment: {
     eyebrow: "安全付款",
     title: "完成您的预订",

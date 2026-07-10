@@ -89,7 +89,7 @@ const fr: Translation = {
     error: "Une erreur s'est produite. Veuillez réessayer ou nous contacter directement.",
     datesUnavailable: "Les dates sélectionnées ne sont plus disponibles. Choisissez une autre période.",
   },
-  footer: { copyright: "" },
+  footer: { copyright: "", admin: "Gestion" },
   payment: {
     eyebrow: "Paiement sécurisé",
     title: "Finalisez votre réservation",

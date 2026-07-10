@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { CONTENT } from "@/lib/siteContent";
 import { PORTAL_LINK } from "@/lib/portalLink";
@@ -25,7 +26,7 @@ const PORTAL_LABEL: Record<LocaleCode, string> = {
 };
 
 export default function SiteFooter() {
-  const { locale } = useLanguage();
+  const { t, locale } = useLanguage();
   const siteName = CONTENT.siteTitle[locale] ?? CONTENT.siteTitle.it;
   const portalLabel = PORTAL_LABEL[locale] ?? PORTAL_LABEL.it;
 
@@ -48,6 +49,14 @@ export default function SiteFooter() {
       <a href="/privacy" className="underline hover:text-gold">
         Informativa sulla privacy
       </a>
+      <div className="mt-3">
+        <Link
+          href="/admin"
+          className="text-xs uppercase tracking-widest transition hover:text-gold"
+        >
+          {t.footer.admin}
+        </Link>
+      </div>
       <div className="mt-4 text-foreground/40">
         Powered by{" "}
         <a
