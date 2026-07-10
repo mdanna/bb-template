@@ -105,7 +105,7 @@ export default function NavBar() {
       </div>
 
       {/* Desktop toolbar */}
-      <div className="mx-auto hidden max-w-6xl items-center justify-between px-6 py-3 lg:flex">
+      <div className="hidden items-center justify-between px-6 py-3 lg:flex">
         <Link href="/" className="whitespace-nowrap font-serif-display text-base italic text-foreground">
           {CONTENT.siteTitle[locale] || CONTENT.siteTitle.it}
         </Link>
