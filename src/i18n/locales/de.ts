@@ -14,7 +14,7 @@ const de: Translation = {
   },
   hero: {
     subtitle: "Eine einladende Wohnung im Herzen der Stadt.",
-    bookDirect: "Hier buchen",
+    bookDirect: "Buchen",
     bookAirbnb: "Auf Airbnb buchen",
     bookOn: "Auf {platform} buchen",
     alsoOn: "Auch auf",

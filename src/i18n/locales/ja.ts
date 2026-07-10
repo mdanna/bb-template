@@ -14,7 +14,7 @@ const ja: Translation = {
   },
   hero: {
     subtitle: "街の中心にある居心地の良いアパートメント。",
-    bookDirect: "こちらで予約",
+    bookDirect: "予約",
     bookAirbnb: "Airbnbで予約する",
     bookOn: "{platform}で予約する",
     alsoOn: "こちらでも予約可能:",
