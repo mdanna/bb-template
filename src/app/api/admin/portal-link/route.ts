@@ -3,10 +3,35 @@ import { auth } from "@/auth";
 import { getFile, putFile, requireBotToken } from "@/lib/githubContent";
 
 // Completa l'associazione/disassociazione al portale DAL LATO SITO (auth-gated:
-// admin di QUESTA struttura). Scrive src/data/portal-link.json sul proprio repo
-// (col proprio bot token) e poi notifica il portale (register/unregister)
-// inoltrando il token firmato che il portale aveva emesso.
+// admin di QUESTA struttura). Scrive src/data/portal-link.json (di proprietà del
+// sito, letto dal footer) e src/data/portal-link-token.json (SOLO server: il token
+// di appartenenza restituito dal portale, per il sync del teaser e lo scollega),
+// poi notifica il portale (register/unregister) inoltrando il token dell'handshake.
+//
+// INVARIANTE «un solo portale»: se il sito è già collegato a un portale DIVERSO, il
+// collegamento a un nuovo portale viene RIFIUTATO (409): l'host deve prima scollegarsi.
 const FILE = "src/data/portal-link.json";
+const TOKEN_FILE = "src/data/portal-link-token.json";
+
+async function readLinkUrl(token: string): Promise<string> {
+  try {
+    const { content } = await getFile(FILE, token);
+    const j = JSON.parse(content) as { url?: string };
+    return (j.url || "").trim().replace(/\/+$/, "");
+  } catch {
+    return "";
+  }
+}
+
+async function writeJson(path: string, obj: unknown, message: string, token: string): Promise<void> {
+  let sha = "";
+  try {
+    ({ sha } = await getFile(path, token));
+  } catch {
+    sha = "";
+  }
+  await putFile(path, JSON.stringify(obj, null, 2) + "\n", sha, message, token);
+}
 
 export async function POST(request: Request) {
   const session = await auth();
@@ -22,42 +47,64 @@ export async function POST(request: Request) {
   }
 
   try {
-    // 1) Scrivi il link (di proprietà del sito) sul proprio repo → il footer lo legge.
     const token = requireBotToken();
-    let sha = "";
-    try {
-      ({ sha } = await getFile(FILE, token));
-    } catch {
-      sha = "";
-    }
-    const linkData = action === "link" ? { url: portal, name } : { url: "", name: "" };
-    const content = JSON.stringify(linkData, null, 2) + "\n";
-    await putFile(
-      FILE,
-      content,
-      sha,
-      action === "link" ? `Collega al portale ${name}` : "Scollega dal portale",
-      token,
-    );
 
-    // 2) Notifica il portale, inoltrando il token firmato.
-    const endpoint = action === "link" ? "/api/register" : "/api/unregister";
+    if (action === "link") {
+      // Invariante: già collegato a un portale diverso → blocca.
+      const current = await readLinkUrl(token);
+      if (current && current !== portal) {
+        return NextResponse.json(
+          {
+            error: `Questo sito è già collegato a un altro portale (${current}). Scollegati prima da quello — dalle Impostazioni del tuo sito o dal pannello di quel portale — poi riprova.`,
+            currentPortal: current,
+          },
+          { status: 409 },
+        );
+      }
+
+      // 1) Notifica il portale (register) e ricevi il token di appartenenza.
+      let portalOk = false;
+      let portalErr = "";
+      let memberToken = "";
+      try {
+        const res = await fetch(`${portal}/api/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: t }),
+          signal: AbortSignal.timeout(10000),
+        });
+        const data = await res.json().catch(() => ({}));
+        portalOk = res.ok;
+        if (res.ok) memberToken = typeof data.memberToken === "string" ? data.memberToken : "";
+        else portalErr = data?.error || `HTTP ${res.status}`;
+      } catch (e) {
+        portalErr = e instanceof Error ? e.message : "portale non raggiungibile";
+      }
+
+      // 2) Scrivi il link (il footer lo mostra) + il token di appartenenza (solo server).
+      await writeJson(FILE, { url: portal, name }, `Collega al portale ${name}`, token);
+      await writeJson(TOKEN_FILE, { token: memberToken }, "Aggiorna token portale", token);
+
+      return NextResponse.json({ ok: true, action, portalOk, portalErr });
+    }
+
+    // action === "unlink": handshake avviato dal portale.
     let portalOk = false;
     let portalErr = "";
     try {
-      const res = await fetch(`${portal}${endpoint}`, {
+      const res = await fetch(`${portal}/api/unregister`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: t }),
         signal: AbortSignal.timeout(10000),
       });
       portalOk = res.ok;
-      if (!res.ok) {
-        portalErr = (await res.json().catch(() => ({})))?.error || `HTTP ${res.status}`;
-      }
+      if (!res.ok) portalErr = (await res.json().catch(() => ({})))?.error || `HTTP ${res.status}`;
     } catch (e) {
       portalErr = e instanceof Error ? e.message : "portale non raggiungibile";
     }
+    await writeJson(FILE, { url: "", name: "" }, "Scollega dal portale", token);
+    await writeJson(TOKEN_FILE, { token: "" }, "Rimuovi token portale", token);
 
     return NextResponse.json({ ok: true, action, portalOk, portalErr });
   } catch (err) {

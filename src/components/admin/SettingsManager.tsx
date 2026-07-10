@@ -6,6 +6,7 @@ import { useAdminLanguage } from "@/i18n/AdminLanguageContext";
 import { adminLocaleOrder, adminTranslations, type AdminLocaleCode } from "@/i18n/admin";
 import type { CalendarSyncResult } from "@/app/api/admin/calendar-sync/route";
 import type { OtaPlatform } from "@/data/availability";
+import { PORTAL_LINK } from "@/lib/portalLink";
 
 type State = "idle" | "saving" | "success" | "error";
 
@@ -46,6 +47,11 @@ const LABELS = {
     policyCard: "Regole di prenotazione", policyCardDesc: "Acconto, cancellazione, tassa di soggiorno, orari di check-in/out.",
     stripeCard: "Pagamenti (Stripe)", stripeCardDesc: "Chiavi, modalità test/produzione, sicurezza.",
     themeCard: "Colori", themeCardDesc: "Palette e colori del sito, con anteprima e controllo di contrasto.",
+    portalTitle: "Portale",
+    portalLinkedTo: "Questo sito è collegato al portale:",
+    portalNotLinked: "Questo sito non è collegato a nessun portale (funziona in autonomia).",
+    portalHint: "Un sito può appartenere a un solo portale. Per collegarlo, avvia l'associazione dal pannello del portale.",
+    portalUnlink: "Scollega", portalUnlinking: "Scollegamento…", portalUnlinked: "Scollegato — il portale si aggiornerà tra 1-2 minuti.", portalUnlinkErr: "Scollegamento fallito.",
   },
   en: {
     title: "Calendar sync",
@@ -74,6 +80,11 @@ const LABELS = {
     policyCard: "Booking rules", policyCardDesc: "Deposit, cancellation, city tax, check-in/out times.",
     stripeCard: "Payments (Stripe)", stripeCardDesc: "Keys, test/live mode, security.",
     themeCard: "Colors", themeCardDesc: "Site palette and colors, with preview and contrast check.",
+    portalTitle: "Portal",
+    portalLinkedTo: "This site is linked to the portal:",
+    portalNotLinked: "This site isn't linked to any portal (it works on its own).",
+    portalHint: "A site can belong to only one portal. To link it, start the association from the portal's panel.",
+    portalUnlink: "Unlink", portalUnlinking: "Unlinking…", portalUnlinked: "Unlinked — the portal will update in 1–2 minutes.", portalUnlinkErr: "Unlink failed.",
   },
   es: {
     title: "Sincronización de calendarios",
@@ -102,6 +113,11 @@ const LABELS = {
     policyCard: "Reglas de reserva", policyCardDesc: "Depósito, cancelación, tasa turística, horarios de entrada/salida.",
     stripeCard: "Pagos (Stripe)", stripeCardDesc: "Claves, modo prueba/producción, seguridad.",
     themeCard: "Colores", themeCardDesc: "Paleta y colores del sitio, con vista previa y control de contraste.",
+    portalTitle: "Portal",
+    portalLinkedTo: "Este sitio está vinculado al portal:",
+    portalNotLinked: "Este sitio no está vinculado a ningún portal (funciona por su cuenta).",
+    portalHint: "Un sitio puede pertenecer a un solo portal. Para vincularlo, inicia la asociación desde el panel del portal.",
+    portalUnlink: "Desvincular", portalUnlinking: "Desvinculando…", portalUnlinked: "Desvinculado — el portal se actualizará en 1-2 minutos.", portalUnlinkErr: "Error al desvincular.",
   },
   fr: {
     title: "Synchronisation des calendriers",
@@ -130,6 +146,11 @@ const LABELS = {
     policyCard: "Règles de réservation", policyCardDesc: "Acompte, annulation, taxe de séjour, horaires d'arrivée/départ.",
     stripeCard: "Paiements (Stripe)", stripeCardDesc: "Clés, mode test/production, sécurité.",
     themeCard: "Couleurs", themeCardDesc: "Palette et couleurs du site, avec aperçu et contrôle du contraste.",
+    portalTitle: "Portail",
+    portalLinkedTo: "Ce site est associé au portail :",
+    portalNotLinked: "Ce site n'est associé à aucun portail (il fonctionne seul).",
+    portalHint: "Un site ne peut appartenir qu'à un seul portail. Pour l'associer, lancez l'association depuis le panneau du portail.",
+    portalUnlink: "Dissocier", portalUnlinking: "Dissociation…", portalUnlinked: "Dissocié — le portail se mettra à jour dans 1 à 2 minutes.", portalUnlinkErr: "Échec de la dissociation.",
   },
 } as const;
 
@@ -148,6 +169,8 @@ export default function SettingsManager() {
   const [ext, setExt] = useState<{ airbnbUrl: string; bookingUrl: string; vrboUrl: string; defaultBookingPlatform: OtaPlatform }>({ airbnbUrl: "", bookingUrl: "", vrboUrl: "", defaultBookingPlatform: "airbnb" });
   const [extSaveState, setExtSaveState] = useState<State>("idle");
   const [adminLoc, setAdminLoc] = useState<AdminLocaleCode>(locale as AdminLocaleCode);
+  const [portalState, setPortalState] = useState<State>("idle");
+  const [portalMsg, setPortalMsg] = useState("");
   const [locSaveState, setLocSaveState] = useState<State>("idle");
 
   useEffect(() => {
@@ -221,6 +244,25 @@ export default function SettingsManager() {
     }
   }
 
+  async function unlinkPortal() {
+    setPortalState("saving");
+    setPortalMsg("");
+    try {
+      const res = await fetch("/api/admin/portal-unlink", { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setPortalState("error");
+        setPortalMsg(data.error || L.portalUnlinkErr);
+        return;
+      }
+      setPortalState("success");
+      setPortalMsg(L.portalUnlinked);
+    } catch {
+      setPortalState("error");
+      setPortalMsg(L.portalUnlinkErr);
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Collegamenti alle altre aree di configurazione (spostate qui dalla nav) */}
@@ -268,6 +310,39 @@ export default function SettingsManager() {
         </select>
         {locSaveState === "success" && <p className="text-xs text-green-700">{DEMO ? L.demo : L.langNote}</p>}
         {locSaveState === "error" && <p className="text-xs text-red-600">{L.saveError}</p>}
+      </div>
+
+      {/* Portale: appartenenza (uno solo) + scollega. Un sito senza legame è autonomo. */}
+      <div className="rounded-lg border border-gold/40 bg-card p-5 space-y-3">
+        <h2 className="font-serif-display text-2xl italic text-foreground">{L.portalTitle}</h2>
+        {portalState === "success" ? (
+          <p className="text-sm text-green-700">{portalMsg || L.portalUnlinked}</p>
+        ) : PORTAL_LINK.url ? (
+          <>
+            <p className="text-sm text-foreground/70">
+              {L.portalLinkedTo}{" "}
+              <a href={PORTAL_LINK.url} target="_blank" rel="noopener" className="text-gold hover:underline">
+                {PORTAL_LINK.name || PORTAL_LINK.url}
+              </a>
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={unlinkPortal}
+                disabled={portalState === "saving" || DEMO}
+                className="rounded-full border border-gold/40 px-5 py-2 text-xs uppercase tracking-widest text-foreground/70 transition hover:bg-gold/10 disabled:opacity-50"
+              >
+                {portalState === "saving" ? L.portalUnlinking : L.portalUnlink}
+              </button>
+              {portalState === "success" && <span className="text-xs text-green-700">{portalMsg}</span>}
+              {portalState === "error" && <span className="text-xs text-red-600">{portalMsg}</span>}
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="text-sm text-foreground/60">{L.portalNotLinked}</p>
+            <p className="text-xs text-foreground/40">{L.portalHint}</p>
+          </>
+        )}
       </div>
 
       <div>

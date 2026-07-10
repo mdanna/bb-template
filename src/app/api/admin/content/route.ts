@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getFile, putFile, requireBotToken } from "@/lib/githubContent";
 import { CONTENT, type SiteContent } from "@/lib/siteContent";
+import { notifyPortalCard } from "@/lib/portalSync";
 
 const FILE_PATH = "src/data/content.json";
 
@@ -75,6 +76,9 @@ export async function POST(request: Request) {
     const merged: SiteContent = { ...current, ...body };
     const content = JSON.stringify(merged, null, 2) + "\n";
     const { commitSha } = await putFile(FILE_PATH, content, sha, "Update site content", token);
+    // Se la struttura è collegata a un portale, aggiorna subito il suo teaser con i
+    // meta freschi (best-effort: non blocca la risposta se il portale non risponde).
+    await notifyPortalCard(merged);
     return NextResponse.json({ ok: true, commitSha });
   } catch (err) {
     return NextResponse.json(
