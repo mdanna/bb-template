@@ -101,7 +101,7 @@ const en: Translation = {
     cardCvc: "CVC",
     cardNote: "Secure payment processed by Stripe: your card details never pass through or are stored on this site.",
     paypalNote: "You'll be redirected to PayPal to complete the payment.",
-    confirmButton: "Proceed to pay the deposit",
+    confirmButton: "Proceed to payment",
     processing: "Processing...",
     notApproved: "This booking is not currently available for payment.",
     notFound: "Booking not found.",

@@ -100,7 +100,7 @@ const zh: Translation = {
     cardCvc: "安全码",
     cardNote: "由 Stripe 处理的安全支付:您的卡信息不会经过或保存在本网站。",
     paypalNote: "您将被跳转至 PayPal 完成付款。",
-    confirmButton: "前往支付定金",
+    confirmButton: "前往支付",
     processing: "处理中...",
     notApproved: "此预订目前无法进行付款。",
     notFound: "未找到该预订。",

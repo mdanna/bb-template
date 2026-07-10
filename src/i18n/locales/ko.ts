@@ -100,7 +100,7 @@ const ko: Translation = {
     cardCvc: "CVC",
     cardNote: "Stripe를 통한 안전한 결제입니다. 카드 정보는 본 사이트를 거치거나 저장되지 않습니다.",
     paypalNote: "결제를 완료하려면 PayPal로 이동합니다.",
-    confirmButton: "보증금 결제로 이동",
+    confirmButton: "결제로 이동",
     processing: "처리 중...",
     notApproved: "현재 이 예약은 결제할 수 없습니다.",
     notFound: "예약을 찾을 수 없습니다.",

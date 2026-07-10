@@ -102,7 +102,7 @@ const de: Translation = {
     cardCvc: "CVC",
     cardNote: "Sichere Zahlung über Stripe: Ihre Kartendaten laufen nicht über diese Website und werden hier nicht gespeichert.",
     paypalNote: "Sie werden zu PayPal weitergeleitet, um die Zahlung abzuschließen.",
-    confirmButton: "Zur Zahlung der Anzahlung",
+    confirmButton: "Zur Zahlung",
     processing: "Wird verarbeitet...",
     notApproved: "Diese Buchung steht derzeit nicht zur Zahlung zur Verfügung.",
     notFound: "Buchung nicht gefunden.",

@@ -100,7 +100,7 @@ const ja: Translation = {
     cardCvc: "CVC",
     cardNote: "Stripeによる安全な決済です。カード情報が当サイトを経由したり保存されたりすることはありません。",
     paypalNote: "PayPalにリダイレクトされ、お支払いを完了します。",
-    confirmButton: "保証金の支払いに進む",
+    confirmButton: "支払いに進む",
     processing: "処理中...",
     notApproved: "この予約は現在お支払いいただけません。",
     notFound: "予約が見つかりません。",
