@@ -171,6 +171,7 @@ const fr: Translation = {
     labelDepositPaid: "Acompte payé",
     labelBalance: "Solde",
     labelBalanceDue: "€{amount} à régler",
+    labelCityTax: "Taxe de séjour",
     proceedToPayment: "Procéder au paiement →",
     downloadReceipt: "↓ Télécharger le reçu PDF",
     balanceSectionTitle: "Solde à payer",
@@ -221,6 +222,8 @@ const fr: Translation = {
     cityTaxNote: "Taxe de séjour : €{amount} — encaissée séparément à l'arrivée",
     cityTaxOnlineNote: "Taxe de séjour : €{amount} — incluse dans le paiement en ligne comme ligne distincte",
     refundPolicy: "L'acompte est remboursable en cas d'annulation au moins 10 jours avant l'arrivée.",
+    cityTaxLine: "Taxe de séjour",
+    totalPaidOnline: "Total payé en ligne",
   },
 };
 

@@ -171,6 +171,7 @@ const de: Translation = {
     labelDepositPaid: "Anzahlung bezahlt",
     labelBalance: "Restbetrag",
     labelBalanceDue: "€{amount} ausstehend",
+    labelCityTax: "Kurtaxe",
     proceedToPayment: "Zur Zahlung →",
     downloadReceipt: "↓ PDF-Quittung herunterladen",
     balanceSectionTitle: "Ausstehender Restbetrag",
@@ -221,6 +222,8 @@ const de: Translation = {
     cityTaxNote: "Kurtaxe: €{amount} — bei Anreise separat erhoben",
     cityTaxOnlineNote: "Kurtaxe: €{amount} — in der Online-Zahlung als separate Position enthalten",
     refundPolicy: "Die Anzahlung wird erstattet, wenn Sie mindestens 10 Tage vor der Anreise stornieren.",
+    cityTaxLine: "Kurtaxe",
+    totalPaidOnline: "Online bezahlt (gesamt)",
   },
 };
 

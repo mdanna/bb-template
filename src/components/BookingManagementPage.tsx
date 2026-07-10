@@ -233,31 +233,44 @@ export default function BookingManagementPage({ code, token }: { code: string; t
               <p className="mt-0.5 text-foreground">€{Number(booking.total_price).toFixed(2)}</p>
             </div>
           )}
-          {booking.status === "completed" && (
-            balancePaid ? (
-              <div>
-                <p className="text-[11px] uppercase tracking-widest text-foreground/40">{m.labelTotalPaid}</p>
-                <p className="mt-0.5 font-medium text-green-700">€{totalPaid.toFixed(2)} ✓</p>
-              </div>
-            ) : booking.deposit_amount ? (
+          {booking.status === "completed" && (() => {
+            const hasBalance = booking.balance_due != null && Number(booking.balance_due) > 0;
+            const fullyPaid = balancePaid || !hasBalance;
+            if (fullyPaid) {
+              // Pagamento completo (intero anticipo o saldo già versato): la tassa, se incassata
+              // online, è una voce DISTINTA e ADDIZIONALE → mostrata a parte e sommata nel totale
+              // pagato (non "inclusa nel prezzo del soggiorno").
+              return (
+                <>
+                  {cityTaxOnline && cityTaxNum > 0 && (
+                    <div>
+                      <p className="text-[11px] uppercase tracking-widest text-foreground/40">{m.labelCityTax}</p>
+                      <p className="mt-0.5 text-foreground">€{cityTaxNum.toFixed(2)}</p>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-[11px] uppercase tracking-widest text-foreground/40">{m.labelTotalPaid}</p>
+                    <p className="mt-0.5 font-medium text-green-700">€{totalPaid.toFixed(2)} ✓</p>
+                  </div>
+                </>
+              );
+            }
+            // Anticipo versato, saldo ancora dovuto.
+            return booking.deposit_amount ? (
               <>
                 <div>
-                  <p className="text-[11px] uppercase tracking-widest text-foreground/40">
-                    {booking.balance_due && Number(booking.balance_due) > 0 ? m.labelDepositPaid : m.labelTotalPaid}
-                  </p>
-                  <p className="mt-0.5 text-foreground">€{Number(booking.deposit_amount).toFixed(2)}</p>
+                  <p className="text-[11px] uppercase tracking-widest text-foreground/40">{m.labelDepositPaid}</p>
+                  <p className="mt-0.5 text-foreground">€{depositNum.toFixed(2)}</p>
                 </div>
-                {booking.balance_due && Number(booking.balance_due) > 0 && (
-                  <div>
-                    <p className="text-[11px] uppercase tracking-widest text-foreground/40">{m.labelBalance}</p>
-                    <p className="mt-0.5 font-medium text-amber-600">
-                      {format(m.labelBalanceDue, { amount: Number(booking.balance_due).toFixed(2) })}
-                    </p>
-                  </div>
-                )}
+                <div>
+                  <p className="text-[11px] uppercase tracking-widest text-foreground/40">{m.labelBalance}</p>
+                  <p className="mt-0.5 font-medium text-amber-600">
+                    {format(m.labelBalanceDue, { amount: Number(booking.balance_due).toFixed(2) })}
+                  </p>
+                </div>
               </>
-            ) : null
-          )}
+            ) : null;
+          })()}
         </div>
 
         {booking.status === "approved" && (

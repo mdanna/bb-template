@@ -170,6 +170,7 @@ const en: Translation = {
     labelDepositPaid: "Deposit paid",
     labelBalance: "Balance",
     labelBalanceDue: "€{amount} due",
+    labelCityTax: "City tax",
     proceedToPayment: "Proceed to payment →",
     downloadReceipt: "↓ Download PDF receipt",
     balanceSectionTitle: "Balance due",
@@ -220,6 +221,8 @@ const en: Translation = {
     cityTaxNote: "City tax: €{amount} — collected separately at check-in",
     cityTaxOnlineNote: "City tax: €{amount} — included in the online payment as a separate item",
     refundPolicy: "The deposit is refundable if you cancel at least 10 days before check-in.",
+    cityTaxLine: "City tax",
+    totalPaidOnline: "Total paid online",
   },
 };
 

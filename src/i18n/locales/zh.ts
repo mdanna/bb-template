@@ -169,6 +169,7 @@ const zh: Translation = {
     labelDepositPaid: "已付定金",
     labelBalance: "余款",
     labelBalanceDue: "€{amount} 待付",
+    labelCityTax: "城市税",
     proceedToPayment: "前往付款 →",
     downloadReceipt: "↓ 下载PDF收据",
     balanceSectionTitle: "待付余款",
@@ -219,6 +220,8 @@ const zh: Translation = {
     cityTaxNote: "城市税：€{amount}——入住时单独收取",
     cityTaxOnlineNote: "城市税：€{amount}——已作为单独项目包含在线上付款中",
     refundPolicy: "如在入住前至少10天取消预订,定金可退还。",
+    cityTaxLine: "城市税",
+    totalPaidOnline: "在线支付总额",
   },
 };
 

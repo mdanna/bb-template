@@ -171,6 +171,7 @@ const it: Translation = {
     labelDepositPaid: "Anticipo pagato",
     labelBalance: "Saldo",
     labelBalanceDue: "€{amount} da versare",
+    labelCityTax: "Tassa di soggiorno",
     proceedToPayment: "Procedi al pagamento →",
     downloadReceipt: "↓ Scarica ricevuta PDF",
     balanceSectionTitle: "Saldo da pagare",
@@ -221,6 +222,8 @@ const it: Translation = {
     cityTaxNote: "Tassa di soggiorno: €{amount} — riscossa separatamente al check-in",
     cityTaxOnlineNote: "Tassa di soggiorno: €{amount} — inclusa nel pagamento online come voce separata",
     refundPolicy: "L'anticipo è rimborsabile secondo la policy di cancellazione.",
+    cityTaxLine: "Tassa di soggiorno",
+    totalPaidOnline: "Totale pagato online",
   },
 };
 

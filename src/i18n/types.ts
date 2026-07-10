@@ -153,6 +153,7 @@ export interface Translation {
     labelDepositPaid: string;
     labelBalance: string;
     labelBalanceDue: string; // template {amount}
+    labelCityTax: string; // etichetta cella tassa di soggiorno nel riepilogo
     proceedToPayment: string;
     downloadReceipt: string;
     balanceSectionTitle: string;
@@ -203,5 +204,7 @@ export interface Translation {
     cityTaxNote: string; // template, use {amount}
     cityTaxOnlineNote: string; // template {amount} — variante online: tassa inclusa nel pagamento online come voce separata
     refundPolicy: string;
+    cityTaxLine: string; // etichetta neutra della voce tassa nel breakdown importi
+    totalPaidOnline: string; // totale effettivamente addebitato online (alloggio + tassa se online)
   };
 }

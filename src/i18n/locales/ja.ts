@@ -169,6 +169,7 @@ const ja: Translation = {
     labelDepositPaid: "デポジット支払い済み",
     labelBalance: "残額",
     labelBalanceDue: "€{amount} 未払い",
+    labelCityTax: "宿泊税",
     proceedToPayment: "お支払いへ進む →",
     downloadReceipt: "↓ PDF領収書をダウンロード",
     balanceSectionTitle: "残額のお支払い",
@@ -219,6 +220,8 @@ const ja: Translation = {
     cityTaxNote: "宿泊税：€{amount}——チェックイン時に別途徴収",
     cityTaxOnlineNote: "宿泊税：€{amount}——オンライン決済に別項目として含まれます",
     refundPolicy: "チェックインの10日以上前にキャンセルされた場合、保証金は返金されます。",
+    cityTaxLine: "宿泊税",
+    totalPaidOnline: "オンライン支払い合計",
   },
 };
 

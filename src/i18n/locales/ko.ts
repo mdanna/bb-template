@@ -169,6 +169,7 @@ const ko: Translation = {
     labelDepositPaid: "보증금 결제 완료",
     labelBalance: "잔액",
     labelBalanceDue: "€{amount} 미결제",
+    labelCityTax: "도시세",
     proceedToPayment: "결제 진행 →",
     downloadReceipt: "↓ PDF 영수증 다운로드",
     balanceSectionTitle: "잔액 결제",
@@ -219,6 +220,8 @@ const ko: Translation = {
     cityTaxNote: "도시세: €{amount} — 체크인 시 별도 징수",
     cityTaxOnlineNote: "도시세: €{amount} — 온라인 결제에 별도 항목으로 포함됨",
     refundPolicy: "체크인 10일 전까지 취소하시면 보증금은 환불됩니다.",
+    cityTaxLine: "도시세",
+    totalPaidOnline: "온라인 결제 총액",
   },
 };
 

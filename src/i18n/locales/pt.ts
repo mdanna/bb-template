@@ -171,6 +171,7 @@ const pt: Translation = {
     labelDepositPaid: "Sinal pago",
     labelBalance: "Saldo",
     labelBalanceDue: "€{amount} em falta",
+    labelCityTax: "Taxa turística",
     proceedToPayment: "Proceder ao pagamento →",
     downloadReceipt: "↓ Descarregar recibo PDF",
     balanceSectionTitle: "Saldo a pagar",
@@ -221,6 +222,8 @@ const pt: Translation = {
     cityTaxNote: "Taxa turística: €{amount} — cobrada separadamente no check-in",
     cityTaxOnlineNote: "Taxa turística: €{amount} — incluída no pagamento online como item separado",
     refundPolicy: "O depósito é reembolsável em caso de cancelamento com pelo menos 10 dias de antecedência em relação ao check-in.",
+    cityTaxLine: "Taxa turística",
+    totalPaidOnline: "Total pago online",
   },
 };
 

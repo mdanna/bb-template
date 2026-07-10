@@ -137,33 +137,52 @@ export default function ConfirmationPage({ code }: { code: string }) {
           {formatStayDate(booking.checkin)} → {formatStayDate(booking.checkout)} ·{" "}
           {format(t.confirmation.guests, { count: booking.guests })}
         </p>
-        {booking.total_price && (
-          <p className="mt-1 text-sm text-foreground/80">
-            {t.confirmation.totalStayPrice}: €{booking.total_price}
-          </p>
-        )}
-        {booking.deposit_amount && (
-          <p className="mt-1 text-sm text-foreground/80">
-            {t.confirmation.depositPaid}: €{booking.deposit_amount}
-          </p>
-        )}
-        {booking.balance_due && Number(booking.balance_due) > 0 && (
-          <p className="mt-1 text-sm text-foreground/80">
-            {format(t.confirmation.balanceDueAtCheckin, { amount: booking.balance_due })}
-          </p>
-        )}
-        {booking.city_tax && Number(booking.city_tax) > 0 && (
-          booking.city_tax_online ? (
-            // Opzione A: tassa incassata online con l'anticipo → voce pagata, non "al check-in".
-            <p className="mt-1 text-sm text-foreground/80">
-              {format(t.confirmation.cityTaxOnlineNote, { amount: booking.city_tax })}
-            </p>
-          ) : (
-            <p className="mt-1 text-sm text-foreground/60">
-              {format(t.confirmation.cityTaxNote, { amount: booking.city_tax })}
-            </p>
-          )
-        )}
+        {(() => {
+          const total = Number(booking.total_price ?? 0);
+          const deposit = Number(booking.deposit_amount ?? 0);
+          const balance = Number(booking.balance_due ?? 0);
+          const tax = Number(booking.city_tax ?? 0);
+          const taxOnline = booking.city_tax_online === true && tax > 0;
+          const hasBalance = balance > 0;
+          // Importo alloggio di questa riga: anticipo se c'è ancora un saldo, altrimenti l'intero soggiorno.
+          const stayFigure = hasBalance ? deposit : (total || deposit);
+          // Totale effettivamente addebitato online ORA: alloggio pagato + tassa (se incassata online
+          // come voce separata). NON è "inclusa nel prezzo del soggiorno": è aggiunta sopra.
+          const paidOnline = deposit + (taxOnline ? tax : 0);
+          return (
+            <>
+              <dl className="mt-4 space-y-1.5 text-sm">
+                <div className="flex items-center justify-between">
+                  <dt className="text-foreground/70">
+                    {hasBalance ? t.confirmation.depositPaid : t.confirmation.totalStayPrice}
+                  </dt>
+                  <dd className="text-foreground">€{stayFigure.toFixed(2)}</dd>
+                </div>
+                {taxOnline && (
+                  <div className="flex items-center justify-between">
+                    <dt className="text-foreground/70">{t.confirmation.cityTaxLine}</dt>
+                    <dd className="text-foreground">€{tax.toFixed(2)}</dd>
+                  </div>
+                )}
+                <div className="flex items-center justify-between border-t border-gold/30 pt-1.5">
+                  <dt className="font-medium text-foreground">{t.confirmation.totalPaidOnline}</dt>
+                  <dd className="font-medium text-green-700">€{paidOnline.toFixed(2)} ✓</dd>
+                </div>
+              </dl>
+              {hasBalance && (
+                <p className="mt-3 text-sm text-foreground/80">
+                  {format(t.confirmation.balanceDueAtCheckin, { amount: balance.toFixed(2) })}
+                </p>
+              )}
+              {/* Tassa NON incassata online → riscossa al check-in (nota grigia, non entra nel totale). */}
+              {tax > 0 && !taxOnline && (
+                <p className="mt-1 text-sm text-foreground/60">
+                  {format(t.confirmation.cityTaxNote, { amount: tax.toFixed(2) })}
+                </p>
+              )}
+            </>
+          );
+        })()}
         <p className="mt-1 text-sm text-foreground/80">
           {t.confirmation.method}: {methodLabel(booking.payment_method)}
         </p>
