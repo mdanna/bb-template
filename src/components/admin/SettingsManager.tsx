@@ -333,7 +333,6 @@ export default function SettingsManager() {
               >
                 {portalState === "saving" ? L.portalUnlinking : L.portalUnlink}
               </button>
-              {portalState === "success" && <span className="text-xs text-green-700">{portalMsg}</span>}
               {portalState === "error" && <span className="text-xs text-red-600">{portalMsg}</span>}
             </div>
           </>
