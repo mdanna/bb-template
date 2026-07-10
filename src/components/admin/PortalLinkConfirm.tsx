@@ -74,10 +74,10 @@ export default function PortalLinkConfirm({
           <h1 className="font-serif-display text-3xl italic text-foreground">Fatto</h1>
           <p className="max-w-md text-sm text-foreground/70">{msg}</p>
           <a
-            href={portal}
+            href={`${portal.replace(/\/+$/, "")}/admin`}
             className="rounded-full border border-gold bg-gold px-8 py-3 text-sm font-medium uppercase tracking-widest text-[#faf6ec] transition hover:bg-transparent hover:text-gold"
           >
-            Vai al portale →
+            Torna al portale →
           </a>
         </>
       ) : (
