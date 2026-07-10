@@ -2,6 +2,16 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import Anthropic from "@anthropic-ai/sdk";
 import type { LocaleCode } from "@/i18n/index";
+import { DEMO_MODE } from "@/lib/demo";
+
+// Messaggio mostrato quando si tenta di tradurre nella demo pubblica: il pulsante
+// resta visibile (vetrina) ma non chiama l'API Anthropic (niente costi/abusi).
+const DEMO_TRANSLATE_MSG: Partial<Record<LocaleCode, string>> = {
+  it: "Traduzione disponibile nella versione completa (non attiva nella demo).",
+  en: "Translation available in the full version (not active in the demo).",
+  es: "Traducción disponible en la versión completa (no activa en la demo).",
+  fr: "Traduction disponible dans la version complète (non active dans la démo).",
+};
 
 const LOCALE_NAMES: Record<LocaleCode, string> = {
   it: "Italian", en: "English", fr: "French", de: "German",
@@ -26,6 +36,13 @@ export async function POST(request: Request) {
     ? body.sourceLang as LocaleCode
     : "it";
   const TARGET_LOCALES = ALL_LOCALES.filter((l) => l !== sourceLang);
+
+  // In demo il pulsante è visibile ma non traduce: torna un messaggio (localizzato sulla
+  // lingua in modifica) che i handler mostrano nel loro slot. Blocca anche l'abuso diretto
+  // dell'API in una demo pubblica.
+  if (DEMO_MODE) {
+    return NextResponse.json({ error: DEMO_TRANSLATE_MSG[sourceLang] ?? DEMO_TRANSLATE_MSG.it }, { status: 200 });
+  }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return NextResponse.json({ error: "ANTHROPIC_API_KEY non configurata" }, { status: 503 });
