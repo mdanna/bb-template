@@ -25,7 +25,9 @@ export default function DemoBanner() {
         {onAdmin ? "← Vedi il sito pubblico" : "Entra nel pannello di gestione →"}
       </Link>
       <a
-        href="mailto:info@dimorasuite.com?subject=Vorrei%20un%20sito%20Dimora%20Suite"
+        href="https://dimorasuite.com/inizia.html"
+        target="_blank"
+        rel="noopener"
         className="underline"
       >
         Richiedi il tuo sito
