@@ -38,7 +38,7 @@ export default function SiteFooter() {
             href={PORTAL_URL}
             className="inline-flex items-center gap-1.5 text-xs uppercase tracking-widest text-gold transition hover:opacity-70"
           >
-            {PORTAL_NAME ? `${PORTAL_NAME} · ${portalLabel}` : portalLabel} →
+            {PORTAL_NAME || portalLabel} →
           </a>
         </div>
       )}
