@@ -47,6 +47,7 @@ const LABELS = {
     policyCard: "Regole di prenotazione", policyCardDesc: "Acconto, cancellazione, tassa di soggiorno, orari di check-in/out.",
     stripeCard: "Pagamenti (Stripe)", stripeCardDesc: "Chiavi, modalità test/produzione, sicurezza.",
     themeCard: "Colori", themeCardDesc: "Palette e colori del sito, con anteprima e controllo di contrasto.",
+    accessCard: "Accessi amministratore", accessCardDesc: "Gli indirizzi email autorizzati ad accedere al pannello.",
     portalTitle: "Portale",
     portalLinkedTo: "Questo sito è collegato al portale:",
     portalNotLinked: "Questo sito non è collegato a nessun portale (funziona in autonomia).",
@@ -80,6 +81,7 @@ const LABELS = {
     policyCard: "Booking rules", policyCardDesc: "Deposit, cancellation, city tax, check-in/out times.",
     stripeCard: "Payments (Stripe)", stripeCardDesc: "Keys, test/live mode, security.",
     themeCard: "Colors", themeCardDesc: "Site palette and colors, with preview and contrast check.",
+    accessCard: "Admin access", accessCardDesc: "The email addresses allowed to sign in to the panel.",
     portalTitle: "Portal",
     portalLinkedTo: "This site is linked to the portal:",
     portalNotLinked: "This site isn't linked to any portal (it works on its own).",
@@ -113,6 +115,7 @@ const LABELS = {
     policyCard: "Reglas de reserva", policyCardDesc: "Depósito, cancelación, tasa turística, horarios de entrada/salida.",
     stripeCard: "Pagos (Stripe)", stripeCardDesc: "Claves, modo prueba/producción, seguridad.",
     themeCard: "Colores", themeCardDesc: "Paleta y colores del sitio, con vista previa y control de contraste.",
+    accessCard: "Accesos de administrador", accessCardDesc: "Las direcciones de correo autorizadas a entrar en el panel.",
     portalTitle: "Portal",
     portalLinkedTo: "Este sitio está vinculado al portal:",
     portalNotLinked: "Este sitio no está vinculado a ningún portal (funciona por su cuenta).",
@@ -146,6 +149,7 @@ const LABELS = {
     policyCard: "Règles de réservation", policyCardDesc: "Acompte, annulation, taxe de séjour, horaires d'arrivée/départ.",
     stripeCard: "Paiements (Stripe)", stripeCardDesc: "Clés, mode test/production, sécurité.",
     themeCard: "Couleurs", themeCardDesc: "Palette et couleurs du site, avec aperçu et contrôle du contraste.",
+    accessCard: "Accès administrateur", accessCardDesc: "Les adresses e-mail autorisées à se connecter au panneau.",
     portalTitle: "Portail",
     portalLinkedTo: "Ce site est associé au portail :",
     portalNotLinked: "Ce site n'est associé à aucun portail (il fonctionne seul).",
@@ -278,6 +282,13 @@ export default function SettingsManager() {
           <div>
             <h3 className="font-serif-display text-lg italic text-foreground">{L.themeCard}</h3>
             <p className="mt-0.5 text-sm text-foreground/60">{L.themeCardDesc}</p>
+          </div>
+          <span className="text-gold transition group-hover:translate-x-0.5">→</span>
+        </Link>
+        <Link href="/admin/accessi" className="group flex items-center justify-between rounded-lg border border-gold/40 bg-card p-5 transition hover:bg-gold/5">
+          <div>
+            <h3 className="font-serif-display text-lg italic text-foreground">{L.accessCard}</h3>
+            <p className="mt-0.5 text-sm text-foreground/60">{L.accessCardDesc}</p>
           </div>
           <span className="text-gold transition group-hover:translate-x-0.5">→</span>
         </Link>

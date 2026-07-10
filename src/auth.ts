@@ -7,17 +7,17 @@ import type { Adapter } from "next-auth/adapters";
 import { pool, ensureAuthSchema } from "@/lib/db";
 import { CONTENT } from "@/lib/siteContent";
 import { DEMO_MODE } from "@/lib/demo";
+import { ADMIN_EMAILS } from "@/lib/adminAccess";
 
-// Allowlist admin: username GitHub e/o indirizzi email autorizzati.
+// Allowlist admin. Gli username GitHub restano su env; le email autorizzate (magic-link)
+// arrivano da src/lib/adminAccess (file committato editabile da /admin/accessi, con
+// fallback alle env ADMIN_EMAILS).
 const ALLOWED_LOGINS = (process.env.ADMIN_GITHUB_LOGINS ?? "")
   .split(",")
   .map((s) => s.trim().toLowerCase())
   .filter(Boolean);
 
-const ALLOWED_EMAILS = (process.env.ADMIN_EMAILS ?? "")
-  .split(",")
-  .map((s) => s.trim().toLowerCase())
-  .filter(Boolean);
+const ALLOWED_EMAILS = ADMIN_EMAILS;
 
 // Mittente del magic-link: di default lo stesso indirizzo (sul dominio verificato
 // in Resend) usato per le email transazionali, così eredita l'autenticazione SPF/DKIM.
