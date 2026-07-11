@@ -10,15 +10,8 @@ import StructureSwitcher from "@/components/admin/StructureSwitcher";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function AdminNav({ userName: _userName }: { userName?: string | null }) {
   const pathname = usePathname();
-  const { t, locale } = useAdminLanguage();
+  const { t } = useAdminLanguage();
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  // Il manuale è ospitato centralmente su dimorasuite.com (IT + EN); apre la
-  // versione nella lingua del pannello (EN fa da fallback per es/fr).
-  const manualUrl =
-    locale === "it"
-      ? "https://dimorasuite.com/manuale.html"
-      : "https://dimorasuite.com/manuale-en.html";
 
   // Ordine per frequenza d'uso: operatività (Dashboard, Calendario, Prenotazioni),
   // poi aspetto del sito (Contenuti, Immagini), poi Impostazioni.
@@ -75,12 +68,12 @@ export default function AdminNav({ userName: _userName }: { userName?: string | 
           {/* Switcher tra le strutture del portale (non mostrato se la struttura è singola) */}
           <StructureSwitcher />
           <a
-            href={manualUrl}
+            href="/"
             target="_blank"
             rel="noopener"
             className="text-xs uppercase tracking-widest text-foreground/70 transition hover:text-gold"
           >
-            {t.nav.manual}
+            {t.nav.publicSite}
           </a>
           <button
             onClick={() => signOut({ callbackUrl: "/admin" })}
@@ -107,13 +100,13 @@ export default function AdminNav({ userName: _userName }: { userName?: string | 
             ))}
             <StructureSwitcher />
             <a
-              href={manualUrl}
+              href="/"
               target="_blank"
               rel="noopener"
               onClick={() => setMobileOpen(false)}
               className="text-left text-xs uppercase tracking-widest text-foreground/70 transition hover:text-gold"
             >
-              {t.nav.manual}
+              {t.nav.publicSite}
             </a>
             <button
               onClick={() => signOut({ callbackUrl: "/admin" })}
