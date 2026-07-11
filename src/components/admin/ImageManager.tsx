@@ -272,11 +272,11 @@ export default function ImageManager() {
                   </div>
                   <div className="flex items-center gap-1">
                     {inGallery && (
-                      <button onClick={() => moveGallery(img.name, -1)} disabled={gi === 0} aria-label={ti.moveLeft} className="rounded border border-gold/30 px-1.5 text-xs text-foreground/60 disabled:opacity-30 hover:bg-gold/10">◀</button>
+                      <button onClick={() => moveGallery(img.name, -1)} disabled={gi === 0} aria-label={ti.moveLeft} className="rounded border border-gold/40 px-1.5 text-xs text-foreground/70 transition hover:bg-gold/15 hover:text-gold disabled:border-gold/10 disabled:text-foreground/20 disabled:hover:bg-transparent disabled:cursor-not-allowed">◀</button>
                     )}
                     <button onClick={() => handleDelete(img.name)} disabled={deletingName === img.name} aria-label={ti.delete} className="rounded border border-gold/30 px-1.5 text-xs text-foreground/60 disabled:opacity-40 hover:border-red-400 hover:text-red-600">✕</button>
                     {inGallery && (
-                      <button onClick={() => moveGallery(img.name, 1)} disabled={gi === galleryImages.length - 1} aria-label={ti.moveRight} className="rounded border border-gold/30 px-1.5 text-xs text-foreground/60 disabled:opacity-30 hover:bg-gold/10">▶</button>
+                      <button onClick={() => moveGallery(img.name, 1)} disabled={gi === galleryImages.length - 1} aria-label={ti.moveRight} className="rounded border border-gold/40 px-1.5 text-xs text-foreground/70 transition hover:bg-gold/15 hover:text-gold disabled:border-gold/10 disabled:text-foreground/20 disabled:hover:bg-transparent disabled:cursor-not-allowed">▶</button>
                     )}
                   </div>
                 </div>
