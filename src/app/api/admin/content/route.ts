@@ -23,6 +23,7 @@ function isValidContent(body: unknown): body is SiteContent {
     Array.isArray(b.mapBookmarks) &&
     typeof b.heroImage === "string" &&
     Array.isArray(b.galleryImages) &&
+    (!("imageOrder" in b) || Array.isArray(b.imageOrder)) &&
     Array.isArray(b.amenities) &&
     Array.isArray(b.reviews) &&
     (!("heroSubtitle" in b) || typeof b.heroSubtitle === "object") &&

@@ -26,7 +26,8 @@ export default function ImageManager() {
   const [loadError, setLoadError] = useState("");
 
   const [heroImage, setHeroImage] = useState<string>("");
-  const [galleryImages, setGalleryImages] = useState<string[]>([]);
+  const [inGallery, setInGallery] = useState<string[]>([]); // appartenenza alla galleria
+  const [order, setOrder] = useState<string[]>([]); // ordine unificato di TUTTE le immagini
   const [fullContent, setFullContent] = useState<SiteContent | null>(null);
 
   const [selectionDirty, setSelectionDirty] = useState(false);
@@ -41,11 +42,19 @@ export default function ImageManager() {
   // Lightbox: click sulla miniatura ingrandisce, click sull'ingrandita chiude.
   const [zoomSrc, setZoomSrc] = useState<string | null>(null);
 
+  // Riconcilia l'ordine unificato coi file realmente presenti: mantiene l'ordine
+  // salvato per i file esistenti e appende in fondo i nuovi (es. appena caricati).
+  function reconcileOrder(names: string[], stored: string[]) {
+    return [...stored.filter((n) => names.includes(n)), ...names.filter((n) => !stored.includes(n))];
+  }
+
   async function loadImages() {
     const res = await fetch("/api/admin/images");
     const data = await res.json() as { files?: ImageFile[]; error?: string };
     if (!res.ok) throw new Error(data.error ?? t.common.error);
-    setImages(data.files ?? []);
+    const files = data.files ?? [];
+    setImages(files);
+    setOrder((prev) => reconcileOrder(files.map((f) => f.name), prev));
   }
 
   useEffect(() => {
@@ -56,9 +65,13 @@ export default function ImageManager() {
     ])
       .then(([imgData, contentData]) => {
         if (cancelled) return;
-        setImages(imgData.files ?? []);
+        const files = imgData.files ?? [];
+        setImages(files);
         setHeroImage(contentData.heroImage ?? "");
-        setGalleryImages(contentData.galleryImages ?? []);
+        setInGallery(contentData.galleryImages ?? []);
+        // Ordine unificato: usa imageOrder se presente, altrimenti l'ordine dei file
+        // (così la copertina resta al suo posto naturale, non viene esiliata in fondo).
+        setOrder(reconcileOrder(files.map((f) => f.name), contentData.imageOrder ?? []));
         setFullContent(contentData);
         setLoading(false);
       })
@@ -72,25 +85,29 @@ export default function ImageManager() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function toggleHero(name: string) {
-    setHeroImage((prev) => (prev === name ? "" : name));
+  function markDirty() {
     setSelectionDirty(true);
     setSaveState("idle");
+  }
+
+  function toggleHero(name: string) {
+    setHeroImage((prev) => (prev === name ? "" : name));
+    markDirty();
   }
 
   function toggleGallery(name: string) {
-    setGalleryImages((prev) => {
-      const inGallery = prev.includes(name);
-      if (inGallery) return prev.filter((n) => n !== name);
+    setInGallery((prev) => {
+      const has = prev.includes(name);
+      if (has) return prev.filter((n) => n !== name);
       if (prev.length >= MAX_GALLERY) return prev;
       return [...prev, name];
     });
-    setSelectionDirty(true);
-    setSaveState("idle");
+    markDirty();
   }
 
-  function moveGallery(name: string, dir: -1 | 1) {
-    setGalleryImages((prev) => {
+  // Sposta l'immagine nell'ordine unificato (copertina inclusa).
+  function move(name: string, dir: -1 | 1) {
+    setOrder((prev) => {
       const i = prev.indexOf(name);
       const j = i + dir;
       if (i < 0 || j < 0 || j >= prev.length) return prev;
@@ -98,15 +115,16 @@ export default function ImageManager() {
       [next[i], next[j]] = [next[j], next[i]];
       return next;
     });
-    setSelectionDirty(true);
-    setSaveState("idle");
+    markDirty();
   }
 
   async function handleSaveSelection() {
     if (!fullContent) return;
     setSaveState("saving");
     try {
-      const body: SiteContent = { ...fullContent, heroImage, galleryImages };
+      // Galleria pubblica = immagini in galleria, nell'ordine unificato scelto dall'admin.
+      const galleryImages = order.filter((n) => inGallery.includes(n));
+      const body: SiteContent = { ...fullContent, heroImage, galleryImages, imageOrder: order };
       const res = await fetch("/api/admin/content", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -141,6 +159,7 @@ export default function ImageManager() {
         // (nessuna scrittura su GitHub). Persa al refresh — coerente con la demo.
         const name = images.some((i) => i.name === file.name) ? `${Date.now()}-${file.name}` : file.name;
         setImages((prev) => [...prev, { name, sha: "demo", url: dataUrl }]);
+        setOrder((prev) => [...prev, name]);
         setUploadState("success");
         if (fileInputRef.current) fileInputRef.current.value = "";
         setTimeout(() => setUploadState("idle"), 4000);
@@ -164,12 +183,18 @@ export default function ImageManager() {
     }
   }
 
+  function forgetLocally(name: string) {
+    setImages((prev) => prev.filter((i) => i.name !== name));
+    setOrder((prev) => prev.filter((n) => n !== name));
+    if (heroImage === name) setHeroImage("");
+    setInGallery((prev) => prev.filter((n) => n !== name));
+  }
+
   async function handleDelete(name: string) {
     if (!confirm(`${ti.delete} "${name}"?`)) return;
     if (DEMO) {
-      setImages((prev) => prev.filter((i) => i.name !== name));
-      if (heroImage === name) { setHeroImage(""); setSelectionDirty(true); }
-      if (galleryImages.includes(name)) { setGalleryImages((prev) => prev.filter((n) => n !== name)); setSelectionDirty(true); }
+      forgetLocally(name);
+      markDirty();
       return;
     }
     setDeletingName(name);
@@ -181,15 +206,14 @@ export default function ImageManager() {
       });
       const data = await res.json() as { ok?: boolean; error?: string; contentUpdated?: boolean; commitSha?: string };
       if (!res.ok) throw new Error(data.error ?? t.common.error);
-      // Il server ha già rimosso i riferimenti da content.json: allinea lo stato
-      // locale (hero, galleria e fullContent) senza marcare la selezione come
-      // "da salvare" — non c'è nulla di pendente da salvare per questa delete.
-      if (heroImage === name) setHeroImage("");
-      if (galleryImages.includes(name)) setGalleryImages((prev) => prev.filter((n) => n !== name));
+      // Il server ha già rimosso i riferimenti da content.json (hero, galleria, ordine):
+      // allinea lo stato locale senza marcare la selezione come "da salvare".
+      forgetLocally(name);
       setFullContent((prev) => prev ? {
         ...prev,
         heroImage: prev.heroImage === name ? "" : prev.heroImage,
         galleryImages: prev.galleryImages.filter((n) => n !== name),
+        imageOrder: (prev.imageOrder ?? []).filter((n) => n !== name),
       } : prev);
       if (data.commitSha) setDeploySha(data.commitSha);
       await loadImages();
@@ -200,13 +224,8 @@ export default function ImageManager() {
     }
   }
 
-  const srcOf = (img: ImageFile) => img.url ?? `/images/${img.name}`;
-  // Ordine di visualizzazione: prima le immagini in galleria (nel loro ordine, così
-  // le frecce ◀▶ le spostano visibilmente), poi le altre nell'ordine dei file.
-  const orderedImages: ImageFile[] = [
-    ...galleryImages.map((n) => images.find((i) => i.name === n)).filter((i): i is ImageFile => !!i),
-    ...images.filter((i) => !galleryImages.includes(i.name)),
-  ];
+  const arrowCls =
+    "rounded border border-gold/40 px-1.5 text-xs text-foreground/70 transition hover:bg-gold/15 hover:text-gold disabled:border-gold/10 disabled:text-foreground/20 disabled:hover:bg-transparent disabled:cursor-not-allowed";
 
   return (
     <div className="space-y-6">
@@ -227,7 +246,8 @@ export default function ImageManager() {
         )}
       </div>
 
-      {/* Libreria immagini: griglia con controlli nel footer (hero/galleria + ordina/elimina) */}
+      {/* Libreria immagini: un unico ordine, controllato dall'admin. Ogni miniatura ha
+          i toggle principale/galleria e le frecce di riordino (copertina inclusa). */}
       {loading ? (
         <p className="text-sm text-foreground/60">{t.common.loading}</p>
       ) : loadError ? (
@@ -236,18 +256,19 @@ export default function ImageManager() {
         <p className="text-sm text-foreground/50">{ti.noImages}</p>
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-          {orderedImages.map((img) => {
-            const isHero = heroImage === img.name;
-            const inGallery = galleryImages.includes(img.name);
-            const galleryFull = galleryImages.length >= MAX_GALLERY && !inGallery;
-            const gi = galleryImages.indexOf(img.name);
-            const src = srcOf(img);
+          {order.map((name, idx) => {
+            const img = images.find((i) => i.name === name);
+            if (!img) return null;
+            const isHero = heroImage === name;
+            const inGal = inGallery.includes(name);
+            const galleryFull = inGallery.length >= MAX_GALLERY && !inGal;
+            const src = img.url ?? `/images/${name}`;
             return (
-              <div key={img.name} className={`overflow-hidden rounded-lg border ${isHero || inGallery ? "border-gold/50" : "border-gold/20"}`}>
+              <div key={name} className={`overflow-hidden rounded-lg border ${isHero || inGal ? "border-gold/50" : "border-gold/20"}`}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={src}
-                  alt={img.name}
+                  alt={name}
                   onClick={() => setZoomSrc(src)}
                   className="h-36 w-full cursor-zoom-in object-cover"
                   onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
@@ -255,29 +276,25 @@ export default function ImageManager() {
                 <div className="flex items-center justify-between gap-1 bg-card/60 px-1.5 py-1">
                   <div className="flex items-center gap-1">
                     <button
-                      onClick={() => toggleHero(img.name)}
+                      onClick={() => toggleHero(name)}
                       title={ti.hero}
                       className={`rounded border px-1.5 text-base leading-none transition ${isHero ? "border-gold/50 text-yellow-400" : "border-gold/30 text-foreground/50 hover:text-yellow-400"}`}
                     >
                       {isHero ? "★" : "☆"}
                     </button>
                     <button
-                      onClick={() => toggleGallery(img.name)}
+                      onClick={() => toggleGallery(name)}
                       disabled={galleryFull}
                       title={galleryFull ? `Max ${MAX_GALLERY}` : ti.gallery}
-                      className={`rounded border px-1.5 text-sm leading-none transition disabled:opacity-30 ${inGallery ? "border-gold/50 text-gold" : "border-gold/30 text-foreground/50 hover:text-gold"}`}
+                      className={`rounded border px-1.5 text-sm leading-none transition disabled:opacity-30 ${inGal ? "border-gold/50 text-gold" : "border-gold/30 text-foreground/50 hover:text-gold"}`}
                     >
-                      {inGallery ? "▦" : "▢"}
+                      {inGal ? "▦" : "▢"}
                     </button>
                   </div>
                   <div className="flex items-center gap-1">
-                    {inGallery && (
-                      <button onClick={() => moveGallery(img.name, -1)} disabled={gi === 0} aria-label={ti.moveLeft} className="rounded border border-gold/40 px-1.5 text-xs text-foreground/70 transition hover:bg-gold/15 hover:text-gold disabled:border-gold/10 disabled:text-foreground/20 disabled:hover:bg-transparent disabled:cursor-not-allowed">◀</button>
-                    )}
-                    <button onClick={() => handleDelete(img.name)} disabled={deletingName === img.name} aria-label={ti.delete} className="rounded border border-gold/30 px-1.5 text-xs text-foreground/60 disabled:opacity-40 hover:border-red-400 hover:text-red-600">✕</button>
-                    {inGallery && (
-                      <button onClick={() => moveGallery(img.name, 1)} disabled={gi === galleryImages.length - 1} aria-label={ti.moveRight} className="rounded border border-gold/40 px-1.5 text-xs text-foreground/70 transition hover:bg-gold/15 hover:text-gold disabled:border-gold/10 disabled:text-foreground/20 disabled:hover:bg-transparent disabled:cursor-not-allowed">▶</button>
-                    )}
+                    <button onClick={() => move(name, -1)} disabled={idx === 0} aria-label={ti.moveLeft} className={arrowCls}>◀</button>
+                    <button onClick={() => handleDelete(name)} disabled={deletingName === name} aria-label={ti.delete} className="rounded border border-gold/30 px-1.5 text-xs text-foreground/60 disabled:opacity-40 hover:border-red-400 hover:text-red-600">✕</button>
+                    <button onClick={() => move(name, 1)} disabled={idx === order.length - 1} aria-label={ti.moveRight} className={arrowCls}>▶</button>
                   </div>
                 </div>
               </div>
@@ -286,7 +303,7 @@ export default function ImageManager() {
         </div>
       )}
 
-      {/* Salvataggio della selezione (hero + galleria + ordine) */}
+      {/* Salvataggio della selezione (copertina + galleria + ordine) */}
       <div className="flex items-center gap-4">
         <button
           onClick={handleSaveSelection}

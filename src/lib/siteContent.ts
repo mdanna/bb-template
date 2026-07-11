@@ -48,6 +48,10 @@ export interface SiteContent {
   mapBookmarks: MapBookmark[];
   heroImage: string;
   galleryImages: string[];
+  // Ordine unificato di TUTTE le immagini gestite (copertina inclusa), controllato
+  // dall'admin. La galleria pubblica usa galleryImages (sottoinsieme ordinato); questo
+  // serve al pannello per mantenere la disposizione scelta senza esiliare la copertina.
+  imageOrder?: string[];
   amenities: L10n[];
   reviews: Review[];
   heroSubtitle: L10n;

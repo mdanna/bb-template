@@ -136,11 +136,13 @@ export async function DELETE(request: Request) {
       const current = JSON.parse(cur) as SiteContent;
       const nextHero = current.heroImage === name ? "" : current.heroImage;
       const nextGallery = (current.galleryImages ?? []).filter((n) => n !== name);
+      const nextOrder = (current.imageOrder ?? []).filter((n) => n !== name);
       const changed =
         nextHero !== current.heroImage ||
-        nextGallery.length !== (current.galleryImages ?? []).length;
+        nextGallery.length !== (current.galleryImages ?? []).length ||
+        nextOrder.length !== (current.imageOrder ?? []).length;
       if (changed) {
-        const merged: SiteContent = { ...current, heroImage: nextHero, galleryImages: nextGallery };
+        const merged: SiteContent = { ...current, heroImage: nextHero, galleryImages: nextGallery, imageOrder: nextOrder };
         const json = JSON.stringify(merged, null, 2) + "\n";
         ({ commitSha } = await putFile(CONTENT_PATH, json, contentSha, `Remove image reference: ${name}`, token));
         contentUpdated = true;
