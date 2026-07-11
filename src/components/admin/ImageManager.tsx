@@ -176,10 +176,19 @@ export default function ImageManager() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name }),
       });
-      const data = await res.json() as { ok?: boolean; error?: string };
+      const data = await res.json() as { ok?: boolean; error?: string; contentUpdated?: boolean; commitSha?: string };
       if (!res.ok) throw new Error(data.error ?? t.common.error);
-      if (heroImage === name) { setHeroImage(""); setSelectionDirty(true); }
-      if (galleryImages.includes(name)) { setGalleryImages((prev) => prev.filter((n) => n !== name)); setSelectionDirty(true); }
+      // Il server ha già rimosso i riferimenti da content.json: allinea lo stato
+      // locale (hero, galleria e fullContent) senza marcare la selezione come
+      // "da salvare" — non c'è nulla di pendente da salvare per questa delete.
+      if (heroImage === name) setHeroImage("");
+      if (galleryImages.includes(name)) setGalleryImages((prev) => prev.filter((n) => n !== name));
+      setFullContent((prev) => prev ? {
+        ...prev,
+        heroImage: prev.heroImage === name ? "" : prev.heroImage,
+        galleryImages: prev.galleryImages.filter((n) => n !== name),
+      } : prev);
+      if (data.commitSha) setDeploySha(data.commitSha);
       await loadImages();
     } catch (err) {
       alert(err instanceof Error ? err.message : t.common.error);

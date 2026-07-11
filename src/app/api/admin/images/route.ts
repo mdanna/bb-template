@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { getFile, deleteFile, requireBotToken } from "@/lib/githubContent";
+import { getFile, putFile, deleteFile, requireBotToken } from "@/lib/githubContent";
 import { DEMO_MODE, demoWriteBlocked } from "@/lib/demo";
+import type { SiteContent } from "@/lib/siteContent";
+import { notifyPortalCard } from "@/lib/portalSync";
 import contentData from "@/data/content.json";
 
 const IMAGES_DIR = "public/images";
+const CONTENT_PATH = "src/data/content.json";
 
 export async function GET() {
   const session = await auth();
@@ -118,9 +121,39 @@ export async function DELETE(request: Request) {
 
   try {
     const token = requireBotToken();
+
+    // Radice del problema: PRIMA di rimuovere il file, togli ogni riferimento a
+    // questa immagine da content.json (hero + galleria), così il dato non resta
+    // mai a puntare a un file inesistente (galleria, hero e JsonLd inclusi).
+    // Ordine: content.json prima, immagine dopo — lo stato intermedio (ref già
+    // rimosso, file ancora presente) è innocuo. Best-effort: se la ripulitura
+    // fallisce si procede comunque con la delete (il filtro build-time della
+    // galleria fa da rete di sicurezza).
+    let contentUpdated = false;
+    let commitSha: string | undefined;
+    try {
+      const { content: cur, sha: contentSha } = await getFile(CONTENT_PATH, token);
+      const current = JSON.parse(cur) as SiteContent;
+      const nextHero = current.heroImage === name ? "" : current.heroImage;
+      const nextGallery = (current.galleryImages ?? []).filter((n) => n !== name);
+      const changed =
+        nextHero !== current.heroImage ||
+        nextGallery.length !== (current.galleryImages ?? []).length;
+      if (changed) {
+        const merged: SiteContent = { ...current, heroImage: nextHero, galleryImages: nextGallery };
+        const json = JSON.stringify(merged, null, 2) + "\n";
+        ({ commitSha } = await putFile(CONTENT_PATH, json, contentSha, `Remove image reference: ${name}`, token));
+        contentUpdated = true;
+        // Aggiorna il teaser del portale se collegato (best-effort, non blocca).
+        try { await notifyPortalCard(merged); } catch { /* ignora */ }
+      }
+    } catch {
+      // Ripulitura non riuscita: procedi comunque con l'eliminazione del file.
+    }
+
     const { sha } = await getFile(path, token);
     await deleteFile(path, sha, `Delete image: ${name}`, token);
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, contentUpdated, commitSha });
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Eliminazione fallita" },
