@@ -1,44 +1,23 @@
-"use client";
-
-import Image from "next/image";
-import { useState } from "react";
-import { useLanguage } from "@/i18n/LanguageContext";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { CONTENT } from "@/lib/siteContent";
+import GalleryGrid from "@/components/GalleryGrid";
 
-function Diamond() {
-  return <div className="divider-diamond text-gold">◆</div>;
-}
+// Statica: il filtro sui file esistenti deve girare a build-time (quando
+// public/images è sul filesystem), non a runtime — su Vercel gli asset di
+// public/ non stanno sul filesystem della function, quindi un fs.existsSync
+// runtime li nasconderebbe tutti. force-static garantisce il prerender.
+export const dynamic = "force-static";
 
-const galleryPhotos = CONTENT.galleryImages.map((img) => `/images/${img}`);
+const IMAGES_DIR = join(process.cwd(), "public", "images");
 
 export default function GalleriaPage() {
-  const { t, locale } = useLanguage();
-  // Un'immagine referenziata ma eliminata va in 404: la nascondiamo del tutto
-  // invece di lasciare il riquadro vuoto col bordo.
-  const [broken, setBroken] = useState<string[]>([]);
-  const photos = galleryPhotos.filter((src) => !broken.includes(src));
+  // Scarta i riferimenti a immagini eliminate dall'admin ma ancora presenti in
+  // content.json (la delete non ripulisce la selezione): così il riquadro vuoto
+  // non arriva mai al client — niente placeholder, niente flash.
+  const photos = CONTENT.galleryImages
+    .filter((name) => existsSync(join(IMAGES_DIR, name)))
+    .map((name) => `/images/${name}`);
 
-  return (
-    <section className="px-6 py-16">
-      <h1 className="font-serif-display mb-2 text-center text-3xl italic text-foreground">
-        {t.gallery.title}
-      </h1>
-      <div className="mx-auto mb-10 max-w-xs">
-        <Diamond />
-      </div>
-      <div className="mx-auto grid max-w-5xl grid-cols-2 gap-3 sm:grid-cols-3">
-        {photos.map((src) => (
-          <div key={src} className="relative aspect-square overflow-hidden rounded-md border border-gold/40">
-            <Image
-              src={src}
-              alt={CONTENT.siteTitle[locale] || CONTENT.siteTitle.it}
-              fill
-              className="object-cover"
-              onError={() => setBroken((b) => (b.includes(src) ? b : [...b, src]))}
-            />
-          </div>
-        ))}
-      </div>
-    </section>
-  );
+  return <GalleryGrid photos={photos} />;
 }
