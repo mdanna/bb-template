@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { CONTENT } from "@/lib/siteContent";
 
@@ -17,6 +17,20 @@ export default function GalleryGrid({ photos }: { photos: string[] }) {
   const [broken, setBroken] = useState<string[]>([]);
   const visible = photos.filter((src) => !broken.includes(src));
 
+  // Lightbox: clic su una foto la ingrandisce, clic sull'ingrandita o Esc chiude.
+  const [zoomed, setZoomed] = useState<string | null>(null);
+  useEffect(() => {
+    if (!zoomed) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setZoomed(null); };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [zoomed]);
+
   return (
     <section className="px-6 py-16">
       <h1 className="font-serif-display mb-2 text-center text-3xl italic text-foreground">
@@ -27,7 +41,12 @@ export default function GalleryGrid({ photos }: { photos: string[] }) {
       </div>
       <div className="mx-auto grid max-w-5xl grid-cols-2 gap-3 sm:grid-cols-3">
         {visible.map((src) => (
-          <div key={src} className="relative aspect-square overflow-hidden rounded-md border border-gold/40">
+          <button
+            key={src}
+            type="button"
+            onClick={() => setZoomed(src)}
+            className="relative aspect-square cursor-zoom-in overflow-hidden rounded-md border border-gold/40 transition hover:opacity-90"
+          >
             <Image
               src={src}
               alt={CONTENT.siteTitle[locale] || CONTENT.siteTitle.it}
@@ -35,9 +54,26 @@ export default function GalleryGrid({ photos }: { photos: string[] }) {
               className="object-cover"
               onError={() => setBroken((b) => (b.includes(src) ? b : [...b, src]))}
             />
-          </div>
+          </button>
         ))}
       </div>
+
+      {/* Lightbox: clic ovunque (immagine o sfondo) o Esc chiude */}
+      {zoomed && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setZoomed(null)}
+          className="fixed inset-0 z-50 flex cursor-zoom-out items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={zoomed}
+            alt={CONTENT.siteTitle[locale] || CONTENT.siteTitle.it}
+            className="max-h-[92vh] max-w-[92vw] rounded-lg object-contain shadow-2xl"
+          />
+        </div>
+      )}
     </section>
   );
 }
