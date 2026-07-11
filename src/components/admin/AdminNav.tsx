@@ -60,8 +60,9 @@ export default function AdminNav({ userName: _userName }: { userName?: string | 
         <span className="w-9" aria-hidden />
       </div>
 
-      {/* Desktop toolbar */}
-      <div className="mx-auto hidden max-w-6xl items-center justify-between px-6 py-3 lg:flex">
+      {/* Desktop toolbar: full-width con px-6 costante (niente mx-auto/max-w) così
+          titolo e voci restano ancorati ai bordi a qualsiasi larghezza, come il NavBar pubblico. */}
+      <div className="hidden items-center justify-between px-6 py-3 lg:flex">
         <span className="font-serif-display text-base italic text-foreground">
           {t.nav.title}
         </span>
