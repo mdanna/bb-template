@@ -86,6 +86,19 @@ export default function ImageManager() {
     setSaveState("idle");
   }
 
+  function moveGallery(name: string, dir: -1 | 1) {
+    setGalleryImages((prev) => {
+      const i = prev.indexOf(name);
+      const j = i + dir;
+      if (i < 0 || j < 0 || j >= prev.length) return prev;
+      const next = [...prev];
+      [next[i], next[j]] = [next[j], next[i]];
+      return next;
+    });
+    setSelectionDirty(true);
+    setSaveState("idle");
+  }
+
   async function handleSaveSelection() {
     if (!fullContent) return;
     setSaveState("saving");
@@ -201,6 +214,47 @@ export default function ImageManager() {
             </div>
           )}
         </div>
+
+        {!loading && !loadError && galleryImages.length > 0 && (
+          <div className="rounded-lg border border-gold/30 bg-background p-3 space-y-2">
+            <p className="text-xs font-medium text-foreground/60">{ti.order}</p>
+            <div className="flex flex-wrap gap-2">
+              {galleryImages.map((name, idx) => {
+                const src = images.find((i) => i.name === name)?.url ?? `/images/${name}`;
+                return (
+                  <div key={name} className="w-24 rounded-md border border-gold/30 bg-card overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={src}
+                      alt={name}
+                      className="h-16 w-full object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                    />
+                    <div className="flex items-center justify-between px-1.5 py-1">
+                      <button
+                        onClick={() => moveGallery(name, -1)}
+                        disabled={idx === 0}
+                        title={ti.moveLeft}
+                        className="text-sm leading-none text-foreground/60 hover:text-gold disabled:opacity-25"
+                      >
+                        ◀
+                      </button>
+                      <span className="text-[10px] text-foreground/40">{idx + 1}</span>
+                      <button
+                        onClick={() => moveGallery(name, 1)}
+                        disabled={idx === galleryImages.length - 1}
+                        title={ti.moveRight}
+                        className="text-sm leading-none text-foreground/60 hover:text-gold disabled:opacity-25"
+                      >
+                        ▶
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {loading ? (
           <p className="text-sm text-foreground/60">{t.common.loading}</p>
