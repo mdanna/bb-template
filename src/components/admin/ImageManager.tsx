@@ -39,6 +39,13 @@ export default function ImageManager() {
   const [deletingName, setDeletingName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Immagini appena caricate: committate su GitHub ma non ancora servite (il file
+  // compare solo dopo il redeploy Vercel). Restano "in pubblicazione" — con avviso
+  // e placeholder — finché il loro <img> non riesce a caricarsi (onLoad).
+  const [pending, setPending] = useState<string[]>([]);
+  const [tick, setTick] = useState(0); // ticker condiviso: ogni 3s riprova a caricare le immagini in pubblicazione
+  const MAX_UPLOAD_TICKS = 60; // ~3 min: oltre, si rinuncia (comparirà al refresh)
+
   // Lightbox: click sulla miniatura ingrandisce, click sull'ingrandita chiude.
   const [zoomSrc, setZoomSrc] = useState<string | null>(null);
 
@@ -84,6 +91,19 @@ export default function ImageManager() {
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Mentre ci sono immagini "in pubblicazione", un solo timer (cadenza 3s) fa
+  // avanzare il ticker: cambia il query param di quelle immagini → il browser
+  // riprova a scaricarle. Quando l'ultima si carica (onLoad) pending si svuota e
+  // il timer si ferma. Dopo MAX_UPLOAD_TICKS si rinuncia.
+  useEffect(() => {
+    if (pending.length === 0) return;
+    const id = window.setTimeout(() => {
+      if (tick + 1 >= MAX_UPLOAD_TICKS) setPending([]); // rinuncia: comparirà al refresh
+      else setTick((n) => n + 1);
+    }, 3000);
+    return () => window.clearTimeout(id);
+  }, [pending.length, tick]);
 
   function markDirty() {
     setSelectionDirty(true);
@@ -174,6 +194,10 @@ export default function ImageManager() {
       const data = await res.json() as { ok?: boolean; error?: string };
       if (!res.ok) throw new Error(data.error ?? t.common.error);
       setUploadState("success");
+      // Committata su GitHub ma non ancora servita: marcala "in pubblicazione"
+      // finché il redeploy non la rende visibile (il suo <img> farà onLoad).
+      setPending((p) => (p.includes(file.name) ? p : [...p, file.name]));
+      setTick(0);
       await loadImages();
       if (fileInputRef.current) fileInputRef.current.value = "";
       setTimeout(() => setUploadState("idle"), 3000);
@@ -188,6 +212,7 @@ export default function ImageManager() {
     setOrder((prev) => prev.filter((n) => n !== name));
     if (heroImage === name) setHeroImage("");
     setInGallery((prev) => prev.filter((n) => n !== name));
+    setPending((prev) => prev.filter((n) => n !== name));
   }
 
   async function handleDelete(name: string) {
@@ -246,6 +271,15 @@ export default function ImageManager() {
         )}
       </div>
 
+      {/* Avviso: immagini appena caricate ancora in pubblicazione (redeploy in corso).
+          Sparisce da solo appena l'ultima immagine riesce a caricarsi. */}
+      {pending.length > 0 && (
+        <div className="flex items-center gap-2 rounded-lg border border-gold/40 bg-gold/10 px-4 py-3 text-sm text-foreground/80">
+          <span className="inline-block h-3 w-3 shrink-0 animate-pulse rounded-full bg-gold" aria-hidden />
+          {ti.publishing}
+        </div>
+      )}
+
       {/* Libreria immagini: un unico ordine, controllato dall'admin. Ogni miniatura ha
           i toggle principale/galleria e le frecce di riordino (copertina inclusa). */}
       {loading ? (
@@ -262,17 +296,31 @@ export default function ImageManager() {
             const isHero = heroImage === name;
             const inGal = inGallery.includes(name);
             const galleryFull = inGallery.length >= MAX_GALLERY && !inGal;
-            const src = img.url ?? `/images/${name}`;
+            const isPending = pending.includes(name);
+            // Per un'immagine "in pubblicazione" il query param (tick) cambia ogni 3s
+            // così il browser riprova a scaricarla finché il deploy non la serve.
+            const src = img.url ?? (isPending ? `/images/${name}?v=${tick}` : `/images/${name}`);
             return (
               <div key={name} className={`overflow-hidden rounded-lg border ${isHero || inGal ? "border-gold/50" : "border-gold/20"}`}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={src}
-                  alt={name}
-                  onClick={() => setZoomSrc(src)}
-                  className="h-36 w-full cursor-zoom-in object-cover"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                />
+                <div className="relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={src}
+                    alt={name}
+                    onClick={() => { if (!isPending) setZoomSrc(src); }}
+                    className={`h-36 w-full object-cover ${isPending ? "opacity-0" : "cursor-zoom-in"}`}
+                    onLoad={() => { if (isPending) setPending((p) => p.filter((n) => n !== name)); }}
+                    onError={(e) => {
+                      // In pubblicazione: non nascondere, ci riprova il ticker condiviso.
+                      if (!isPending) (e.target as HTMLImageElement).style.display = "none";
+                    }}
+                  />
+                  {isPending && (
+                    <div className="absolute inset-0 flex animate-pulse items-center justify-center bg-gold/10 text-[10px] uppercase tracking-widest text-foreground/40">
+                      …
+                    </div>
+                  )}
+                </div>
                 <div className="flex items-center justify-between gap-1 bg-card/60 px-1.5 py-1">
                   <div className="flex items-center gap-1">
                     <button
