@@ -24,7 +24,7 @@ const ko: Translation = {
     p1: "여기에 귀하의 아파트와 호스트로서의 이야기를 설명하세요.",
     p2: "",
   },
-  gallery: { title: "갤러리" },
+  gallery: { title: "이미지" },
   details: {
     title: "세부 정보",
     rating: "에어비앤비 평점 ★{rating} ({count}개 리뷰)",

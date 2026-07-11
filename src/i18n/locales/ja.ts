@@ -24,7 +24,7 @@ const ja: Translation = {
     p1: "ここにあなたのアパートメントとホストとしての物語を説明してください。",
     p2: "",
   },
-  gallery: { title: "ギャラリー" },
+  gallery: { title: "画像" },
   details: {
     title: "詳細",
     rating: "Airbnb評価 ★{rating}({count}件のレビュー)",

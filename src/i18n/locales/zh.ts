@@ -24,7 +24,7 @@ const zh: Translation = {
     p1: "在这里描述您的公寓和作为房东的故事。",
     p2: "",
   },
-  gallery: { title: "图库" },
+  gallery: { title: "图片" },
   details: {
     title: "详情",
     rating: "Airbnb评分 ★{rating}({count}条评价)",

@@ -24,7 +24,7 @@ const de: Translation = {
     p1: "Beschreiben Sie hier Ihre Wohnung und Ihre Geschichte als Gastgeber.",
     p2: "",
   },
-  gallery: { title: "Galerie" },
+  gallery: { title: "Bilder" },
   details: {
     title: "Die Details",
     rating: "★ {rating} auf Airbnb ({count} Bewertungen)",
