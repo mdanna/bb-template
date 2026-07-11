@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import type { SiteContent, MapBookmark, Review, AreaPlace, L10n, Details } from "@/lib/siteContent";
 import { useAdminLanguage } from "@/i18n/AdminLanguageContext";
-import DeployToast from "@/components/admin/DeployToast";
+import { useDrafts } from "@/components/admin/DraftContext";
+import AdminSaveBar from "@/components/admin/AdminSaveBar";
 
-type SaveState = "idle" | "saving" | "success" | "error";
 type TranslateState = "idle" | "translating" | "done" | "error";
 type SubTab = "struttura" | "testi" | "area" | "servizi" | "recensioni" | "seo";
 
@@ -34,30 +34,6 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
   return <span className={labelTextCls}>{children}</span>;
 }
 
-function SaveButton({
-  saveState,
-  onClick,
-  labels,
-}: {
-  saveState: SaveState;
-  onClick: () => void;
-  labels: { save: string; saving: string; saved: string; error: string };
-}) {
-  return (
-    <div className="flex items-center gap-4 pt-6">
-      <button
-        onClick={onClick}
-        disabled={saveState === "saving"}
-        className="rounded-full bg-gold px-6 py-2 text-xs uppercase tracking-widest text-[#faf6ec] transition hover:opacity-90 disabled:opacity-50"
-      >
-        {saveState === "saving" ? labels.saving : labels.save}
-      </button>
-      {saveState === "success" && <span className="text-sm text-green-600">{labels.saved}</span>}
-      {saveState === "error" && <span className="text-sm text-red-600">{labels.error}</span>}
-    </div>
-  );
-}
-
 function LangBadge({ lang }: { lang: string }) {
   return (
     <span className="ml-2 rounded bg-gold/20 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-gold">
@@ -66,12 +42,16 @@ function LangBadge({ lang }: { lang: string }) {
   );
 }
 
+// Wrapper: si rimonta quando le bozze sono idratate da sessionStorage (`hydrated`), così
+// dopo un refresh l'editor riparte dalla bozza non pubblicata e non dai dati del server.
 export default function ContentEditor() {
+  const { hydrated } = useDrafts();
+  return <ContentEditorInner key={`default-${hydrated}`} />;
+}
+
+function ContentEditorInner() {
   const { t, locale } = useAdminLanguage();
-  const tc = t.contents;
-  const DEMO = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
   const subTabLabels = SUB_TAB_LABELS[locale] ?? SUB_TAB_LABELS.en;
-  const saveLabels = { save: tc.save, saving: tc.saving, saved: DEMO ? t.common.demoSaved : tc.saved, error: t.common.error };
 
   const CONTENT_LABELS = {
     it: { property: "Struttura", posizione: "Posizione (visualizzata)", città: "Città", indirizzo: "Indirizzo", tel: "Telefono", email: "Email contatto", emailPren: "Email prenotazioni", piva: "Partita IVA / Codice fiscale host", cin: "CIN (Codice Identificativo Nazionale)", nomeHost: "Nome host", metaDesc: "Meta description (SEO)", privacyNote: "Visualizzato nella pagina Privacy come titolare del trattamento dati.", emailNote: "L'email di contatto è anche l'indirizzo dove ricevi le notifiche di prenotazione.", airbnbUrl: "URL Airbnb", rating: "Rating", numReviews: "Numero recensioni", details: "Dettagli", tipoAlloggio: "Tipo di alloggio", caratteristiche: "Caratteristiche", composizione: "Composizione", capacità: "Capacità", zona: "Zona", titoloStruttura: "Titolo struttura", sottotitoloHero: "Sottotitolo hero", titoloRacconto: "Titolo racconto", paragrafiRacconto: "Paragrafi racconto", aggiungiParag: "+ Aggiungi paragrafo", descArea: "Descrizione area", descrizione: "Descrizione", coordinate: "Coordinate appartamento", lat: "Latitudine", lng: "Longitudine", segnalibri: "Segnalibri mappa (max 5)", etichetta: "Etichetta", aggiungiSegnalibro: "Aggiungi segnalibro", puntiInteresse: "Punti di interesse", nome: "Nome", commento: "Commento", aggiungiPunto: "Aggiungi punto", servizi: "Servizi", aggiungiServizio: "Aggiungi servizio", autore: "Autore", testoRecensione: "Testo recensione", aggiungiRecensione: "Aggiungi recensione", elimina: "Elimina", rimuovi: "Rimuovi", traduceTutto: "Traduci tutto", traduceDesc: "Traduce automaticamente tutti i contenuti in 8 lingue con un solo clic, poi salva.", traduzioneCompletata: "Traduzione completata — ricordati di salvare.", traduciAuto: "Traduci automaticamente", traduciDettagli: "Traduci dettagli", traduciArea: "Traduci", traduciPunti: "Traduci punti di interesse", traduciServizi: "Traduci servizi", traduciRecensioni: "Traduci recensioni", inCorso: "Traduzione in corso…", vediEn: "Vedi traduzioni (EN)", nascondi: "Nascondi", tradotto: "Tradotto", airbnbSection: "Airbnb", paragrafoPh: "Paragrafo {n}…" },
@@ -86,9 +66,11 @@ export default function ContentEditor() {
   // Best available source text: prefer current admin locale, fallback to Italian
   const src = (field: L10n): string => field[srcLang] || field.it || Object.values(field).find(Boolean) || "";
 
+  // Bozza condivisa con Immagini: se c'è una modifica non pubblicata, riparti da lì.
+  const { getDraft, setDraft } = useDrafts();
+  const draftKey = "content:default";
+
   const [content, setContent] = useState<SiteContent | null>(null);
-  const [saveState, setSaveState] = useState<SaveState>("idle");
-  const [deploySha, setDeploySha] = useState<string | null>(null);
   const [loadError, setLoadError] = useState("");
   const [activeTab, setActiveTab] = useState<SubTab>("struttura");
 
@@ -117,6 +99,10 @@ export default function ContentEditor() {
   const [allTranslateError, setAllTranslateError] = useState("");
 
   useEffect(() => {
+    // Se esiste una bozza non pubblicata, usala; altrimenti carica dal server.
+    const d = getDraft<SiteContent>(draftKey);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (d) { setContent(d); return; }
     fetch("/api/admin/content")
       .then((r) => r.json())
       .then(setContent)
@@ -124,23 +110,10 @@ export default function ContentEditor() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function handleSave() {
-    if (!content) return;
-    setSaveState("saving");
-    try {
-      const res = await fetch("/api/admin/content", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(content),
-      });
-      const data = (await res.json()) as { error?: string; commitSha?: string };
-      if (!res.ok) throw new Error(data.error ?? t.common.error);
-      setSaveState("success");
-      if (data.commitSha) setDeploySha(data.commitSha);
-      setTimeout(() => setSaveState("idle"), 3000);
-    } catch {
-      setSaveState("error");
-    }
+  // "Salva" mette i contenuti in bozza (istantaneo, niente deploy); "Pubblica" (in
+  // AdminSaveBar) committa tutte le bozze insieme.
+  function saveToDraft() {
+    if (content) setDraft(draftKey, content);
   }
 
   function set<K extends keyof SiteContent>(key: K, value: SiteContent[K]) {
@@ -556,7 +529,7 @@ export default function ContentEditor() {
           </div>
         </div>
 
-        <SaveButton saveState={saveState} onClick={handleSave} labels={saveLabels} />
+        <AdminSaveBar onSave={saveToDraft} />
       </div>
     );
   }
@@ -677,7 +650,7 @@ export default function ContentEditor() {
           </div>
         )}
 
-        <SaveButton saveState={saveState} onClick={handleSave} labels={saveLabels} />
+        <AdminSaveBar onSave={saveToDraft} />
       </div>
     );
   }
@@ -896,7 +869,7 @@ export default function ContentEditor() {
           </div>
         </div>
 
-        <SaveButton saveState={saveState} onClick={handleSave} labels={saveLabels} />
+        <AdminSaveBar onSave={saveToDraft} />
       </div>
     );
   }
@@ -957,7 +930,7 @@ export default function ContentEditor() {
             )}
           </div>
         </div>
-        <SaveButton saveState={saveState} onClick={handleSave} labels={saveLabels} />
+        <AdminSaveBar onSave={saveToDraft} />
       </div>
     );
   }
@@ -1036,7 +1009,7 @@ export default function ContentEditor() {
             )}
           </div>
         </div>
-        <SaveButton saveState={saveState} onClick={handleSave} labels={saveLabels} />
+        <AdminSaveBar onSave={saveToDraft} />
       </div>
     );
   }
@@ -1095,13 +1068,15 @@ export default function ContentEditor() {
           <span className="text-xs text-foreground/40">{S.altNamesHelp}</span>
         </label>
 
-        <SaveButton saveState={saveState} onClick={handleSave} labels={saveLabels} />
+        <AdminSaveBar onSave={saveToDraft} />
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
+      <AdminSaveBar onSave={saveToDraft} />
+
       {/* Traduci tutto */}
       <div className="flex flex-wrap items-center gap-3 rounded-lg border border-gold/30 bg-gold/5 px-4 py-3">
         <button
@@ -1150,8 +1125,6 @@ export default function ContentEditor() {
         {activeTab === "recensioni" && renderRecensioni()}
         {activeTab === "seo" && renderSeo()}
       </div>
-
-      <DeployToast sha={deploySha} onDone={() => setDeploySha(null)} />
     </div>
   );
 }

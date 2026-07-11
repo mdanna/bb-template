@@ -1,6 +1,7 @@
 import { AdminLanguageProvider } from "@/i18n/AdminLanguageContext";
 import { resolveAdminLocale } from "@/lib/policies";
 import AdminFooter from "@/components/admin/AdminFooter";
+import { DraftProvider } from "@/components/admin/DraftContext";
 
 // La lingua del pannello viene dalla configurazione del sito (policies.adminLocale,
 // default "it"), letta lato server e passata al provider. Cambiabile da Impostazioni.
@@ -8,8 +9,10 @@ import AdminFooter from "@/components/admin/AdminFooter";
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <AdminLanguageProvider locale={resolveAdminLocale()}>
-      {children}
-      <AdminFooter />
+      <DraftProvider>
+        {children}
+        <AdminFooter />
+      </DraftProvider>
     </AdminLanguageProvider>
   );
 }
