@@ -5,7 +5,7 @@ const fr: Translation = {
   nav: {
     location: "Ville · Quartier",
     home: "Accueil",
-    gallery: "Galerie",
+    gallery: "Images",
     amenities: "Services",
     area: "Quartier",
     reviews: "Avis",

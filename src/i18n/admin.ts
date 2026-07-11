@@ -149,6 +149,7 @@ export const adminTranslations = {
       order: "Ordine galleria",
       moveLeft: "Sposta indietro",
       moveRight: "Sposta avanti",
+      legend: "★ principale   ▦ galleria",
     },
     // Dashboard
     dashboard: {
@@ -332,6 +333,7 @@ export const adminTranslations = {
       order: "Gallery order",
       moveLeft: "Move back",
       moveRight: "Move forward",
+      legend: "★ hero   ▦ gallery",
     },
     dashboard: {
       title: "Dashboard",
@@ -513,6 +515,7 @@ export const adminTranslations = {
       order: "Orden de la galería",
       moveLeft: "Mover atrás",
       moveRight: "Mover adelante",
+      legend: "★ principal   ▦ galería",
     },
     dashboard: {
       title: "Panel de control",
@@ -694,6 +697,7 @@ export const adminTranslations = {
       order: "Ordre de la galerie",
       moveLeft: "Déplacer avant",
       moveRight: "Déplacer après",
+      legend: "★ hero   ▦ galerie",
     },
     dashboard: {
       title: "Tableau de bord",
@@ -752,7 +756,7 @@ export type AdminTranslation = {
   calendar: { title: string; syncAirbnb: string; syncing: string; syncDone: string; blockDays: string; unblockDays: string; addBooking: string; price: string; pricePerNight: string; setPrice: string; guestName: string; save: string; saving: string; cancel: string; confirmBlock: string; confirmUnblock: string; nights: string; selectDates: string; from: string; to: string; type: string; directBooking: string; manualBlock: string };
   contents: { title: string; intro: string; save: string; saving: string; saved: string; translate: string; translating: string; translated: string; translateAll: string; field: string; preview: string; addItem: string; removeItem: string; moveUp: string; moveDown: string };
   policy: { title: string; intro: string; save: string; saving: string; saved: string };
-  images: { title: string; intro: string; upload: string; uploading: string; delete: string; deleting: string; noImages: string; hero: string; gallery: string; order: string; moveLeft: string; moveRight: string };
+  images: { title: string; intro: string; upload: string; uploading: string; delete: string; deleting: string; noImages: string; hero: string; gallery: string; order: string; moveLeft: string; moveRight: string; legend: string };
   dashboard: { title: string; totalBookings: string; revenue: string; occupancy: string; upcomingBookings: string; noUpcoming: string; thisMonth: string; thisYear: string };
   common: { yes: string; no: string; confirm: string; cancel: string; close: string; error: string; success: string; loading: string; noData: string; optional: string; demoSaved: string; demoImage: string };
   deploy: { building: string; ready: string; error: string };

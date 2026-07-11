@@ -38,6 +38,9 @@ export default function ImageManager() {
   const [deletingName, setDeletingName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Lightbox: click sulla miniatura ingrandisce, click sull'ingrandita chiude.
+  const [zoomSrc, setZoomSrc] = useState<string | null>(null);
+
   async function loadImages() {
     const res = await fetch("/api/admin/images");
     const data = await res.json() as { files?: ImageFile[]; error?: string };
@@ -70,7 +73,7 @@ export default function ImageManager() {
   }, []);
 
   function toggleHero(name: string) {
-    setHeroImage(name);
+    setHeroImage((prev) => (prev === name ? "" : name));
     setSelectionDirty(true);
     setSaveState("idle");
   }
@@ -197,152 +200,114 @@ export default function ImageManager() {
     }
   }
 
+  const srcOf = (img: ImageFile) => img.url ?? `/images/${img.name}`;
+  // Ordine di visualizzazione: prima le immagini in galleria (nel loro ordine, così
+  // le frecce ◀▶ le spostano visibilmente), poi le altre nell'ordine dei file.
+  const orderedImages: ImageFile[] = [
+    ...galleryImages.map((n) => images.find((i) => i.name === n)).filter((i): i is ImageFile => !!i),
+    ...images.filter((i) => !galleryImages.includes(i.name)),
+  ];
+
   return (
-    <div className="space-y-8">
-      <div className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h3 className="text-sm font-medium text-foreground/80">
-            {ti.gallery}
-            {!loading && (
-              <span className="ml-2 text-xs text-foreground/40">
-                ({galleryImages.length}/{MAX_GALLERY})
-              </span>
-            )}
-          </h3>
-          {selectionDirty && (
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleSaveSelection}
-                disabled={saveState === "saving"}
-                className="rounded-full bg-gold px-5 py-1.5 text-xs uppercase tracking-widest text-[#faf6ec] transition hover:opacity-90 disabled:opacity-50"
-              >
-                {saveState === "saving" ? t.contents.saving : t.contents.save}
-              </button>
-              {saveState === "success" && <span className="text-xs text-green-600">{DEMO ? t.common.demoSaved : t.contents.saved}</span>}
-              {saveState === "error" && <span className="text-xs text-red-600">{t.common.error}</span>}
-            </div>
-          )}
-        </div>
-
-        {!loading && !loadError && galleryImages.length > 0 && (
-          <div className="rounded-lg border border-gold/30 bg-background p-3 space-y-2">
-            <p className="text-xs font-medium text-foreground/60">{ti.order}</p>
-            <div className="flex flex-wrap gap-2">
-              {galleryImages.map((name, idx) => {
-                const src = images.find((i) => i.name === name)?.url ?? `/images/${name}`;
-                return (
-                  <div key={name} className="w-24 rounded-md border border-gold/30 bg-card overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={src}
-                      alt={name}
-                      className="h-16 w-full object-cover"
-                      onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                    />
-                    <div className="flex items-center justify-between px-1.5 py-1">
-                      <button
-                        onClick={() => moveGallery(name, -1)}
-                        disabled={idx === 0}
-                        title={ti.moveLeft}
-                        className="text-sm leading-none text-foreground/60 hover:text-gold disabled:opacity-25"
-                      >
-                        ◀
-                      </button>
-                      <span className="text-[10px] text-foreground/40">{idx + 1}</span>
-                      <button
-                        onClick={() => moveGallery(name, 1)}
-                        disabled={idx === galleryImages.length - 1}
-                        title={ti.moveRight}
-                        className="text-sm leading-none text-foreground/60 hover:text-gold disabled:opacity-25"
-                      >
-                        ▶
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {loading ? (
-          <p className="text-sm text-foreground/60">{t.common.loading}</p>
-        ) : loadError ? (
-          <p className="text-sm text-red-600">{loadError}</p>
-        ) : images.length === 0 ? (
-          <p className="text-sm text-foreground/50">{ti.noImages}</p>
-        ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-            {images.map((img) => {
-              const isHero = heroImage === img.name;
-              const inGallery = galleryImages.includes(img.name);
-              const galleryFull = galleryImages.length >= MAX_GALLERY && !inGallery;
-              return (
-                <div key={img.name} className="rounded-lg border border-gold/30 bg-card overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={img.url ?? `/images/${img.name}`}
-                    alt={img.name}
-                    className="h-28 w-full object-cover"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                  />
-                  <div className="p-2 space-y-1.5">
-                    <p className="truncate text-[11px] text-foreground/60" title={img.name}>
-                      {img.name}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => toggleHero(img.name)}
-                        title={ti.hero}
-                        className={`text-base leading-none transition ${isHero ? "text-yellow-500" : "text-foreground/30 hover:text-yellow-400"}`}
-                      >
-                        {isHero ? "★" : "☆"}
-                      </button>
-                      <label
-                        className={`flex items-center gap-1 text-[11px] cursor-pointer ${galleryFull ? "opacity-40 cursor-not-allowed" : ""}`}
-                        title={galleryFull ? `Max ${MAX_GALLERY}` : ti.gallery}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={inGallery}
-                          disabled={galleryFull}
-                          onChange={() => toggleGallery(img.name)}
-                          className="accent-gold"
-                        />
-                        <span className="text-foreground/60">{ti.gallery}</span>
-                      </label>
-                    </div>
-                    <button
-                      onClick={() => handleDelete(img.name)}
-                      disabled={deletingName === img.name}
-                      className="text-[11px] text-red-500 hover:text-red-700 disabled:opacity-50"
-                    >
-                      {deletingName === img.name ? ti.deleting : ti.delete}
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+    <div className="space-y-6">
+      {/* Carica immagine: prima delle immagini (come il pannello portale) */}
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploadState === "uploading"}
+          className="rounded-full border border-gold/40 px-4 py-2 text-xs uppercase tracking-widest text-foreground/70 transition hover:bg-gold/10 disabled:opacity-50"
+        >
+          {uploadState === "uploading" ? ti.uploading : ti.upload}
+        </button>
+        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleUpload} className="hidden" />
+        {uploadState === "success" && <span className="text-xs text-green-700">{DEMO ? t.common.demoImage : t.common.success}</span>}
+        {uploadState === "error" && <span className="text-xs text-red-600">{uploadError}</span>}
+        {!loading && (
+          <span className="ml-auto text-xs text-foreground/45">{ti.legend}</span>
         )}
       </div>
 
-      <div className="rounded-lg border border-gold/40 bg-background p-4 space-y-3">
-        <h3 className="text-sm font-medium text-foreground/80">{ti.upload}</h3>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleUpload}
-          disabled={uploadState === "uploading"}
-          className="block text-sm text-foreground/70 file:mr-4 file:rounded-full file:border file:border-gold/40 file:bg-gold/10 file:px-4 file:py-1.5 file:text-xs file:uppercase file:tracking-widest file:text-gold hover:file:bg-gold/20 disabled:opacity-50"
-        />
-        {uploadState === "uploading" && <p className="text-xs text-foreground/60">{ti.uploading}</p>}
-        {uploadState === "success" && <p className="text-xs text-green-700">{DEMO ? t.common.demoImage : t.common.success}</p>}
-        {uploadState === "error" && <p className="text-xs text-red-600">{uploadError}</p>}
+      {/* Libreria immagini: griglia con controlli nel footer (hero/galleria + ordina/elimina) */}
+      {loading ? (
+        <p className="text-sm text-foreground/60">{t.common.loading}</p>
+      ) : loadError ? (
+        <p className="text-sm text-red-600">{loadError}</p>
+      ) : images.length === 0 ? (
+        <p className="text-sm text-foreground/50">{ti.noImages}</p>
+      ) : (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+          {orderedImages.map((img) => {
+            const isHero = heroImage === img.name;
+            const inGallery = galleryImages.includes(img.name);
+            const galleryFull = galleryImages.length >= MAX_GALLERY && !inGallery;
+            const gi = galleryImages.indexOf(img.name);
+            const src = srcOf(img);
+            return (
+              <div key={img.name} className={`overflow-hidden rounded-lg border ${isHero || inGallery ? "border-gold/50" : "border-gold/20"}`}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={src}
+                  alt={img.name}
+                  onClick={() => setZoomSrc(src)}
+                  className="h-36 w-full cursor-zoom-in object-cover"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                />
+                <div className="flex items-center justify-between gap-1 bg-card/60 px-1.5 py-1">
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => toggleHero(img.name)}
+                      title={ti.hero}
+                      className={`rounded border px-1.5 text-base leading-none transition ${isHero ? "border-gold/50 text-yellow-400" : "border-gold/30 text-foreground/50 hover:text-yellow-400"}`}
+                    >
+                      {isHero ? "★" : "☆"}
+                    </button>
+                    <button
+                      onClick={() => toggleGallery(img.name)}
+                      disabled={galleryFull}
+                      title={galleryFull ? `Max ${MAX_GALLERY}` : ti.gallery}
+                      className={`rounded border px-1.5 text-sm leading-none transition disabled:opacity-30 ${inGallery ? "border-gold/50 text-gold" : "border-gold/30 text-foreground/50 hover:text-gold"}`}
+                    >
+                      {inGallery ? "▦" : "▢"}
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {inGallery && (
+                      <button onClick={() => moveGallery(img.name, -1)} disabled={gi === 0} aria-label={ti.moveLeft} className="rounded border border-gold/30 px-1.5 text-xs text-foreground/60 disabled:opacity-30 hover:bg-gold/10">◀</button>
+                    )}
+                    <button onClick={() => handleDelete(img.name)} disabled={deletingName === img.name} aria-label={ti.delete} className="rounded border border-gold/30 px-1.5 text-xs text-foreground/60 disabled:opacity-40 hover:border-red-400 hover:text-red-600">✕</button>
+                    {inGallery && (
+                      <button onClick={() => moveGallery(img.name, 1)} disabled={gi === galleryImages.length - 1} aria-label={ti.moveRight} className="rounded border border-gold/30 px-1.5 text-xs text-foreground/60 disabled:opacity-30 hover:bg-gold/10">▶</button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Salvataggio della selezione (hero + galleria + ordine) */}
+      <div className="flex items-center gap-4">
+        <button
+          onClick={handleSaveSelection}
+          disabled={saveState === "saving" || !selectionDirty}
+          className="rounded-full border border-gold bg-gold px-6 py-2 text-xs uppercase tracking-widest text-[#faf6ec] transition hover:bg-transparent hover:text-gold disabled:opacity-40"
+        >
+          {saveState === "saving" ? t.contents.saving : t.contents.save}
+        </button>
+        {saveState === "success" && <span className="text-sm text-green-600">{DEMO ? t.common.demoSaved : t.contents.saved}</span>}
+        {saveState === "error" && <span className="text-sm text-red-600">{t.common.error}</span>}
       </div>
 
       <DeployToast sha={deploySha} onDone={() => setDeploySha(null)} />
+
+      {/* Lightbox */}
+      {zoomSrc && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4" onClick={() => setZoomSrc(null)} role="dialog" aria-label={ti.gallery}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={zoomSrc} alt="" className="max-h-[90vh] max-w-[90vw] cursor-zoom-out object-contain" />
+        </div>
+      )}
     </div>
   );
 }
