@@ -4,7 +4,6 @@ import { useState } from "react";
 import AvailabilityCalendar from "@/components/AvailabilityCalendar";
 import BookingForm from "@/components/BookingForm";
 import { useLanguage } from "@/i18n/LanguageContext";
-import { format } from "@/i18n/format";
 
 function Diamond() {
   return <div className="divider-diamond text-gold">◆</div>;
@@ -12,11 +11,10 @@ function Diamond() {
 
 interface Props {
   airbnbUrl: string;
-  airbnbRating: number;
   minAdvanceDays: number;
 }
 
-export default function PrenotaClient({ airbnbUrl, airbnbRating, minAdvanceDays }: Props) {
+export default function PrenotaClient({ airbnbUrl, minAdvanceDays }: Props) {
   const { t } = useLanguage();
   const [booking, setBooking] = useState<{
     checkin: string;
@@ -34,17 +32,19 @@ export default function PrenotaClient({ airbnbUrl, airbnbRating, minAdvanceDays 
           <Diamond />
         </div>
         <p className="mx-auto mt-6 max-w-xl text-foreground/80">{t.booking.subtitle}</p>
-        <p className="mx-auto mt-3 max-w-xl text-sm text-foreground/60">
-          {t.booking.preferAirbnb}{" "}
-          <a
-            href={airbnbUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gold underline"
-          >
-            {format(t.booking.goToListing, { rating: airbnbRating })}
-          </a>
-        </p>
+        {airbnbUrl && (
+          <p className="mx-auto mt-3 max-w-xl text-sm text-foreground/60">
+            {t.booking.preferAirbnb}{" "}
+            <a
+              href={airbnbUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gold underline"
+            >
+              {t.hero.bookAirbnb}
+            </a>
+          </p>
+        )}
       </div>
 
       <div className="mt-12">

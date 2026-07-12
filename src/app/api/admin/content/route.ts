@@ -16,8 +16,6 @@ function isValidContent(body: unknown): body is SiteContent {
     typeof b.email === "string" &&
     typeof b.hostName === "string" &&
     (!("airbnbUrl" in b) || typeof b.airbnbUrl === "string") &&
-    typeof b.airbnbRating === "number" &&
-    typeof b.airbnbReviewCount === "number" &&
     typeof b.mapLat === "number" &&
     typeof b.mapLng === "number" &&
     Array.isArray(b.mapBookmarks) &&
@@ -25,7 +23,6 @@ function isValidContent(body: unknown): body is SiteContent {
     Array.isArray(b.galleryImages) &&
     (!("imageOrder" in b) || Array.isArray(b.imageOrder)) &&
     Array.isArray(b.amenities) &&
-    Array.isArray(b.reviews) &&
     (!("heroSubtitle" in b) || typeof b.heroSubtitle === "object") &&
     (!("storyTitle" in b) || typeof b.storyTitle === "object") &&
     (!("storyParagraphs" in b) || Array.isArray(b.storyParagraphs)) &&
