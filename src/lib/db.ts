@@ -68,6 +68,7 @@ export async function ensureSchema() {
   // vecchio (tassa riscossa al check-in). true = online. Le prenotazioni create prima di questa
   // colonna restano NULL = vecchio comportamento (tassa al check-in), invariato.
   await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS city_tax_online BOOLEAN;`);
+  await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS review_request_sent_at TIMESTAMPTZ;`);
   initialized = true;
 }
 
@@ -232,4 +233,5 @@ export interface Booking {
   // true = tassa di soggiorno inclusa nel pagamento online (voce separata); false/null = vecchio
   // comportamento, tassa riscossa al check-in. NULL = prenotazioni antecedenti al flag.
   city_tax_online: boolean | null;
+  review_request_sent_at: string | null;
 }
