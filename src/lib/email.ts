@@ -8,6 +8,7 @@ import {
 } from "./emailHtml";
 
 import { CONTENT } from "./siteContent";
+import { waLink } from "./whatsapp";
 import { POLICIES, } from "./policies";
 import { MIN_DEPOSIT_RATE } from "./pricing";
 
@@ -26,6 +27,9 @@ const MODEL_D = !!MAIL_FROM_ADDRESS;
 const FROM = `${CONTENT.siteTitle.it} <${MAIL_FROM_ADDRESS || CONTENT.bookingEmail}>`;
 const HOST_EMAIL = CONTENT.email;
 const HOST_PHONE = CONTENT.phone;
+// Suffisso "· WhatsApp" per le righe contatto delle email (se il numero è configurato).
+const HOST_WA = waLink(CONTENT.whatsappNumber);
+const WA_SUFFIX = HOST_WA ? ` · <a href="${HOST_WA}" style="color:#128C7E;">WhatsApp</a>` : "";
 
 async function send(payload: { to: string; subject: string; text: string; html?: string; replyTo?: string }) {
   const { replyTo, subject, ...rest } = payload;
@@ -228,7 +232,7 @@ export async function sendRejectionEmail(params: {
     (params.reason ? infoBox(smallPara(`${bold("Motivo:")} ${params.reason}`)) : "") +
     para("Se desideri verificare altre date, siamo a tua disposizione.", true) +
     divider() +
-    smallPara(`<a href="mailto:${HOST_EMAIL}" style="color:#b8755f;">${HOST_EMAIL}</a> · ${HOST_PHONE}`)
+    smallPara(`<a href="mailto:${HOST_EMAIL}" style="color:#b8755f;">${HOST_EMAIL}</a> · ${HOST_PHONE}${WA_SUFFIX}`)
   );
   await send({ to: params.to, subject, text, html, replyTo: HOST_EMAIL });
 }
@@ -349,7 +353,7 @@ export async function sendBookingRequestAutoReply(params: {
     title(s.autoReplySubject(code)) +
     bodyHtml +
     divider() +
-    smallPara(`<a href="mailto:${HOST_EMAIL}" style="color:#b8755f;">${HOST_EMAIL}</a> · ${HOST_PHONE}`)
+    smallPara(`<a href="mailto:${HOST_EMAIL}" style="color:#b8755f;">${HOST_EMAIL}</a> · ${HOST_PHONE}${WA_SUFFIX}`)
   );
   await send({
     to, replyTo: HOST_EMAIL,
@@ -537,7 +541,7 @@ export async function sendReviewRequestEmail(params: {
     para(s.reviewRequestBody(firstName).replace(/\n/g, "<br>")) +
     button(s.reviewRequestButton, reviewUrl) +
     divider() +
-    smallPara(`<a href="mailto:${HOST_EMAIL}" style="color:#b8755f;">${HOST_EMAIL}</a> · ${HOST_PHONE}`)
+    smallPara(`<a href="mailto:${HOST_EMAIL}" style="color:#b8755f;">${HOST_EMAIL}</a> · ${HOST_PHONE}${WA_SUFFIX}`)
   );
   await send({
     to,
