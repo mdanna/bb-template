@@ -4,13 +4,15 @@ import { getFile, putFile, requireBotToken } from "@/lib/githubContent";
 
 const FILE_PATH = "src/data/availability.json";
 
-interface DayRate {
-  date: string;
-  price: number;
-  status: "available" | "booked";
-  source?: "airbnb" | "app" | "blocked" | "direct";
-  note?: string;
-}
+import type { DayRate, DaySource } from "@/data/availability";
+
+// Fonte unica dei `source` validi (allineata a DaySource in availability.ts): include i
+// blocchi/prenotazioni multi-OTA (booking, vrbo) e i blocchi importati (imported). Senza
+// questi, pubblicare un calendario che contiene notti sincronizzate da Booking/Vrbo o
+// blocchi OTA veniva rifiutato con "Dati non validi".
+const VALID_SOURCES: ReadonlySet<DaySource> = new Set<DaySource>([
+  "airbnb", "booking", "vrbo", "app", "direct", "blocked", "imported", "airbnb-blocked",
+]);
 
 interface SavePayload {
   defaultPrice: number;
@@ -31,9 +33,11 @@ function isValidPayload(body: unknown): body is SavePayload {
       typeof r.price === "number" &&
       r.price > 0 &&
       (r.status === "available" || r.status === "booked") &&
-      (r.source === undefined || r.source === "airbnb" || r.source === "airbnb-blocked" || r.source === "app" || r.source === "blocked" || r.source === "direct") &&
+      (r.source === undefined || VALID_SOURCES.has(r.source as DaySource)) &&
       (r.note === undefined || typeof r.note === "string") &&
-      (r.conflict === undefined || typeof r.conflict === "boolean")
+      (r.conflict === undefined || typeof r.conflict === "boolean") &&
+      (r.blockedBy === undefined || Array.isArray(r.blockedBy)) &&
+      (r.conflictWith === undefined || Array.isArray(r.conflictWith))
     );
   });
 }
