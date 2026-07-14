@@ -35,6 +35,14 @@ const LABELS = {
     changed: "Sincronizzazione completata — il sito si aggiornerà tra qualche secondo.",
     unchanged: "Sincronizzazione completata — nessuna modifica.",
     demo: "In demo la sincronizzazione non viene eseguita.",
+    autoSyncNote: "La sincronizzazione in import è automatica ogni 3 ore; qui puoi anche forzarla subito.",
+    lastAutoSync: "Ultima sincronizzazione automatica",
+    lastAutoSyncNever: "nessuna ancora",
+    exportTitle: "Esporta il tuo calendario",
+    exportDesc: "Incolla questo link nel campo \u201cimporta calendario\u201d di Airbnb, Booking o altri portali: vedranno le notti gi\u00e0 occupate qui (prenotazioni dirette e da altri OTA) e le bloccheranno.",
+    exportCopy: "Copia",
+    exportCopied: "Copiato \u2713",
+    exportSecret: "Link segreto: non condividerlo pubblicamente.",
     extTitle: "Prenotazione esterna",
     extDesc: "Se un ospite preferisce prenotare fuori da Dimora, il bottone “Prenota su…” in home lo porta alla piattaforma scelta.",
     airbnbListing: "URL annuncio Airbnb",
@@ -78,6 +86,14 @@ const LABELS = {
     changed: "Sync complete — the site will update in a few seconds.",
     unchanged: "Sync complete — no changes.",
     demo: "In the demo, sync is not performed.",
+    autoSyncNote: "Importing runs automatically every 3 hours; here you can also force it now.",
+    lastAutoSync: "Last automatic sync",
+    lastAutoSyncNever: "none yet",
+    exportTitle: "Export your calendar",
+    exportDesc: "Paste this link into the \u201cimport calendar\u201d field on Airbnb, Booking or other portals: they'll see the nights already taken here (direct and other-OTA bookings) and block them.",
+    exportCopy: "Copy",
+    exportCopied: "Copied \u2713",
+    exportSecret: "Secret link: don't share it publicly.",
     extTitle: "External booking",
     extDesc: "If a guest prefers to book outside Dimora, the “Book on…” button on the homepage sends them to the chosen platform.",
     airbnbListing: "Airbnb listing URL",
@@ -121,6 +137,14 @@ const LABELS = {
     changed: "Sincronización completa — el sitio se actualizará en unos segundos.",
     unchanged: "Sincronización completa — sin cambios.",
     demo: "En la demo la sincronización no se ejecuta.",
+    autoSyncNote: "La importación se ejecuta automáticamente cada 3 horas; aquí también puedes forzarla ahora.",
+    lastAutoSync: "Última sincronización automática",
+    lastAutoSyncNever: "ninguna todavía",
+    exportTitle: "Exporta tu calendario",
+    exportDesc: "Pega este enlace en el campo \u201cimportar calendario\u201d de Airbnb, Booking u otros portales: verán las noches ya ocupadas aquí (reservas directas y de otros OTA) y las bloquearán.",
+    exportCopy: "Copiar",
+    exportCopied: "Copiado \u2713",
+    exportSecret: "Enlace secreto: no lo compartas públicamente.",
     extTitle: "Reserva externa",
     extDesc: "Si un huésped prefiere reservar fuera de Dimora, el botón «Reserva en…» de la home lo lleva a la plataforma elegida.",
     airbnbListing: "URL del anuncio de Airbnb",
@@ -164,6 +188,14 @@ const LABELS = {
     changed: "Synchronisation terminée — le site se mettra à jour dans quelques secondes.",
     unchanged: "Synchronisation terminée — aucun changement.",
     demo: "Dans la démo, la synchronisation n'est pas exécutée.",
+    autoSyncNote: "L'import s'exécute automatiquement toutes les 3 heures ; ici vous pouvez aussi le forcer maintenant.",
+    lastAutoSync: "Dernière synchronisation automatique",
+    lastAutoSyncNever: "aucune pour l'instant",
+    exportTitle: "Exportez votre calendrier",
+    exportDesc: "Collez ce lien dans le champ « importer un calendrier » d'Airbnb, Booking ou d'autres portails : ils verront les nuits déjà occupées ici (réservations directes et d'autres OTA) et les bloqueront.",
+    exportCopy: "Copier",
+    exportCopied: "Copié \u2713",
+    exportSecret: "Lien secret : ne le partagez pas publiquement.",
     extTitle: "Réservation externe",
     extDesc: "Si un voyageur préfère réserver hors de Dimora, le bouton « Réserver sur… » de l'accueil l'envoie vers la plateforme choisie.",
     airbnbListing: "URL de l'annonce Airbnb",
@@ -215,6 +247,29 @@ export default function SettingsManager() {
   const [portalState, setPortalState] = useState<State>("idle");
   const [portalMsg, setPortalMsg] = useState("");
   const [locSaveState, setLocSaveState] = useState<State>("idle");
+  const [exportUrl, setExportUrl] = useState("");
+  const [lastSyncAt, setLastSyncAt] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/admin/calendar-export")
+      .then((r) => r.json())
+      .then((d: { url?: string; lastSyncAt?: string | null }) => {
+        setExportUrl(d.url ?? "");
+        setLastSyncAt(d.lastSyncAt ?? null);
+      })
+      .catch(() => {});
+  }, []);
+
+  async function copyExportUrl() {
+    try {
+      await navigator.clipboard.writeText(exportUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      /* clipboard non disponibile: l'utente può selezionare il testo a mano */
+    }
+  }
 
   useEffect(() => {
     fetch("/api/admin/settings")
@@ -487,6 +542,12 @@ export default function SettingsManager() {
           className="rounded-full border border-gold bg-gold px-6 py-2 text-xs uppercase tracking-widest text-[#faf6ec] transition hover:bg-transparent hover:text-gold disabled:opacity-50 disabled:cursor-not-allowed">
           {syncState === "saving" ? L.syncing : L.syncNow}
         </button>
+        <p className="text-xs text-foreground/50">{L.autoSyncNote}</p>
+        {!DEMO && (
+          <p className="text-xs text-foreground/60">
+            {L.lastAutoSync}: <span className="text-foreground/80">{lastSyncAt ? new Date(lastSyncAt).toLocaleString(locale) : L.lastAutoSyncNever}</span>
+          </p>
+        )}
         {!anyUrl && <p className="text-xs text-foreground/50">{L.noneConfigured}</p>}
         {syncState === "error" && <p className="text-sm text-red-600">{syncError}</p>}
         {demoDone && <p className="text-sm text-foreground/70">{L.demo}</p>}
@@ -531,6 +592,32 @@ export default function SettingsManager() {
               <p className="text-xs text-foreground/50">{L.bookingDisclaimer}</p>
             )}
           </div>
+        )}
+      </div>
+
+      {/* Export: feed iCal (noi → OTA), protetto da token segreto nell'URL. */}
+      <div className="rounded-lg border border-gold/40 bg-card p-5 space-y-3">
+        <div>
+          <h2 className="font-serif-display text-2xl italic text-foreground">{L.exportTitle}</h2>
+          <p className="mt-1 text-sm text-foreground/60">{L.exportDesc}</p>
+        </div>
+        {exportUrl ? (
+          <>
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                type="text" readOnly value={exportUrl}
+                onFocus={(e) => e.currentTarget.select()}
+                className="min-w-0 flex-1 rounded border border-gold/40 bg-background px-3 py-2 text-xs text-foreground/80 outline-none font-mono"
+              />
+              <button onClick={copyExportUrl}
+                className="rounded-full border border-gold/40 px-5 py-2 text-xs uppercase tracking-widest text-foreground/70 transition hover:bg-gold/10">
+                {copied ? L.exportCopied : L.exportCopy}
+              </button>
+            </div>
+            <p className="text-xs text-foreground/50">{L.exportSecret}</p>
+          </>
+        ) : (
+          <p className="text-xs text-foreground/50">{DEMO ? L.demo : L.noneConfigured}</p>
         )}
       </div>
 
