@@ -189,6 +189,7 @@ export const adminTranslations = {
       subtitle: "Accedi per gestire prezzi e disponibilità. Scegli il metodo che preferisci.",
       backToSite: "Torna al sito",
       github: "Accedi con GitHub",
+      google: "Accedi con Google",
       or: "oppure",
       emailPlaceholder: "La tua email",
       emailSubmit: "Inviami un link di accesso",
@@ -373,6 +374,7 @@ export const adminTranslations = {
       subtitle: "Sign in to manage prices and availability. Choose your preferred method.",
       backToSite: "Back to the site",
       github: "Sign in with GitHub",
+      google: "Sign in with Google",
       or: "or",
       emailPlaceholder: "Your email",
       emailSubmit: "Send me a login link",
@@ -557,6 +559,7 @@ export const adminTranslations = {
       subtitle: "Inicia sesión para gestionar precios y disponibilidad. Elige el método que prefieras.",
       backToSite: "Volver al sitio",
       github: "Iniciar sesión con GitHub",
+      google: "Iniciar sesión con Google",
       or: "o",
       emailPlaceholder: "Tu correo",
       emailSubmit: "Envíame un enlace de acceso",
@@ -741,6 +744,7 @@ export const adminTranslations = {
       subtitle: "Connectez-vous pour gérer les prix et les disponibilités. Choisissez la méthode que vous préférez.",
       backToSite: "Retour au site",
       github: "Se connecter avec GitHub",
+      google: "Se connecter avec Google",
       or: "ou",
       emailPlaceholder: "Votre e-mail",
       emailSubmit: "Envoyez-moi un lien de connexion",
@@ -768,5 +772,5 @@ export type AdminTranslation = {
   dashboard: { title: string; totalBookings: string; revenue: string; occupancy: string; upcomingBookings: string; noUpcoming: string; thisMonth: string; thisYear: string };
   common: { yes: string; no: string; confirm: string; cancel: string; close: string; error: string; success: string; loading: string; noData: string; optional: string; demoSaved: string; demoImage: string };
   deploy: { building: string; ready: string; error: string };
-  login: { title: string; subtitle: string; backToSite: string; github: string; or: string; emailPlaceholder: string; emailSubmit: string; emailSending: string; emailEmpty: string; emailSent: string; emailError: string; demoEyebrow: string; demoTitle: string; demoDesc: string; demoNotSaved: string; demoEnter: string };
+  login: { title: string; subtitle: string; backToSite: string; github: string; google: string; or: string; emailPlaceholder: string; emailSubmit: string; emailSending: string; emailEmpty: string; emailSent: string; emailError: string; demoEyebrow: string; demoTitle: string; demoDesc: string; demoNotSaved: string; demoEnter: string };
 };
