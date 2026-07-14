@@ -69,6 +69,14 @@ export async function ensureSchema() {
   // colonna restano NULL = vecchio comportamento (tassa al check-in), invariato.
   await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS city_tax_online BOOLEAN;`);
   await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS review_request_sent_at TIMESTAMPTZ;`);
+  // Politica di rimborso CONGELATA al momento della prenotazione (flexible|moderate|strict):
+  // il calcolo del rimborso usa sempre questa, non la policy corrente dell'host.
+  await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS refund_policy TEXT;`);
+  // Importo di rimborso CALCOLATO alla cancellazione (secondo la policy congelata e chi
+  // cancella). L'host lo esegue poi dal pannello (refund semi-automatico) → refunded_at.
+  await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS refund_due NUMERIC;`);
+  // Le colonne deposit_amount/balance_due/deposit_rate/balance_* restano per compatibilità
+  // ma non sono più usate (modello a pagamento intero). refunded_at ora è attivo (rimborsi).
   initialized = true;
 }
 
@@ -234,4 +242,8 @@ export interface Booking {
   // comportamento, tassa riscossa al check-in. NULL = prenotazioni antecedenti al flag.
   city_tax_online: boolean | null;
   review_request_sent_at: string | null;
+  // Politica di rimborso CONGELATA alla prenotazione (flexible|moderate|strict).
+  refund_policy: string | null;
+  // Importo di rimborso calcolato alla cancellazione; eseguito dall'host (→ refunded_at).
+  refund_due: number | null;
 }
