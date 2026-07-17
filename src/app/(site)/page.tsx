@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import { pickL10n } from "@/lib/l10n";
 import Link from "next/link";
 import { useLanguage } from "@/i18n/LanguageContext";
-import { CONTENT } from "@/lib/siteContent";
+import { CONTENT, heroImageList } from "@/lib/siteContent";
+import HeroBackdrop from "@/components/HeroBackdrop";
 import { getBookingLinks } from "@/lib/bookingLinks";
 import { format } from "@/i18n/format";
 
@@ -20,14 +20,11 @@ export default function Home() {
     <div className="flex flex-1 flex-col">
       {/* Hero */}
       <header className="relative flex min-h-[80vh] flex-col items-center justify-center overflow-hidden px-6 py-24 text-center">
-        <Image
-          src={`/images/${CONTENT.heroImage}`}
-          alt={pickL10n(CONTENT.siteTitle, locale)}
-          fill
-          priority
-          className="object-cover"
+        <HeroBackdrop
+          images={heroImageList(CONTENT)}
+          intervalSec={CONTENT.heroIntervalSec ?? 5}
+          veilClassName="bg-[#f5efe1]/45"
         />
-        <div className="absolute inset-0 bg-[#f5efe1]/45" />
         <div className="relative">
           <p className="text-xs font-bold uppercase tracking-widest text-[#8a6a2a]">
             {CONTENT.locationDisplay}

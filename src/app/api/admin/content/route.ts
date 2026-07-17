@@ -22,6 +22,8 @@ function isValidContent(body: unknown): body is SiteContent {
     typeof b.heroImage === "string" &&
     Array.isArray(b.galleryImages) &&
     (!("imageOrder" in b) || Array.isArray(b.imageOrder)) &&
+    (!("heroImages" in b) || (Array.isArray(b.heroImages) && b.heroImages.every((n) => typeof n === "string"))) &&
+    (!("heroIntervalSec" in b) || typeof b.heroIntervalSec === "number") &&
     Array.isArray(b.amenities) &&
     (!("heroSubtitle" in b) || typeof b.heroSubtitle === "object") &&
     (!("storyTitle" in b) || typeof b.storyTitle === "object") &&
