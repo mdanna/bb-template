@@ -150,6 +150,30 @@ export default function AdminEditor(props: Props) {
   return <AdminEditorInner key={`default-${hydrated}`} {...props} />;
 }
 
+// Normalizza le regole per la PERSISTENZA: un campo uguale al default non viene salvato
+// (quelle date seguono il default dinamico di Impostazioni); una regola in cui né min né
+// max sono personalizzati non viene creata affatto (JSON.stringify omette i campi undefined).
+function normalizeStayRules(rules: StayRule[]): StayRule[] {
+  return rules
+    .map((r) => ({
+      from: r.from,
+      to: r.to,
+      minStay: r.minStay === POLICIES.minNights ? undefined : r.minStay,
+      maxStay: r.maxStay === POLICIES.maxNights ? undefined : r.maxStay,
+    }))
+    .filter((r) => r.minStay !== undefined || r.maxStay !== undefined);
+}
+
+// Idrata per la UI: i campi omessi (che seguono il default) mostrano a video il valore di
+// default, così l'host vede sempre i numeri anche su regole caricate dal file già normalizzate.
+function hydrateStayRules(rules: StayRule[]): StayRule[] {
+  return rules.map((r) => ({
+    ...r,
+    minStay: r.minStay ?? POLICIES.minNights,
+    maxStay: r.maxStay ?? POLICIES.maxNights,
+  }));
+}
+
 function AdminEditorInner({ initialDefaultPrice, initialOverrides, initialStayRules }: Props) {
   const { locale } = useAdminLanguage();
   const L = EDITOR_LABELS[locale] ?? EDITOR_LABELS.en;
@@ -162,7 +186,7 @@ function AdminEditorInner({ initialDefaultPrice, initialOverrides, initialStayRu
 
   const [defaultPrice, setDefaultPrice] = useState(draft?.defaultPrice ?? initialDefaultPrice);
   const [overrides, setOverrides] = useState<DayRate[]>(draft?.overrides ?? initialOverrides);
-  const [stayRules, setStayRules] = useState<StayRule[]>(draft?.stayRules ?? initialStayRules);
+  const [stayRules, setStayRules] = useState<StayRule[]>(hydrateStayRules(draft?.stayRules ?? initialStayRules));
   const today = toLocalISODate(new Date());
   const [rangeStart, setRangeStart] = useState(today);
   const [rangeEnd, setRangeEnd] = useState(today);
@@ -244,7 +268,7 @@ function AdminEditorInner({ initialDefaultPrice, initialOverrides, initialStayRu
   // "Salva" mette il calendario in bozza (istantaneo, niente deploy); "Pubblica" (in
   // AdminSaveBar) committa tutte le bozze insieme.
   function saveToDraft() {
-    setDraft(draftKey, { defaultPrice, overrides, stayRules });
+    setDraft(draftKey, { defaultPrice, overrides, stayRules: normalizeStayRules(stayRules) });
   }
 
   return (
