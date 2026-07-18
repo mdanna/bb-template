@@ -9,6 +9,7 @@ import { computePricingBreakdown } from "@/lib/pricing";
 import { refundPolicyOf } from "@/lib/refund";
 import { nightsBetween } from "@/lib/dateOnly";
 import { POLICIES } from "@/lib/policies";
+import { getDayRate, getStayLimits, availableGapNights } from "@/data/availability";
 import { DEMO_MODE } from "@/lib/demo";
 
 const MAX_NAME_LENGTH = 100;
@@ -71,8 +72,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Dati non validi" }, { status: 400 });
   }
 
-  if (nightsBetween(body.checkin, body.checkout) > POLICIES.maxNights) {
-    return NextResponse.json({ error: `Soggiorno massimo: ${POLICIES.maxNights} notti` }, { status: 400 });
+  // Durata min/max effettiva per la data di check-in: default di policy, sovrascritti
+  // dalle regole di soggiorno per-data (stayRules) del calendario.
+  const nights = nightsBetween(body.checkin, body.checkout);
+  const limits = getStayLimits(body.checkin, { min: POLICIES.minNights, max: POLICIES.maxNights });
+  if (nights > limits.max) {
+    return NextResponse.json({ error: `Soggiorno massimo: ${limits.max} notti` }, { status: 400 });
   }
 
   const locale: LocaleCode = (localeOrder as string[]).includes(body.locale)
@@ -94,11 +99,11 @@ export async function POST(request: Request) {
     );
   }
 
-  // Minimum 2 days advance notice
+  // Preavviso minimo: il check-in deve essere almeno `minAdvanceBookingDays` giorni dopo oggi.
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const minCheckin = new Date(today);
-  minCheckin.setDate(minCheckin.getDate() + 2);
+  minCheckin.setDate(minCheckin.getDate() + POLICIES.minAdvanceBookingDays);
   const [cy, cm, cd] = body.checkin.split("-").map(Number);
   const checkinDate = new Date(cy!, (cm ?? 1) - 1, cd ?? 1);
   if (checkinDate < minCheckin) {
@@ -108,13 +113,12 @@ export async function POST(request: Request) {
     );
   }
 
-  // Minimum 3 nights (enforced client-side too, server validates as defence)
-  const [oy, om, od] = body.checkout.split("-").map(Number);
-  const checkoutDate = new Date(oy!, (om ?? 1) - 1, od ?? 1);
-  const nights = Math.round((checkoutDate.getTime() - checkinDate.getTime()) / 86_400_000);
-  if (nights < 2) {
+  // Durata minima (difesa lato server; il calendario la applica già lato client). Eccezione:
+  // se il soggiorno riempie ESATTAMENTE un buco disponibile (nights === buco), è ammesso anche
+  // se inferiore al minimo — così il server non rifiuta una selezione valida del client.
+  if (nights < limits.min && nights !== availableGapNights(body.checkin, getDayRate)) {
     return NextResponse.json(
-      { error: "Il soggiorno minimo è di 2 notti." },
+      { error: `Il soggiorno minimo è di ${limits.min} notti.` },
       { status: 400 }
     );
   }

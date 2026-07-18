@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { DayRate } from "@/data/availability";
+import type { DayRate, StayRule } from "@/data/availability";
 import AdminCalendar from "./AdminCalendar";
 import { useAdminLanguage } from "@/i18n/AdminLanguageContext";
 import { useDrafts } from "@/components/admin/DraftContext";
@@ -10,7 +10,42 @@ import AdminSaveBar from "@/components/admin/AdminSaveBar";
 interface Props {
   initialDefaultPrice: number;
   initialOverrides: DayRate[];
+  initialStayRules: StayRule[];
 }
+
+// Etichette locali (lingua del pannello it/en/es/fr, fallback en) per la sezione "Regole
+// di soggiorno per date" — stesso schema module-local di AdminCalendar.LABELS, senza
+// aggiungere chiavi ai tipi i18n condivisi.
+const STAY_LABELS = {
+  it: {
+    title: "Regole di soggiorno per date",
+    desc: "Durata minima/massima delle notti per i CHECK-IN in un intervallo di date. Lascia un campo vuoto per usare il valore di default (Impostazioni).",
+    from: "Dal", to: "Al", minStay: "Min notti", maxStay: "Max notti",
+    add: "Aggiungi regola", remove: "Rimuovi",
+    empty: "Nessuna regola: valgono i valori di default delle Impostazioni.",
+  },
+  en: {
+    title: "Stay rules by date",
+    desc: "Minimum/maximum nights for CHECK-IN dates within a range. Leave a field empty to use the default value (Settings).",
+    from: "From", to: "To", minStay: "Min nights", maxStay: "Max nights",
+    add: "Add rule", remove: "Remove",
+    empty: "No rules: the default values from Settings apply.",
+  },
+  es: {
+    title: "Reglas de estancia por fechas",
+    desc: "Noches mínimas/máximas para los CHECK-IN dentro de un rango de fechas. Deja un campo vacío para usar el valor por defecto (Ajustes).",
+    from: "Del", to: "Al", minStay: "Mín noches", maxStay: "Máx noches",
+    add: "Añadir regla", remove: "Quitar",
+    empty: "Sin reglas: se aplican los valores por defecto de Ajustes.",
+  },
+  fr: {
+    title: "Règles de séjour par dates",
+    desc: "Nuits minimum/maximum pour les CHECK-IN dans une plage de dates. Laissez un champ vide pour utiliser la valeur par défaut (Réglages).",
+    from: "Du", to: "Au", minStay: "Min nuits", maxStay: "Max nuits",
+    add: "Ajouter une règle", remove: "Retirer",
+    empty: "Aucune règle : les valeurs par défaut des Réglages s'appliquent.",
+  },
+} as const;
 
 type RangeMode = "price" | "booked" | "direct";
 
@@ -114,17 +149,19 @@ export default function AdminEditor(props: Props) {
   return <AdminEditorInner key={`default-${hydrated}`} {...props} />;
 }
 
-function AdminEditorInner({ initialDefaultPrice, initialOverrides }: Props) {
+function AdminEditorInner({ initialDefaultPrice, initialOverrides, initialStayRules }: Props) {
   const { locale } = useAdminLanguage();
   const L = EDITOR_LABELS[locale] ?? EDITOR_LABELS.en;
+  const SL = STAY_LABELS[locale] ?? STAY_LABELS.en;
 
   // Bozza: se c'è una modifica non pubblicata per il calendario, riparti da lì.
   const { getDraft, setDraft } = useDrafts();
   const draftKey = "calendar:default";
-  const draft = getDraft<{ defaultPrice: number; overrides: DayRate[] }>(draftKey);
+  const draft = getDraft<{ defaultPrice: number; overrides: DayRate[]; stayRules?: StayRule[] }>(draftKey);
 
   const [defaultPrice, setDefaultPrice] = useState(draft?.defaultPrice ?? initialDefaultPrice);
   const [overrides, setOverrides] = useState<DayRate[]>(draft?.overrides ?? initialOverrides);
+  const [stayRules, setStayRules] = useState<StayRule[]>(draft?.stayRules ?? initialStayRules);
   const today = toLocalISODate(new Date());
   const [rangeStart, setRangeStart] = useState(today);
   const [rangeEnd, setRangeEnd] = useState(today);
@@ -187,10 +224,21 @@ function AdminEditorInner({ initialDefaultPrice, initialOverrides }: Props) {
     });
   }
 
+  // Regole di soggiorno per date (min/max notti per intervallo di check-in).
+  function addStayRule() {
+    setStayRules((prev) => [...prev, { from: today, to: today }]);
+  }
+  function updateStayRule(i: number, patch: Partial<StayRule>) {
+    setStayRules((prev) => prev.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
+  }
+  function removeStayRule(i: number) {
+    setStayRules((prev) => prev.filter((_, idx) => idx !== i));
+  }
+
   // "Salva" mette il calendario in bozza (istantaneo, niente deploy); "Pubblica" (in
   // AdminSaveBar) committa tutte le bozze insieme.
   function saveToDraft() {
-    setDraft(draftKey, { defaultPrice, overrides });
+    setDraft(draftKey, { defaultPrice, overrides, stayRules });
   }
 
   return (
@@ -269,6 +317,50 @@ function AdminEditorInner({ initialDefaultPrice, initialOverrides }: Props) {
           </button>
           {rangeEnd < rangeStart && <p className="mt-2 text-xs text-red-600">{L.dateError}</p>}
           {rangeError && <p className="mt-2 text-xs text-red-600">{rangeError}</p>}
+        </section>
+
+        <section className="rounded-lg border border-gold/40 bg-card p-5">
+          <h2 className="font-serif-display text-xl italic text-foreground">{SL.title}</h2>
+          <p className="mt-1 text-sm text-foreground/60">{SL.desc}</p>
+          <div className="mt-4 space-y-3">
+            {stayRules.length === 0 && <p className="text-xs text-foreground/50">{SL.empty}</p>}
+            {stayRules.map((r, i) => (
+              <div key={i} className="flex flex-wrap items-end gap-3">
+                <label className="flex flex-col gap-1 text-xs">
+                  <span className="uppercase tracking-widest text-foreground/60">{SL.from}</span>
+                  <input type="date" value={r.from}
+                    onChange={(e) => updateStayRule(i, { from: e.target.value })}
+                    className="rounded border border-gold/40 bg-background px-2 py-1.5 text-sm text-foreground outline-none focus:border-gold" />
+                </label>
+                <label className="flex flex-col gap-1 text-xs">
+                  <span className="uppercase tracking-widest text-foreground/60">{SL.to}</span>
+                  <input type="date" value={r.to}
+                    onChange={(e) => updateStayRule(i, { to: e.target.value })}
+                    className="rounded border border-gold/40 bg-background px-2 py-1.5 text-sm text-foreground outline-none focus:border-gold" />
+                </label>
+                <label className="flex flex-col gap-1 text-xs">
+                  <span className="uppercase tracking-widest text-foreground/60">{SL.minStay}</span>
+                  <input type="number" min={1} value={r.minStay ?? ""}
+                    onChange={(e) => updateStayRule(i, { minStay: e.target.value === "" ? undefined : Number(e.target.value) })}
+                    className="w-24 rounded border border-gold/40 bg-background px-2 py-1.5 text-sm text-foreground outline-none focus:border-gold" />
+                </label>
+                <label className="flex flex-col gap-1 text-xs">
+                  <span className="uppercase tracking-widest text-foreground/60">{SL.maxStay}</span>
+                  <input type="number" min={1} value={r.maxStay ?? ""}
+                    onChange={(e) => updateStayRule(i, { maxStay: e.target.value === "" ? undefined : Number(e.target.value) })}
+                    className="w-24 rounded border border-gold/40 bg-background px-2 py-1.5 text-sm text-foreground outline-none focus:border-gold" />
+                </label>
+                <button onClick={() => removeStayRule(i)}
+                  className="rounded-full border border-red-400/60 px-3 py-1.5 text-xs uppercase tracking-widest text-red-600 transition hover:bg-red-50">
+                  {SL.remove}
+                </button>
+              </div>
+            ))}
+          </div>
+          <button onClick={addStayRule}
+            className="mt-4 rounded-full border border-gold bg-gold px-6 py-2 text-xs uppercase tracking-widest text-[#faf6ec] transition hover:bg-transparent hover:text-gold">
+            {SL.add}
+          </button>
         </section>
 
         <section>
