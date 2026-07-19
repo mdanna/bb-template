@@ -70,14 +70,14 @@ export default function NavBar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
 
+  // Link "contenuto" (browse). L'azione principale (Prenota) è un pulsante a parte;
+  // "gestisci prenotazione" vive nel footer (compito da ospite di ritorno).
   const links = [
     { href: "/", label: t.nav.home },
     { href: "/galleria", label: t.nav.gallery },
     { href: "/servizi", label: t.nav.amenities },
     { href: "/zona", label: t.nav.area },
     { href: "/recensioni", label: t.nav.reviews },
-    { href: "/prenota", label: t.nav.booking },
-    { href: "/gestione-prenotazione", label: t.nav.manage },
   ];
 
   function isActive(href: string) {
@@ -124,6 +124,12 @@ export default function NavBar() {
               </Link>
             ))}
           </div>
+          <Link
+            href="/prenota"
+            className="rounded-full border border-gold bg-gold px-5 py-1.5 text-xs uppercase tracking-widest text-[#faf6ec] transition hover:bg-transparent hover:text-gold"
+          >
+            {t.nav.booking}
+          </Link>
           <LanguagePicker locale={locale} setLocale={setLocale} open={langOpen} setOpen={setLangOpen} />
         </div>
       </div>
@@ -143,6 +149,13 @@ export default function NavBar() {
                 {link.label}
               </Link>
             ))}
+            <Link
+              href="/prenota"
+              onClick={() => setMobileOpen(false)}
+              className="mt-1 rounded-full border border-gold bg-gold px-5 py-2 text-center text-xs uppercase tracking-widest text-[#faf6ec] transition hover:bg-transparent hover:text-gold"
+            >
+              {t.nav.booking}
+            </Link>
           </div>
         </div>
       )}

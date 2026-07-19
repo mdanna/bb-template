@@ -66,6 +66,12 @@ export default function SiteFooter() {
                   {portalLabel} →
                 </a>
               )}
+              <Link
+                href="/gestione-prenotazione"
+                className="underline decoration-gold/40 underline-offset-2 transition hover:text-gold"
+              >
+                {t.nav.manage}
+              </Link>
               <a
                 href="/privacy"
                 className="underline decoration-gold/40 underline-offset-2 transition hover:text-gold"

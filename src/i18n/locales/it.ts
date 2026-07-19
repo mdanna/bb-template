@@ -5,12 +5,12 @@ const it: Translation = {
   nav: {
     location: "Città · Quartiere",
     home: "Home",
-    gallery: "Immagini",
+    gallery: "Galleria",
     amenities: "Servizi",
-    area: "Zona",
+    area: "Dintorni",
     reviews: "Recensioni",
     booking: "Prenota",
-    manage: "Prenotazione",
+    manage: "La mia prenotazione",
   },
   hero: {
     subtitle: "Un appartamento accogliente nel cuore della città.",
@@ -24,7 +24,7 @@ const it: Translation = {
     p1: "Descrivi qui il tuo appartamento e la tua storia come host.",
     p2: "",
   },
-  gallery: { title: "Immagini" },
+  gallery: { title: "Galleria" },
   details: {
     title: "I dettagli",
     rating: "★ {rating} su Airbnb ({count} recensioni)",
@@ -34,7 +34,7 @@ const it: Translation = {
     items: [],
   },
   area: {
-    title: "La zona",
+    title: "Dintorni",
     subtitle: "Descrivi il quartiere e i punti di interesse nelle vicinanze.",
     places: [],
     mapApartmentLabel: "L'appartamento",

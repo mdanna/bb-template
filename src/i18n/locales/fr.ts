@@ -5,7 +5,7 @@ const fr: Translation = {
   nav: {
     location: "Ville · Quartier",
     home: "Accueil",
-    gallery: "Images",
+    gallery: "Galerie",
     amenities: "Services",
     area: "Quartier",
     reviews: "Avis",
@@ -24,7 +24,7 @@ const fr: Translation = {
     p1: "Décrivez ici votre appartement et votre histoire en tant qu'hôte.",
     p2: "",
   },
-  gallery: { title: "Images" },
+  gallery: { title: "Galerie" },
   details: {
     title: "Les détails",
     rating: "★ {rating} sur Airbnb ({count} avis)",

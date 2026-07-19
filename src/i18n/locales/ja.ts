@@ -5,7 +5,7 @@ const ja: Translation = {
   nav: {
     location: "都市 · 地区",
     home: "ホーム",
-    gallery: "画像",
+    gallery: "ギャラリー",
     amenities: "設備",
     area: "周辺エリア",
     reviews: "レビュー",
@@ -24,7 +24,7 @@ const ja: Translation = {
     p1: "ここにあなたのアパートメントとホストとしての物語を説明してください。",
     p2: "",
   },
-  gallery: { title: "画像" },
+  gallery: { title: "ギャラリー" },
   details: {
     title: "詳細",
     rating: "Airbnb評価 ★{rating}({count}件のレビュー)",

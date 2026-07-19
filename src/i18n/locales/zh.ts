@@ -5,7 +5,7 @@ const zh: Translation = {
   nav: {
     location: "城市 · 街区",
     home: "首页",
-    gallery: "图片",
+    gallery: "画廊",
     amenities: "设施",
     area: "周边",
     reviews: "评价",
@@ -24,7 +24,7 @@ const zh: Translation = {
     p1: "在这里描述您的公寓和作为房东的故事。",
     p2: "",
   },
-  gallery: { title: "图片" },
+  gallery: { title: "画廊" },
   details: {
     title: "详情",
     rating: "Airbnb评分 ★{rating}({count}条评价)",

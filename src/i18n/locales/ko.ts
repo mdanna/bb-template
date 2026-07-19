@@ -5,7 +5,7 @@ const ko: Translation = {
   nav: {
     location: "도시 · 지역",
     home: "홈",
-    gallery: "이미지",
+    gallery: "갤러리",
     amenities: "편의시설",
     area: "주변 지역",
     reviews: "리뷰",
@@ -24,7 +24,7 @@ const ko: Translation = {
     p1: "여기에 귀하의 아파트와 호스트로서의 이야기를 설명하세요.",
     p2: "",
   },
-  gallery: { title: "이미지" },
+  gallery: { title: "갤러리" },
   details: {
     title: "세부 정보",
     rating: "에어비앤비 평점 ★{rating} ({count}개 리뷰)",
