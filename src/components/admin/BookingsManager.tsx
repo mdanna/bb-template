@@ -118,6 +118,12 @@ function displayStatus(b: Booking): DisplayStatus {
   if (isPast(b.checkout)) return "completed";
   return "inProgress";
 }
+// Auto-archiviazione DERIVATA: una prenotazione col check-out passato finisce da sé
+// nel pannello archiviate (niente cron). Il flag `archived` manuale resta per nascondere
+// in anticipo una cancellata/rifiutata ancora futura.
+function effectiveArchived(b: Booking) {
+  return b.archived || isPast(b.checkout);
+}
 
 export default function BookingsManager() {
   const { t, locale } = useAdminLanguage();
@@ -128,6 +134,15 @@ export default function BookingsManager() {
   const [rejectingId, setRejectingId] = useState<number | null>(null);
   const [reason, setReason] = useState("");
   const [showArchived, setShowArchived] = useState(false);
+  const [expanded, setExpanded] = useState<Set<number>>(new Set());
+  function toggleExpand(id: number) {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
   const [customPrices, setCustomPrices] = useState<Record<number, string>>({});
   const [checkinIds, setCheckinIds] = useState<Record<number, boolean>>({});
   const pl = PAY_LABELS[locale] ?? PAY_LABELS.en;
@@ -332,8 +347,13 @@ export default function BookingsManager() {
   }
 
   const pendingCount = bookings.filter((b) => b.status === "pending").length;
-  const visibleBookings = bookings.filter((b) => (showArchived ? b.archived : !b.archived));
-  const archivedCount = bookings.filter((b) => b.archived).length;
+  const archivedCount = bookings.filter(effectiveArchived).length;
+  // Ordine cronologico per check-in: attive dalla più imminente; archiviate dalla più recente.
+  const visibleBookings = bookings
+    .filter((b) => (showArchived ? effectiveArchived(b) : !effectiveArchived(b)))
+    .sort((a, b) =>
+      showArchived ? b.checkin.localeCompare(a.checkin) : a.checkin.localeCompare(b.checkin)
+    );
 
   return (
     <div className="mt-10 space-y-4">
@@ -369,76 +389,88 @@ export default function BookingsManager() {
       {visibleBookings.map((b) => {
         const ds = displayStatus(b);
         const isCurrent = ds === "inProgress";
+        const isExp = expanded.has(b.id);
         return (
         <div key={b.id} className={`rounded-lg border p-5 ${b.status === "cancelled" ? "border-red-300 bg-red-50/30 dark:border-red-900/60 dark:bg-red-950/20" : isCurrent ? "border-l-4 border-gold/40 border-l-[#a87f36] bg-gold/5" : "border-gold/40 bg-card"}`}>
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <p className="font-serif-display text-lg italic text-foreground">
-                {b.code} · {b.first_name} {b.last_name}
-              </p>
-              <p className="mt-1 text-sm text-foreground/70">
-                {formatStayDate(b.checkin)} → {formatStayDate(b.checkout)} · {b.guests} {tb.guests}
-                {b.total_price ? ` · €${b.total_price}` : ""}
-              </p>
-              <p className="mt-1 text-xs text-foreground/50">
-                {b.email} · {b.phone}
-              </p>
-              {waLink(b.phone) && (
-                <a
-                  href={waLink(
-                    b.phone,
-                    (WA_LABELS[locale] ?? WA_LABELS.en).text(b.first_name, formatStayDate(b.checkin), formatStayDate(b.checkout)),
-                  )}
-                  target="_blank"
-                  rel="noopener"
-                  className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-[#25D366]/50 px-3 py-1 text-[11px] font-medium uppercase tracking-widest text-[#128C7E] transition hover:bg-[#25D366]/10"
-                >
-                  <span aria-hidden>✆</span> {(WA_LABELS[locale] ?? WA_LABELS.en).btn}
-                </a>
-              )}
-              {b.message && (
-                <p className="mt-2 text-sm italic text-foreground/70">&ldquo;{b.message}&rdquo;</p>
-              )}
-              {b.status === "rejected" && b.rejection_reason && (
-                <p className="mt-2 text-sm text-red-600">{b.rejection_reason}</p>
-              )}
-
-              {b.status === "approved" && b.total_price != null && (
-                <div className="mt-3 rounded-md border border-gold/30 bg-background px-4 py-3 text-sm space-y-1">
-                  <div className="flex justify-between">
-                    <span className="text-foreground/60">{tb.price}</span>
-                    <span className="font-medium text-foreground">€{b.total_price}</span>
-                  </div>
-                </div>
-              )}
-              {b.status === "completed" && (
-                <div className="mt-3 rounded-md border border-gold/30 bg-background px-4 py-3 text-sm space-y-1">
-                  {/* Nuovo modello: importo intero pagato in un'unica soluzione (o "paga al
-                      check-in" → nulla incassato online). Mostriamo la cifra del soggiorno. */}
-                  <div className="flex justify-between">
-                    <span className="text-foreground/60">
-                      {tb.price} <span className="ml-1 text-green-700 font-semibold">✓</span>
-                    </span>
-                    <span className="font-semibold text-green-700">€{b.total_price ?? "—"}</span>
-                  </div>
-                  {b.city_tax != null && Number(b.city_tax) > 0 && (
-                    <div className="flex justify-between text-foreground/50 text-xs pt-0.5">
-                      <span>{tb.cityTax}</span>
-                      <span>€{b.city_tax}</span>
-                    </div>
-                  )}
-                  {b.paid_at && (
-                    <p className="text-xs text-foreground/50 pt-0.5">
-                      {methodLabel(b.payment_method)} · {tb.paidAt} {formatTimestamp(b.paid_at)}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-            <span className={`text-xs font-semibold uppercase tracking-widest ${DISPLAY_COLOR[ds]}`}>
+          <div className="flex items-start justify-between gap-3">
+            <button
+              type="button"
+              onClick={() => toggleExpand(b.id)}
+              aria-expanded={isExp}
+              className="flex min-w-0 flex-1 items-start gap-2 text-left"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`mt-1.5 h-3.5 w-3.5 flex-none text-gold transition-transform ${isExp ? "rotate-90" : ""}`} aria-hidden="true">
+                <path d="M9 6l6 6-6 6" />
+              </svg>
+              <span className="min-w-0">
+                <span className="block font-serif-display text-lg italic text-foreground">
+                  {b.code} · {b.first_name} {b.last_name}
+                </span>
+                <span className="mt-0.5 block text-sm text-foreground/70">
+                  {formatStayDate(b.checkin)} → {formatStayDate(b.checkout)} · {b.guests} {tb.guests}
+                  {b.total_price ? ` · €${b.total_price}` : ""}
+                </span>
+              </span>
+            </button>
+            <span className={`flex-none text-xs font-semibold uppercase tracking-widest ${DISPLAY_COLOR[ds]}`}>
               {tb.statusLabels[ds]}
             </span>
           </div>
+
+          {isExp && (
+          <div className="mt-3 border-t border-gold/15 pt-3">
+            <p className="text-xs text-foreground/50">
+              {b.email} · {b.phone}
+            </p>
+            {waLink(b.phone) && (
+              <a
+                href={waLink(
+                  b.phone,
+                  (WA_LABELS[locale] ?? WA_LABELS.en).text(b.first_name, formatStayDate(b.checkin), formatStayDate(b.checkout)),
+                )}
+                target="_blank"
+                rel="noopener"
+                className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-[#25D366]/50 px-3 py-1 text-[11px] font-medium uppercase tracking-widest text-[#128C7E] transition hover:bg-[#25D366]/10"
+              >
+                <span aria-hidden>✆</span> {(WA_LABELS[locale] ?? WA_LABELS.en).btn}
+              </a>
+            )}
+            {b.message && (
+              <p className="mt-2 text-sm italic text-foreground/70">&ldquo;{b.message}&rdquo;</p>
+            )}
+            {b.status === "rejected" && b.rejection_reason && (
+              <p className="mt-2 text-sm text-red-600">{b.rejection_reason}</p>
+            )}
+            {b.status === "approved" && b.total_price != null && (
+              <div className="mt-3 rounded-md border border-gold/30 bg-background px-4 py-3 text-sm space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-foreground/60">{tb.price}</span>
+                  <span className="font-medium text-foreground">€{b.total_price}</span>
+                </div>
+              </div>
+            )}
+            {b.status === "completed" && (
+              <div className="mt-3 rounded-md border border-gold/30 bg-background px-4 py-3 text-sm space-y-1">
+                {/* Importo intero pagato in un'unica soluzione (o "paga al check-in"). */}
+                <div className="flex justify-between">
+                  <span className="text-foreground/60">
+                    {tb.price} <span className="ml-1 text-green-700 font-semibold">✓</span>
+                  </span>
+                  <span className="font-semibold text-green-700">€{b.total_price ?? "—"}</span>
+                </div>
+                {b.city_tax != null && Number(b.city_tax) > 0 && (
+                  <div className="flex justify-between text-foreground/50 text-xs pt-0.5">
+                    <span>{tb.cityTax}</span>
+                    <span>€{b.city_tax}</span>
+                  </div>
+                )}
+                {b.paid_at && (
+                  <p className="text-xs text-foreground/50 pt-0.5">
+                    {methodLabel(b.payment_method)} · {tb.paidAt} {formatTimestamp(b.paid_at)}
+                  </p>
+                )}
+              </div>
+            )}
 
           {b.status === "pending" && !showArchived && (
             <div className="mt-4 space-y-3">
@@ -565,9 +597,7 @@ export default function BookingsManager() {
                 {busyId === b.id ? tb.cancelling : tb.cancel}
               </button>
             )}
-            {!showArchived &&
-              (b.status === "completed" || b.status === "rejected" || b.status === "cancelled") &&
-              isPast(b.checkout) && (
+            {!showArchived && (b.status === "rejected" || b.status === "cancelled") && (
                 <button
                   onClick={() => setArchived(b.id, true)}
                   disabled={busyId === b.id}
@@ -576,7 +606,7 @@ export default function BookingsManager() {
                   {busyId === b.id ? tb.archiving : tb.archive}
                 </button>
               )}
-            {showArchived && (
+            {showArchived && b.archived && !isPast(b.checkout) && (
               <button
                 onClick={() => setArchived(b.id, false)}
                 disabled={busyId === b.id}
@@ -586,6 +616,8 @@ export default function BookingsManager() {
               </button>
             )}
           </div>
+          </div>
+          )}
         </div>
         );
       })}
