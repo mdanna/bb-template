@@ -63,6 +63,8 @@ export interface Translation {
   };
   booking: {
     title: string;
+    // Riga "cosa stai prenotando" nel titolo della form (intera struttura).
+    wholeUnit: string;
     subtitle: string;
     preferAirbnb: string;
     goToListing: string;

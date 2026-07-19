@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { format } from "@/i18n/format";
+import { pickL10n } from "@/lib/l10n";
 import { getDayRate, makeDayRateFn, type DayRate } from "@/data/availability";
 
 function makeHasBookedNightBetween(getRate: (d: Date) => DayRate) {
@@ -33,6 +34,10 @@ type SubmitState = "idle" | "sending" | "success" | "error";
 
 export default function BookingForm({ checkin, checkout, totalPrice }: Props) {
   const { t, locale } = useLanguage();
+  // Titolo della form: "cosa stai prenotando". Riga 1 = nome struttura; riga 2 =
+  // l'intera struttura (annuncio singolo → sempre l'intero, non una camera).
+  const siteName = pickL10n(CONTENT.siteTitle, locale);
+  const whatLabel = t.booking.wholeUnit;
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -121,6 +126,10 @@ export default function BookingForm({ checkin, checkout, totalPrice }: Props) {
         id="prenotazione-form"
         className="mx-auto mt-12 max-w-xl rounded-lg border border-gold/40 bg-card p-8 text-center"
       >
+        <div className="mb-6 border-b border-gold/20 pb-5">
+          <p className="text-xs font-bold uppercase tracking-widest text-[#8a6a2a]">{siteName}</p>
+          <p className="font-serif-display mt-1 text-2xl italic text-foreground">{whatLabel}</p>
+        </div>
         <h3 className="font-serif-display text-2xl italic text-foreground">{t.form.title}</h3>
         <p className="mt-4 text-foreground/80">{format(t.form.success, { code: bookingCode })}</p>
       </div>
@@ -133,6 +142,10 @@ export default function BookingForm({ checkin, checkout, totalPrice }: Props) {
       onSubmit={handleSubmit}
       className="mx-auto mt-12 max-w-xl rounded-lg border border-gold/40 bg-card p-8"
     >
+      <div className="mb-6 border-b border-gold/20 pb-5 text-center">
+        <p className="text-xs font-bold uppercase tracking-widest text-[#8a6a2a]">{siteName}</p>
+        <p className="font-serif-display mt-1 text-2xl italic text-foreground">{whatLabel}</p>
+      </div>
       <h3 className="font-serif-display text-2xl italic text-foreground">{t.form.title}</h3>
       {checkin && checkout ? (
         <p className="mt-2 text-sm text-foreground/70">
